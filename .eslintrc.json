@@ -44,7 +44,7 @@
         "@angular-eslint/component-selector": [
           "error",
           {
-            "prefix": "insure",
+            "prefix": "app",
             "style": "kebab-case",
             "type": "element"
           }
@@ -52,7 +52,7 @@
         "@angular-eslint/directive-selector": [
           "error",
           {
-            "prefix": "insure",
+            "prefix": "app",
             "style": "camelCase",
             "type": "attribute"
           }

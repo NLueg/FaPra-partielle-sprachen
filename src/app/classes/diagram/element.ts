@@ -24,7 +24,7 @@ export class Element {
         this._y = value;
     }
 
-    public registerSvg(svg: SVGElement) {
+    public registerSvg(svg: SVGElement): void {
         this._svgElement = svg;
         this._svgElement.onmousedown = (event) => {
             this.processMouseDown(event);
@@ -47,5 +47,4 @@ export class Element {
         }
         this._svgElement.setAttribute('fill', 'black');
     }
-
 }
