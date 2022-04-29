@@ -1,21 +1,18 @@
-import {Injectable} from '@angular/core';
-import {Diagram} from '../classes/diagram/diagram';
-import {Element} from '../classes/diagram/element';
+import { Injectable } from '@angular/core';
+
+import { Diagram } from '../classes/diagram/diagram';
+import { Element } from '../classes/diagram/element';
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class ParserService {
-
-    constructor() {
-    }
-
     parse(text: string): Diagram | undefined {
         const lines = text.split('\n');
 
         const result = new Diagram();
 
-        lines.forEach(line => {
+        lines.forEach((line) => {
             if (line.trimEnd().length > 0) {
                 result.addElement(this.parseElement(line));
             }
