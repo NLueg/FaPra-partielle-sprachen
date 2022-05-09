@@ -7,6 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { ToastrModule } from 'ngx-toastr';
 
 import { AppComponent } from './app.component';
 import { DisplayComponent } from './components/display/display.component';
@@ -29,6 +30,7 @@ import { TemplateButtonComponent } from './components/template-button/template-b
         MatButtonModule,
         MatIconModule,
         ReactiveFormsModule,
+        ToastrModule.forRoot(),
     ],
     providers: [],
     bootstrap: [AppComponent],

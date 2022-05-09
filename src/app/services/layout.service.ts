@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 
-import { Diagram } from '../classes/diagram/diagram';
+import { Run } from '../classes/diagram/run';
 
 @Injectable({
     providedIn: 'root',
@@ -9,7 +9,8 @@ export class LayoutService {
     private static readonly OFFSET = 20;
     private static readonly RANGE = 300;
 
-    public layout(diagram: Diagram): void {
+    // TODO: Implement displaying of the run
+    public layout(diagram: Run): void {
         diagram.elements.forEach((el) => {
             el.x =
                 Math.floor(Math.random() * LayoutService.RANGE) +
