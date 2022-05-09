@@ -4,6 +4,7 @@ import { debounceTime, Subscription } from 'rxjs';
 
 import { DisplayService } from './services/display.service';
 import { ParserService } from './services/parser.service';
+import { UploadService } from './services/upload/upload.service';
 
 @Component({
     selector: 'app-root',
@@ -17,14 +18,14 @@ export class AppComponent implements OnDestroy {
 
     constructor(
         private _parserService: ParserService,
-        private _displayService: DisplayService
+        private _displayService: DisplayService,
+        private _uploadService: UploadService
     ) {
         this.textareaFc = new FormControl();
         this._sub = this.textareaFc.valueChanges
             .pipe(debounceTime(400))
             .subscribe((val) => this.processSourceChange(val));
-        this.textareaFc.setValue(`hello
-world`);
+        this.textareaFc.setValue(`hello world`);
     }
 
     ngOnDestroy(): void {
@@ -33,8 +34,18 @@ world`);
 
     private processSourceChange(newSource: string) {
         const result = this._parserService.parse(newSource);
-        if (result !== undefined) {
-            this._displayService.display(result);
+        if (!result) {
+            return;
         }
+        this._displayService.display(result);
+    }
+
+    async uploadFile(): Promise<void> {
+        const content = await this._uploadService.uploadFile();
+        if (!content) {
+            return;
+        }
+
+        this.textareaFc.setValue(content);
     }
 }

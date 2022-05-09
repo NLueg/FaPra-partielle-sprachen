@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core';
 
-import { Diagram } from '../classes/diagram/diagram';
 import { Element } from '../classes/diagram/element';
+import { Run } from '../classes/diagram/run';
 
 @Injectable({
     providedIn: 'root',
 })
 export class SvgService {
-    public createSvgElements(diagram: Diagram): Array<SVGElement> {
+    public createSvgElements(diagram: Run): Array<SVGElement> {
         const result: Array<SVGElement> = [];
         diagram.elements.forEach((el) => {
             result.push(this.createSvgForElement(el));
