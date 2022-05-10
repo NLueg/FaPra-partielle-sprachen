@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { Observable, Subject } from 'rxjs';
 
@@ -9,7 +9,7 @@ const allowedExtensions = ['ps'];
 @Injectable({
     providedIn: 'root',
 })
-export class UploadService {
+export class UploadService implements OnDestroy {
     private _upload$: Subject<string>;
 
     constructor(private toastr: ToastrService) {
@@ -25,9 +25,9 @@ export class UploadService {
     }
 
     public checkFiles(files: FileList): boolean {
-        var check: boolean = true;
+        let check = true;
 
-        Array.from(files).forEach(file => {
+        Array.from(files).forEach((file) => {
             if (!fileExtensionIsValid(file.name)) {
                 check = false;
                 this.toastr.error(
@@ -40,13 +40,19 @@ export class UploadService {
         return check;
     }
 
-    public openFileSelector() {
-        var fileUpload = document.createElement("input");
-        fileUpload.setAttribute("type", "file");
-        fileUpload.setAttribute("multiple", "multiple");
-        fileUpload.setAttribute("accept", allowedExtensions.map(e => "." + e).join(","));
+    public openFileSelector(): void {
+        const fileUpload = document.createElement('input');
+        fileUpload.setAttribute('type', 'file');
+        fileUpload.setAttribute('multiple', 'multiple');
+        fileUpload.setAttribute(
+            'accept',
+            allowedExtensions.map((e) => '.' + e).join(',')
+        );
         fileUpload.onchange = (event) => {
-            if (event.target instanceof HTMLInputElement && event.target?.files) {
+            if (
+                event.target instanceof HTMLInputElement &&
+                event.target?.files
+            ) {
                 this.uploadFiles(event.target.files);
             }
         };
@@ -54,13 +60,13 @@ export class UploadService {
         fileUpload.click();
     }
 
-    public uploadFiles(files: FileList) {
+    public uploadFiles(files: FileList): void {
         if (!this.checkFiles(files)) {
             return;
         }
 
-        Array.from(files).forEach(file => {
-            var reader = new FileReader();
+        Array.from(files).forEach((file) => {
+            const reader = new FileReader();
 
             reader.onload = () => {
                 const content: string = reader.result as string;

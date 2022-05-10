@@ -34,26 +34,22 @@ export class DisplayService implements OnDestroy {
         this._diagram$.next(net);
     }
 
-    public get currentRun(): Run{
-        return this._currentRun;
-    }
-
     public get runs(): Run[] {
         return this._runs;
     }
 
-    public set currentRun(value: Run)  {
+    public set currentRun(value: Run) {
         this._currentRun = value;
-        this.display(this.currentRun)
+        this.display(this.currentRun);
     }
 
     public addEmptyRun(): void {
         this.registerRun(new Run());
     }
- 
+
     public registerRun(run: Run): void {
         //add run or update current run if empty
-        if(this.currentRun.isEmpty()) {
+        if (this.currentRun.isEmpty()) {
             this.updateCurrentRun(run);
         } else {
             this.runs.push(run);
@@ -78,9 +74,9 @@ export class DisplayService implements OnDestroy {
             this.runs.splice(index, 1);
         }
 
-        if(this.runs.length > 0) {
-            this.currentRun = this.runs[Math.max(index-1, 0)]; //set previous run as active
-        }else {
+        if (this.runs.length > 0) {
+            this.currentRun = this.runs[Math.max(index - 1, 0)]; //set previous run as active
+        } else {
             this.addEmptyRun(); //create new empty run
         }
     }

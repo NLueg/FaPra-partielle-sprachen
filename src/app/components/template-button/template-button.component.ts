@@ -29,28 +29,28 @@ export class TemplateButtonComponent {
     }
 
     processMouseClick(e: MouseEvent): void {
-        if(this.buttonAction) {
-            this.buttonAction.emit()
+        if (this.buttonAction) {
+            this.buttonAction.emit();
         }
     }
 
-    processDrop(e: DragEvent) {
+    processDrop(e: DragEvent): void {
         this.prevent(e);
         const target = e.target as HTMLElement;
         target.classList.remove('drag-hover');
 
-        if(this.dropAction) {
+        if (this.dropAction) {
             this.dropAction.emit(e);
         }
     }
 
-    dragStart(e: DragEvent) {
+    dragStart(e: DragEvent): void {
         this.prevent(e);
         const target = e.target as HTMLElement;
         target.classList.add('drag-hover');
     }
 
-    dragEnd(e: DragEvent) {
+    dragEnd(e: DragEvent): void {
         this.prevent(e);
         const target = e.target as HTMLElement;
         target.classList.remove('drag-hover');
