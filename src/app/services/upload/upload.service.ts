@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
+import { Observable, Subject } from 'rxjs';
 
 import { exampleContent } from './example-file';
 
@@ -9,37 +10,64 @@ const allowedExtensions = ['ps'];
     providedIn: 'root',
 })
 export class UploadService {
-    private fileReader: FileReader;
+    private _upload$: Subject<string>;
 
     constructor(private toastr: ToastrService) {
-        this.fileReader = new FileReader();
+        this._upload$ = new Subject<string>();
     }
 
-    // TODO: Needs to get a path or something
-    uploadFile(): Promise<string | null> {
-        const uploadedFile = new File([exampleContent], `example-file.ps`);
+    ngOnDestroy(): void {
+        this._upload$.complete();
+    }
 
-        if (!fileExtensionIsValid(uploadedFile.name)) {
-            this.toastr.error(
-                `File has to be a valid extension`,
-                `Unable to parse file`
-            );
-            return Promise.resolve(null);
+    public get upload$(): Observable<string> {
+        return this._upload$.asObservable();
+    }
+
+    public checkFiles(files: FileList): boolean {
+        var check: boolean = true;
+
+        Array.from(files).forEach(file => {
+            if (!fileExtensionIsValid(file.name)) {
+                check = false;
+                this.toastr.error(
+                    `File '${file.name}' has to be a valid extension`,
+                    `Unable to parse file`
+                );
+            }
+        });
+
+        return check;
+    }
+
+    public openFileSelector() {
+        var fileUpload = document.createElement("input");
+        fileUpload.setAttribute("type", "file");
+        fileUpload.setAttribute("multiple", "multiple");
+        fileUpload.setAttribute("accept", allowedExtensions.map(e => "." + e).join(","));
+        fileUpload.onchange = (event) => {
+            if (event.target instanceof HTMLInputElement && event.target?.files) {
+                this.uploadFiles(event.target.files);
+            }
+        };
+
+        fileUpload.click();
+    }
+
+    public uploadFiles(files: FileList) {
+        if (!this.checkFiles(files)) {
+            return;
         }
 
-        return this.getFileContent(uploadedFile);
-    }
+        Array.from(files).forEach(file => {
+            var reader = new FileReader();
 
-    private getFileContent(uploadedFile: File): Promise<string> {
-        this.fileReader.readAsText(uploadedFile);
+            reader.onload = () => {
+                const content: string = reader.result as string;
+                this._upload$.next(content);
+            };
 
-        return new Promise((resolve) => {
-            this.fileReader.onload = () => {
-                resolve(this.fileReader.result as string);
-            };
-            this.fileReader.onerror = () => {
-                resolve('');
-            };
+            reader.readAsText(file);
         });
     }
 }

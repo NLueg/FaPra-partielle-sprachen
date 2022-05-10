@@ -10,9 +10,10 @@
 
     <div fxLayout="row" fxLayoutAlign="space-evenly start">
         <app-template-button
-            buttonText="Left button"
-            buttonIcon="lightbulb"
-            (click)="uploadFile()"
+            buttonText="Upload"
+            buttonIcon="upload"
+            (buttonAction)="openFileSelector()"
+            (dropAction)="dropFiles($event)"
         ></app-template-button>
         <mat-form-field appearance="outline" class="textarea">
             <mat-label>Source file</mat-label>

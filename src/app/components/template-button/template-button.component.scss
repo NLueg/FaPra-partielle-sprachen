@@ -7,8 +7,16 @@
     margin-top: 14px;
 }
 
-.mouse-hover {
+.interactive-square * {
+    pointer-events: none;
+}
+
+.mouse-hover:not(.drag-hover) {
     border-color: black;
+}
+
+.drag-hover {
+    border-color: green;
 }
 
 .larger-icon {
@@ -18,6 +26,7 @@
     color: dimgrey;
 }
 
-.mouse-hover .larger-icon {
+.mouse-hover .larger-icon, .drag-hover .larger-icon {
     color: black;
 }
+

@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 @Component({
     selector: 'app-template-button',
@@ -8,6 +8,8 @@ import { Component, Input } from '@angular/core';
 export class TemplateButtonComponent {
     @Input() buttonText: string | undefined;
     @Input() buttonIcon: string | undefined;
+    @Output() buttonAction: EventEmitter<any> = new EventEmitter();
+    @Output() dropAction: EventEmitter<any> = new EventEmitter();
 
     prevent(e: Event): void {
         e.preventDefault();
@@ -27,6 +29,30 @@ export class TemplateButtonComponent {
     }
 
     processMouseClick(e: MouseEvent): void {
-        console.log(`Template button "${this.buttonText}" clicked`, e);
+        if(this.buttonAction) {
+            this.buttonAction.emit()
+        }
+    }
+
+    processDrop(e: DragEvent) {
+        this.prevent(e);
+        const target = e.target as HTMLElement;
+        target.classList.remove('drag-hover');
+
+        if(this.dropAction) {
+            this.dropAction.emit(e);
+        }
+    }
+
+    dragStart(e: DragEvent) {
+        this.prevent(e);
+        const target = e.target as HTMLElement;
+        target.classList.add('drag-hover');
+    }
+
+    dragEnd(e: DragEvent) {
+        this.prevent(e);
+        const target = e.target as HTMLElement;
+        target.classList.remove('drag-hover');
     }
 }

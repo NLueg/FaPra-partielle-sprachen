@@ -24,6 +24,10 @@ export class Run {
     addArc(arc: Arc): void {
         this._arcs.push(arc);
     }
+
+    isEmpty(): boolean {
+        return this.arcs.length + this.elements.length === 0;
+    }
 }
 
 export type Arc = {
