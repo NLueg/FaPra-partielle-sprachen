@@ -34,13 +34,17 @@ export class DisplayService implements OnDestroy {
         this._diagram$.next(net);
     }
 
-    public get runs(): Run[] {
-        return this._runs;
+    public get currentRun(): Run {
+        return this._currentRun;
     }
 
     public set currentRun(value: Run) {
         this._currentRun = value;
         this.display(this.currentRun);
+    }
+
+    public get runs(): Run[] {
+        return this._runs;
     }
 
     public addEmptyRun(): void {
