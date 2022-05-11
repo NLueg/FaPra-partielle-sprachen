@@ -11,13 +11,9 @@ describe('AppComponent', () => {
     const mockUploadService = {
         get upload$(): any {
             return {
-                subscribe: () => {
-                    return {
-                        unsubscribe: () => {
-                            return null;
-                        },
-                    };
-                },
+                subscribe: () => ({
+                    unsubscribe: jest.fn(),
+                }),
             };
         },
     };

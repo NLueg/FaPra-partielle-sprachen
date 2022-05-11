@@ -8,8 +8,8 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 export class TemplateButtonComponent {
     @Input() buttonText: string | undefined;
     @Input() buttonIcon: string | undefined;
-    @Output() buttonAction: EventEmitter<any> = new EventEmitter();
-    @Output() dropAction: EventEmitter<any> = new EventEmitter();
+    @Output() buttonAction = new EventEmitter<void>();
+    @Output() dropAction = new EventEmitter<DragEvent>();
 
     prevent(e: Event): void {
         e.preventDefault();
@@ -29,9 +29,7 @@ export class TemplateButtonComponent {
     }
 
     processMouseClick(e: MouseEvent): void {
-        if (this.buttonAction) {
-            this.buttonAction.emit();
-        }
+        this.buttonAction.emit();
     }
 
     processDrop(e: DragEvent): void {
@@ -39,9 +37,7 @@ export class TemplateButtonComponent {
         const target = e.target as HTMLElement;
         target.classList.remove('drag-hover');
 
-        if (this.dropAction) {
-            this.dropAction.emit(e);
-        }
+        this.dropAction.emit(e);
     }
 
     dragStart(e: DragEvent): void {
