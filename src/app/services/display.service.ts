@@ -7,40 +7,28 @@ import { Run } from '../classes/diagram/run';
     providedIn: 'root',
 })
 export class DisplayService implements OnDestroy {
-    private _diagram$: BehaviorSubject<Run>;
+    private _currentRun$: BehaviorSubject<Run>;
 
     private readonly _runs: Run[] = [];
-    private _currentRun: Run;
 
     constructor() {
-        this._currentRun = new Run();
-        this.runs.push(this.currentRun);
-        this._diagram$ = new BehaviorSubject<Run>(this.currentRun);
+        this.runs.push(new Run());
+        this._currentRun$ = new BehaviorSubject<Run>(this.runs[0]);
     }
 
     ngOnDestroy(): void {
-        this._diagram$.complete();
+        this._currentRun$.complete();
     }
 
-    public get diagram$(): Observable<Run> {
-        return this._diagram$.asObservable();
-    }
-
-    public get diagram(): Run {
-        return this._diagram$.getValue();
-    }
-
-    private display(net: Run): void {
-        this._diagram$.next(net);
+    public get currentRun$(): Observable<Run> {
+        return this._currentRun$.asObservable();
     }
 
     public get currentRun(): Run {
-        return this._currentRun;
+        return this._currentRun$.getValue();
     }
-
-    public set currentRun(value: Run) {
-        this._currentRun = value;
-        this.display(this.currentRun);
+    private display(net: Run): void {
+        this._currentRun$.next(net);
     }
 
     public get runs(): Run[] {
@@ -57,9 +45,8 @@ export class DisplayService implements OnDestroy {
             this.updateCurrentRun(run);
         } else {
             this.runs.push(run);
+            this.display(run);
         }
-
-        this.currentRun = run;
     }
 
     public getRunIndex(run: Run): number {
@@ -69,7 +56,7 @@ export class DisplayService implements OnDestroy {
     public updateCurrentRun(run: Run): void {
         const index = this.getRunIndex(this.currentRun);
         this.runs[index] = run;
-        this.currentRun = run;
+        this.display(run);
     }
 
     public removeRun(run: Run): void {
@@ -79,7 +66,7 @@ export class DisplayService implements OnDestroy {
         }
 
         if (this.runs.length > 0) {
-            this.currentRun = this.runs[Math.max(index - 1, 0)]; //set previous run as active
+            this.display(this.runs[Math.max(index - 1, 0)]); //set previous run as active
         } else {
             this.addEmptyRun(); //create new empty run
         }
