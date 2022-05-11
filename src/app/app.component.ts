@@ -15,6 +15,7 @@ export class AppComponent implements OnDestroy {
     public textareaFc: FormControl;
 
     private _sub: Subscription;
+    private _fileSub: Subscription;
 
     constructor(
         private _parserService: ParserService,
@@ -26,26 +27,43 @@ export class AppComponent implements OnDestroy {
             .pipe(debounceTime(400))
             .subscribe((val) => this.processSourceChange(val));
         this.textareaFc.setValue(`hello world`);
+
+        this._fileSub = this._uploadService.upload$.subscribe((content) =>
+            this.processNewSource(content)
+        );
     }
 
     ngOnDestroy(): void {
         this._sub.unsubscribe();
+        this._fileSub.unsubscribe();
     }
 
-    private processSourceChange(newSource: string) {
+    private processSourceChange(newSource: string): void {
         const result = this._parserService.parse(newSource);
         if (!result) {
             return;
         }
-        this._displayService.display(result);
+
+        this._displayService.updateCurrentRun(result);
     }
 
-    async uploadFile(): Promise<void> {
-        const content = await this._uploadService.uploadFile();
-        if (!content) {
+    private processNewSource(newSource: string): void {
+        const result = this._parserService.parse(newSource);
+        if (!result) {
             return;
         }
 
-        this.textareaFc.setValue(content);
+        this._displayService.registerRun(result);
+        this.textareaFc.setValue(newSource, { emitEvent: false });
+    }
+
+    public openFileSelector(): void {
+        this._uploadService.openFileSelector();
+    }
+
+    public dropFiles(event: DragEvent): void {
+        if (event.dataTransfer?.files) {
+            this._uploadService.uploadFiles(event.dataTransfer.files);
+        }
     }
 }

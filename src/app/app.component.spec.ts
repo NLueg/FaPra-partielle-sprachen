@@ -8,6 +8,16 @@ import { ParserService } from './services/parser.service';
 import { UploadService } from './services/upload/upload.service';
 
 describe('AppComponent', () => {
+    const mockUploadService = {
+        get upload$(): any {
+            return {
+                subscribe: () => ({
+                    unsubscribe: jest.fn(),
+                }),
+            };
+        },
+    };
+
     beforeEach(async () => {
         await TestBed.configureTestingModule({
             imports: [RouterTestingModule],
@@ -15,7 +25,7 @@ describe('AppComponent', () => {
             providers: [
                 { provide: ParserService, useValue: {} },
                 { provide: DisplayService, useValue: {} },
-                { provide: UploadService, useValue: {} },
+                { provide: UploadService, useValue: mockUploadService },
             ],
             schemas: [CUSTOM_ELEMENTS_SCHEMA],
         }).compileComponents();
