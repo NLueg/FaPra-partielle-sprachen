@@ -16,6 +16,7 @@ const arcsAttribute = '.arcs';
 export class ParserService {
     constructor(private toastr: ToastrService) {}
 
+    // TODO: More validation (see PAR-10)
     parse(content: string): Run | null {
         const contentLines = content.split('\n');
 
@@ -24,8 +25,10 @@ export class ParserService {
         let currentParsingState: ParsingStates | undefined = undefined;
 
         for (const line of contentLines) {
-            if (line.startsWith(typeAttribute)) {
-                if (line.endsWith('ps')) {
+            const trimmedLine = line.trim();
+
+            if (trimmedLine.startsWith(typeAttribute)) {
+                if (trimmedLine.endsWith('ps')) {
                     continue;
                 } else {
                     this.toastr.error(
@@ -34,18 +37,18 @@ export class ParserService {
                     );
                     return null;
                 }
-            } else if (line.startsWith(transitionsAttribute)) {
+            } else if (trimmedLine.startsWith(transitionsAttribute)) {
                 currentParsingState = 'transitions';
                 continue;
-            } else if (line.startsWith(arcsAttribute)) {
+            } else if (trimmedLine.startsWith(arcsAttribute)) {
                 currentParsingState = 'arcs';
                 continue;
             }
 
             if (currentParsingState === 'transitions') {
-                run.addElement(new Element(line.split(' ')[0]));
+                run.addElement(new Element(trimmedLine.split(' ')[0]));
             } else if (currentParsingState === 'arcs') {
-                const splitLine = line.split(' ');
+                const splitLine = trimmedLine.split(' ');
                 run.addArc({
                     source: splitLine[0],
                     target: splitLine[1],
