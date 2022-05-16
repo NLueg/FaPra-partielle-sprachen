@@ -4,6 +4,7 @@ import { debounceTime, Subscription } from 'rxjs';
 
 import { DisplayService } from './services/display.service';
 import { ParserService } from './services/parser.service';
+import { exampleContent } from './services/upload/example-file';
 import { UploadService } from './services/upload/upload.service';
 
 @Component({
@@ -26,7 +27,7 @@ export class AppComponent implements OnDestroy {
         this._sub = this.textareaFc.valueChanges
             .pipe(debounceTime(400))
             .subscribe((val) => this.processSourceChange(val));
-        this.textareaFc.setValue(`hello world`);
+        this.textareaFc.setValue(exampleContent);
 
         this._fileSub = this._uploadService.upload$.subscribe((content) =>
             this.processNewSource(content)
