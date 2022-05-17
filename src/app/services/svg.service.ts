@@ -39,10 +39,9 @@ function createSvgForElement(element: Element): SVGElement[] {
     svg.setAttribute('stroke-width', '2');
     svg.setAttribute('fill-opacity', '0');
 
-    // TODO: Find a way to center the text
     const text = createSvgElement('text');
     text.textContent = element.label;
-    text.setAttribute('x', `${element.x + 15}`);
+    text.setAttribute('x', `${element.x + 25}`);
     text.setAttribute('y', `${element.y + 75}`);
 
     element.registerSvg(svg);

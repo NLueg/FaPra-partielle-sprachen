@@ -54,7 +54,7 @@ export class DisplayComponent implements OnDestroy {
             return;
         }
 
-        while (drawingArea.childElementCount > 0) {
+        while (drawingArea.childElementCount > 1 /* keep arrowhead marker */) {
             drawingArea.removeChild(drawingArea.lastChild as ChildNode);
         }
     }
