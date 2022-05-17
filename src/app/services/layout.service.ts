@@ -9,7 +9,7 @@ export class LayoutService {
     private static readonly OFFSET = 20;
     private static readonly RANGE = 300;
 
-    // TODO: Implement displaying of the run
+    // TODO: Calculate coordinates for elements
     public layout(diagram: Run): void {
         diagram.elements.forEach((el) => {
             el.x =

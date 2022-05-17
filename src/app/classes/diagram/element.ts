@@ -36,25 +36,21 @@ export class Element {
 
     public registerSvg(svg: SVGElement): void {
         this._svgElement = svg;
-        this._svgElement.onmousedown = (event) => {
-            this.processMouseDown(event);
-        };
-        this._svgElement.onmouseup = (event) => {
-            this.processMouseUp(event);
-        };
+        this._svgElement.onmousedown = () => this.processMouseDown();
+        this._svgElement.onmouseup = () => this.processMouseUp();
     }
 
-    private processMouseDown(event: MouseEvent) {
+    private processMouseDown() {
         if (this._svgElement === undefined) {
             return;
         }
-        this._svgElement.setAttribute('fill', 'red');
+        this._svgElement.setAttribute('stroke', 'red');
     }
 
-    private processMouseUp(event: MouseEvent) {
+    private processMouseUp() {
         if (this._svgElement === undefined) {
             return;
         }
-        this._svgElement.setAttribute('fill', 'black');
+        this._svgElement.setAttribute('stroke', 'black');
     }
 }
