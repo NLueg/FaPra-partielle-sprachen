@@ -29,16 +29,14 @@ export class Run {
     }
 
     addArc(arc: Arc): void {
-        let contains: boolean;
-        contains = false;
-        for (const item of this._arcs) {
-            if (item.source === arc.source && item.target === arc.target) {
-                contains = true;
-            }
+        const contained = this._arcs.some(
+            (item) => item.source === arc.source && item.target === arc.target
+        );
+        if (contained) {
+            return;
         }
-        if (!contains) {
-            this._arcs.push(arc);
-        }
+
+        this._arcs.push(arc);
     }
 
     isEmpty(): boolean {
