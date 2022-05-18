@@ -18,10 +18,24 @@ export class Run {
     }
 
     addElement(element: Element): void {
+        const contained = this._elements.some(
+            (item) => item.label === element.label
+        );
+        if (contained) {
+            return;
+        }
+
         this._elements.push(element);
     }
 
     addArc(arc: Arc): void {
+        const contained = this._arcs.some(
+            (item) => item.source === arc.source && item.target === arc.target
+        );
+        if (contained) {
+            return;
+        }
+
         this._arcs.push(arc);
     }
 

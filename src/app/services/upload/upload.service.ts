@@ -2,8 +2,6 @@ import { Injectable, OnDestroy } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { Observable, Subject } from 'rxjs';
 
-import { exampleContent } from './example-file';
-
 const allowedExtensions = ['ps'];
 
 @Injectable({
@@ -32,7 +30,7 @@ export class UploadService implements OnDestroy {
                 check = false;
                 this.toastr.error(
                     `File '${file.name}' has to be a valid extension`,
-                    `Unable to parse file`
+                    `Unable to upload file`
                 );
             }
         });
@@ -83,5 +81,5 @@ function fileExtensionIsValid(fileName: string): boolean {
     if (!fileExtension) {
         return false;
     }
-    return allowedExtensions.includes(fileExtension);
+    return allowedExtensions.includes(fileExtension.trim());
 }
