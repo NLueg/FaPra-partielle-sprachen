@@ -28,10 +28,10 @@ export class ParserService {
             switch (currentParsingState) {
                 case 'initial':
                     if (trimmedLine === '') {
-                        continue;
+                        break;
                     } else if (trimmedLine === '.type ps') {
                         currentParsingState = 'type';
-                        continue;
+                        break;
                     } else {
                         this.toastr.error(
                             `The type of the file has to be 'ps'`,
@@ -41,15 +41,15 @@ export class ParserService {
                     }
                 case 'type':
                     if (trimmedLine === '') {
-                        continue;
+                        break;
                     } else if (trimmedLine === transitionsAttribute) {
                         currentParsingState = 'transitions';
                         fileContainsTransitions = true;
-                        continue;
+                        break;
                     } else if (trimmedLine === arcsAttribute) {
                         currentParsingState = 'arcs';
                         fileContainsArcs = true;
-                        continue;
+                        break;
                     } else {
                         this.toastr.error(
                             `The file contains unvalid parts`,
@@ -62,7 +62,7 @@ export class ParserService {
                         trimmedLine === '' ||
                         trimmedLine === transitionsAttribute
                     ) {
-                        continue;
+                        break;
                     } else if (trimmedLine !== arcsAttribute) {
                         if (trimmedLine.split(' ').length !== 1) {
                             this.toastr.warning(
@@ -71,18 +71,18 @@ export class ParserService {
                             );
                         }
                         run.addElement(new Element(trimmedLine.split(' ')[0]));
-                        continue;
+                        break;
                     } else if (trimmedLine === '.arcs') {
                         currentParsingState = 'arcs';
                         fileContainsArcs = true;
-                        continue;
+                        break;
                     } else {
                         this.toastr.error(`Error`, `Unable to parse file`);
                         return null;
                     }
                 case 'arcs':
                     if (trimmedLine === '' || trimmedLine === arcsAttribute) {
-                        continue;
+                        break;
                     } else if (trimmedLine !== '.transitions') {
                         if (trimmedLine.split(' ').length === 2) {
                             const splitLine = trimmedLine.split(' ');
@@ -96,7 +96,7 @@ export class ParserService {
                                 `Invalid arcs are ingnored`
                             );
                         }
-                        continue;
+                        break;
                     } else if (trimmedLine === '.transitions') {
                         currentParsingState = 'transitions';
                         fileContainsTransitions = true;
