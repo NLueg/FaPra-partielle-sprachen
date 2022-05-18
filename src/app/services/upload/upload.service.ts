@@ -3,6 +3,7 @@ import { ToastrService } from 'ngx-toastr';
 import { Observable, Subject } from 'rxjs';
 
 import { exampleContent } from './example-file';
+import {StreamlinerService} from "../streamliner.service";
 
 const allowedExtensions = ['ps'];
 
@@ -12,7 +13,7 @@ const allowedExtensions = ['ps'];
 export class UploadService implements OnDestroy {
     private _upload$: Subject<string>;
 
-    constructor(private toastr: ToastrService) {
+    constructor(private toastr: ToastrService, private streamliner: StreamlinerService) {
         this._upload$ = new Subject<string>();
     }
 
@@ -70,7 +71,7 @@ export class UploadService implements OnDestroy {
 
             reader.onload = () => {
                 const content: string = reader.result as string;
-                this._upload$.next(content);
+                this._upload$.next(this.streamliner.cleanupContent(content));
             };
 
             reader.readAsText(file);
@@ -83,5 +84,5 @@ function fileExtensionIsValid(fileName: string): boolean {
     if (!fileExtension) {
         return false;
     }
-    return allowedExtensions.includes(fileExtension);
+    return allowedExtensions.includes(fileExtension.trim());
 }
