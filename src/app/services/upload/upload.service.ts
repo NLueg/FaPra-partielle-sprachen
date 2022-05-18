@@ -70,7 +70,7 @@ export class UploadService implements OnDestroy {
 
             reader.onload = () => {
                 const content: string = reader.result as string;
-                this._upload$.next(content);
+                this._upload$.next(this.streamliner.cleanupContent(content));
             };
 
             reader.readAsText(file);
