@@ -22,7 +22,7 @@ export class ParserService {
         const contentLines = content.split('\n');
         const run: Run = new Run();
 
-        let currentParsingState: ParsingStates | undefined = undefined;
+        let currentParsingState: ParsingStates = 'initial';
         let fileContainsTransitions: boolean;
         let fileContainsArcs: boolean;
         fileContainsTransitions = false;
