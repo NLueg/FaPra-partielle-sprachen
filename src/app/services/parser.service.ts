@@ -1,13 +1,10 @@
 import { Injectable } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
-import { ignoreElements } from 'rxjs';
 
 import { Element } from '../classes/diagram/element';
-import { Arc, Run } from '../classes/diagram/run';
+import { Run } from '../classes/diagram/run';
 
 type ParsingStates = 'initial' | 'type' | 'transitions' | 'arcs';
-
-const typeAttribute = '.type';
 const transitionsAttribute = '.transitions';
 const arcsAttribute = '.arcs';
 

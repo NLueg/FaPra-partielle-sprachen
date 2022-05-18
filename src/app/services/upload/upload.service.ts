@@ -2,9 +2,6 @@ import { Injectable, OnDestroy } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { Observable, Subject } from 'rxjs';
 
-import { StreamlinerService } from '../streamliner.service';
-import { exampleContent } from './example-file';
-
 const allowedExtensions = ['ps'];
 
 @Injectable({
@@ -13,10 +10,7 @@ const allowedExtensions = ['ps'];
 export class UploadService implements OnDestroy {
     private _upload$: Subject<string>;
 
-    constructor(
-        private toastr: ToastrService,
-        private streamliner: StreamlinerService
-    ) {
+    constructor(private toastr: ToastrService) {
         this._upload$ = new Subject<string>();
     }
 
@@ -74,7 +68,7 @@ export class UploadService implements OnDestroy {
 
             reader.onload = () => {
                 const content: string = reader.result as string;
-                this._upload$.next(this.streamliner.cleanupContent(content));
+                this._upload$.next(content);
             };
 
             reader.readAsText(file);
