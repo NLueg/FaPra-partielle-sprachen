@@ -1,4 +1,4 @@
-import {Element} from './element';
+import { Element } from './element';
 
 export class Run {
     private readonly _arcs: Array<Arc>;
@@ -28,7 +28,6 @@ export class Run {
         if (!contains) {
             this._elements.push(element);
         }
-
     }
 
     addArc(arc: Arc): void {
@@ -42,13 +41,11 @@ export class Run {
         if (!contains) {
             this._arcs.push(arc);
         }
-
     }
 
     isEmpty(): boolean {
         return this.arcs.length + this.elements.length === 0;
     }
-
 }
 
 export type Arc = {

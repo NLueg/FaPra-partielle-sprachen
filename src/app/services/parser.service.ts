@@ -1,9 +1,9 @@
-import {Injectable} from '@angular/core';
-import {ToastrService} from 'ngx-toastr';
-import {ignoreElements} from 'rxjs';
+import { Injectable } from '@angular/core';
+import { ToastrService } from 'ngx-toastr';
+import { ignoreElements } from 'rxjs';
 
-import {Element} from '../classes/diagram/element';
-import {Arc, Run} from '../classes/diagram/run';
+import { Element } from '../classes/diagram/element';
+import { Arc, Run } from '../classes/diagram/run';
 
 type ParsingStates = 'initial' | 'type' | 'transitions' | 'arcs';
 
@@ -15,8 +15,7 @@ const arcsAttribute = '.arcs';
     providedIn: 'root',
 })
 export class ParserService {
-    constructor(private toastr: ToastrService) {
-    }
+    constructor(private toastr: ToastrService) {}
 
     // TODO: More validation (see PAR-10)
     parse(content: string): Run | null {
@@ -37,7 +36,7 @@ export class ParserService {
                     if (trimmedLine === '') {
                         continue;
                     } else if (trimmedLine === '.type ps') {
-                        currentParsingState = 'type'
+                        currentParsingState = 'type';
                         continue;
                     } else {
                         this.toastr.error(
@@ -46,16 +45,15 @@ export class ParserService {
                         );
                         return null;
                     }
-                    ;
                 case 'type':
                     if (trimmedLine === '') {
                         continue;
                     } else if (trimmedLine === transitionsAttribute) {
-                        currentParsingState = 'transitions'
+                        currentParsingState = 'transitions';
                         fileContainsTransitions = true;
                         continue;
                     } else if (trimmedLine === arcsAttribute) {
-                        currentParsingState = 'arcs'
+                        currentParsingState = 'arcs';
                         fileContainsArcs = true;
                         continue;
                     } else {
@@ -65,9 +63,11 @@ export class ParserService {
                         );
                         return null;
                     }
-                    ;
                 case 'transitions':
-                    if (trimmedLine === '' || trimmedLine === transitionsAttribute) {
+                    if (
+                        trimmedLine === '' ||
+                        trimmedLine === transitionsAttribute
+                    ) {
                         continue;
                     } else if (trimmedLine !== arcsAttribute) {
                         if (trimmedLine.split(' ').length !== 1) {
@@ -75,22 +75,17 @@ export class ParserService {
                                 `Transition names are not allow to contain blank`,
                                 `Only first word is used`
                             );
-
                         }
                         run.addElement(new Element(trimmedLine.split(' ')[0]));
                         continue;
                     } else if (trimmedLine === '.arcs') {
-                        currentParsingState = 'arcs'
+                        currentParsingState = 'arcs';
                         fileContainsArcs = true;
                         continue;
                     } else {
-                        this.toastr.error(
-                            `Error`,
-                            `Unable to parse file`
-                        );
+                        this.toastr.error(`Error`, `Unable to parse file`);
                         return null;
                     }
-                    ;
                 case 'arcs':
                     if (trimmedLine === '' || trimmedLine === arcsAttribute) {
                         continue;
@@ -101,7 +96,6 @@ export class ParserService {
                                 source: splitLine[0],
                                 target: splitLine[1],
                             });
-
                         } else {
                             this.toastr.warning(
                                 `File contains invalid arcs`,
@@ -110,18 +104,13 @@ export class ParserService {
                         }
                         continue;
                     } else if (trimmedLine === '.transitions') {
-                        currentParsingState = 'transitions'
+                        currentParsingState = 'transitions';
                         fileContainsTransitions = true;
                         continue;
                     } else {
-                        this.toastr.error(
-                            `Error`,
-                            `Unable to parse file`
-                        );
+                        this.toastr.error(`Error`, `Unable to parse file`);
                         return null;
                     }
-                    ;
-
             }
         }
         if (fileContainsTransitions && fileContainsArcs) {
@@ -133,6 +122,5 @@ export class ParserService {
             );
             return null;
         }
-
     }
 }
