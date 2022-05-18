@@ -23,11 +23,8 @@ export class ParserService {
         const run: Run = new Run();
 
         let currentParsingState: ParsingStates = 'initial';
-        let fileContainsTransitions: boolean;
-        let fileContainsArcs: boolean;
-        fileContainsTransitions = false;
-        fileContainsArcs = false;
-        currentParsingState = 'initial';
+        let fileContainsTransitions = false;
+        let fileContainsArcs = false;
         for (const line of contentLines) {
             const trimmedLine = line.trim();
 
