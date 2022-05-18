@@ -32,7 +32,7 @@ export class UploadService implements OnDestroy {
                 check = false;
                 this.toastr.error(
                     `File '${file.name}' has to be a valid extension`,
-                    `Unable to parse file`
+                    `Unable to upload file`
                 );
             }
         });
@@ -70,7 +70,7 @@ export class UploadService implements OnDestroy {
 
             reader.onload = () => {
                 const content: string = reader.result as string;
-                this._upload$.next(this.streamliner.cleanupContent(content));
+                this._upload$.next(content);
             };
 
             reader.readAsText(file);
