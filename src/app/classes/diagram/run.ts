@@ -18,16 +18,14 @@ export class Run {
     }
 
     addElement(element: Element): void {
-        let contains: boolean;
-        contains = false;
-        for (const item of this._elements) {
-            if (item.label === element.label) {
-                contains = true;
-            }
+        const contained = this._elements.some(
+            (item) => item.label === element.label
+        );
+        if (contained) {
+            return;
         }
-        if (!contains) {
-            this._elements.push(element);
-        }
+
+        this._elements.push(element);
     }
 
     addArc(arc: Arc): void {
