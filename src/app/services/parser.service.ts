@@ -103,7 +103,7 @@ export class ParserService {
                     } else if (trimmedLine === '.transitions') {
                         currentParsingState = 'transitions';
                         fileContainsTransitions = true;
-                        continue;
+                        break;
                     } else {
                         this.toastr.error(`Error`, `Unable to parse file`);
                         return null;
