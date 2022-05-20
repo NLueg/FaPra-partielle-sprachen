@@ -2,6 +2,7 @@ import { Component, OnDestroy } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { debounceTime, Subscription } from 'rxjs';
 
+import { Run } from './classes/diagram/run';
 import { DisplayService } from './services/display.service';
 import { ParserService } from './services/parser.service';
 import { exampleContent } from './services/upload/example-file';
@@ -14,9 +15,12 @@ import { UploadService } from './services/upload/upload.service';
 })
 export class AppComponent implements OnDestroy {
     public textareaFc: FormControl;
+    public Valid = Valid;
 
     private _sub: Subscription;
     private _fileSub: Subscription;
+    private _isRunValid: Valid | undefined;
+    private _runHint = '';
 
     constructor(
         private _parserService: ParserService,
@@ -40,22 +44,45 @@ export class AppComponent implements OnDestroy {
     }
 
     private processSourceChange(newSource: string): void {
-        const result = this._parserService.parse(newSource);
-        if (!result) {
-            return;
-        }
+        const errors = new Set<string>();
+        const result = this._parserService.parse(newSource, errors);
+        this.updateValidation(result, errors);
+
+        if (!result) return;
 
         this._displayService.updateCurrentRun(result);
     }
 
     private processNewSource(newSource: string): void {
-        const result = this._parserService.parse(newSource);
-        if (!result) {
-            return;
-        }
+        const errors = new Set<string>();
+        const result = this._parserService.parse(newSource, errors);
+        this.updateValidation(result, errors);
+
+        if (!result) return;
 
         this._displayService.registerRun(result);
         this.textareaFc.setValue(newSource, { emitEvent: false });
+    }
+
+    private updateValidation(run: Run | null, errors: Set<string>): void {
+        this._runHint = [...errors, ...(run ? run.warnings : [])].join('\n');
+
+        if (!run || errors.size > 0) {
+            this.textareaFc.setErrors({ 'invalid run': true });
+            this._isRunValid = Valid.Error;
+        } else if (run.warnings.size > 0) {
+            this._isRunValid = Valid.Warn;
+        } else {
+            this._isRunValid = Valid.Success;
+        }
+    }
+
+    get isRunValid(): number | undefined {
+        return this._isRunValid;
+    }
+
+    get runHint(): string {
+        return this._runHint;
     }
 
     public openFileSelector(): void {
@@ -67,4 +94,10 @@ export class AppComponent implements OnDestroy {
             this._uploadService.uploadFiles(event.dataTransfer.files);
         }
     }
+}
+
+export enum Valid {
+    Error,
+    Warn,
+    Success,
 }

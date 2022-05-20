@@ -15,8 +15,36 @@
             (buttonAction)="openFileSelector()"
             (dropAction)="dropFiles($event)"
         ></app-template-button>
-        <mat-form-field appearance="outline" class="textarea">
-            <mat-label>Source file</mat-label>
+        <mat-form-field
+            appearance="outline"
+            class="textarea"
+            [matTooltip]="runHint"
+        >
+            <mat-label
+                class="source_label"
+                fxLayout="row"
+                fxLayoutAlign="space-between"
+            >
+                <span>Source file</span>
+                <mat-icon
+                    *ngIf="isRunValid === Valid.Success"
+                    class="color_success"
+                >
+                    check_circle
+                </mat-icon>
+                <mat-icon
+                    *ngIf="isRunValid === Valid.Warn"
+                    class="color_warning"
+                >
+                    warning_amber
+                </mat-icon>
+                <mat-icon
+                    *ngIf="isRunValid === Valid.Error"
+                    class="color_error"
+                >
+                    error_outline
+                </mat-icon>
+            </mat-label>
             <textarea
                 matInput
                 cdkTextareaAutosize

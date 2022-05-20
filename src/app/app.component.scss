@@ -31,3 +31,28 @@ hr {
     margin-bottom: 30px;
     width: 100%;
 }
+
+.source_label mat-icon {
+    font-size: 25px;
+    padding-right: 10px;
+}
+
+mat-icon.color_success { 
+    color: #4CAF50;
+}
+
+mat-icon.color_warning {
+    color: #ff9800;
+}
+
+mat-icon.color_error {
+    color: #f44336;
+}
+
+.mat-tooltip {
+    white-space: pre-line;
+}
+
+::ng-deep .mat-tooltip {
+    white-space: pre-line;
+}

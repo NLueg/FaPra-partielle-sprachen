@@ -5,6 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ToastrModule } from 'ngx-toastr';
@@ -29,8 +30,11 @@ import { TemplateButtonComponent } from './components/template-button/template-b
         MatInputModule,
         MatButtonModule,
         MatIconModule,
+        MatTooltipModule,
         ReactiveFormsModule,
-        ToastrModule.forRoot(),
+        ToastrModule.forRoot({
+            preventDuplicates: true,
+        }),
     ],
     providers: [],
     bootstrap: [AppComponent],
