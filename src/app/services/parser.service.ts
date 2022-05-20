@@ -18,6 +18,8 @@ export class ParserService {
         const contentLines = content.split('\n');
         const run: Run = new Run();
 
+        run.setText(content);
+
         let currentParsingState: ParsingStates = 'initial';
         let fileContainsTransitions = false;
         let fileContainsArcs = false;
@@ -85,7 +87,9 @@ export class ParserService {
                             )
                         ) {
                             run.addWarning(
-                                `File contains duplicate transitions`
+                                `File contains duplicate transition (${
+                                    trimmedLine.split(' ')[0]
+                                })`
                             );
                             this.toastr.warning(
                                 `File contains duplicate transitions`,
@@ -116,7 +120,9 @@ export class ParserService {
                                     targetEl: null,
                                 })
                             ) {
-                                run.addWarning(`File contains duplicate arcs`);
+                                run.addWarning(
+                                    `File contains duplicate arc (${splitLine[0]} ${splitLine[1]})`
+                                );
                                 this.toastr.warning(
                                     `File contains duplicate arcs`,
                                     `Duplicate arcs are ingnored`
@@ -151,6 +157,8 @@ export class ParserService {
                     `Invalid arcs are ingnored`
                 );
             }
+
+            //Todo check circles in run
             return run;
         } else {
             errors.add(`File does not contain transitions and arcs`);

@@ -52,6 +52,75 @@
                 cdkAutosizeMaxRows="20"
                 [formControl]="textareaFc"
             ></textarea>
+            <mat-divider></mat-divider>
+            <div fxLayout="row" fxLayoutAlign="space-evenly start">
+                <span class="run_info">{{ displayRunCount() }}</span>
+                <button
+                    mat-icon-button
+                    aria-label="Previous run"
+                    matTooltip="Previous run"
+                    [disabled]="!hasPreviousRun()"
+                    (click)="previousRun()"
+                >
+                    <mat-icon>navigate_before</mat-icon>
+                </button>
+                <button
+                    mat-icon-button
+                    aria-label="Next run"
+                    matTooltip="Next run"
+                    [disabled]="!hasNextRun()"
+                    (click)="nextRun()"
+                >
+                    <mat-icon>navigate_next</mat-icon>
+                </button>
+            </div>
+            <div fxLayout="row" fxLayoutAlign="space-evenly start">
+                <button
+                    mat-icon-button
+                    aria-label="Delete current run"
+                    matTooltip="Delete current run"
+                    color="warn"
+                    [disabled]="
+                        isCurrentRunEmpty() &&
+                        !hasPreviousRun() &&
+                        !hasNextRun()
+                    "
+                    (click)="removeRun()"
+                >
+                    <mat-icon>delete_forever</mat-icon>
+                </button>
+                <button
+                    mat-icon-button
+                    aria-label="Add empty run"
+                    matTooltip="Add empty run"
+                    color="primary"
+                    [disabled]="isCurrentRunEmpty()"
+                    (click)="addRun()"
+                >
+                    <mat-icon>add_circle</mat-icon>
+                </button>
+                <button
+                    mat-icon-button
+                    aria-label="Reset runs"
+                    matTooltip="Reset runs"
+                    color="warn"
+                    (click)="reset()"
+                >
+                    <mat-icon>restart_alt</mat-icon>
+                </button>
+            </div>
+            <button
+                *ngIf="isRunValid === Valid.Warn"
+                class="button_resolve"
+                color="accent"
+                matSuffix
+                mat-icon-button
+                aria-label="Resolve warnings"
+                matTooltip="Resolve warnings"
+                (click)="resolveWarnings()"
+            >
+                <mat-icon>auto_fix_high</mat-icon>
+            </button>
         </mat-form-field>
         <app-template-button
             buttonText="Right button"

@@ -4,6 +4,7 @@ export class Run {
     private readonly _arcs: Array<Arc>;
     private readonly _elements: Array<Element>;
     private readonly _warnings: Set<string>;
+    private _text = '';
 
     constructor() {
         this._arcs = [];
@@ -21,6 +22,14 @@ export class Run {
 
     get warnings(): Set<string> {
         return this._warnings;
+    }
+
+    get text(): string {
+        return this._text;
+    }
+
+    setText(text: string): void {
+        this._text = text;
     }
 
     addWarning(warning: string): void {
@@ -58,6 +67,26 @@ export class Run {
     isEmpty(): boolean {
         return this.arcs.length + this.elements.length === 0;
     }
+
+    /**
+     * resolve warnings (removes duplicates and invalid arcs)
+     */
+    resolveWarnings(): void {
+        const lines = ['.type ps'];
+        lines.push('.transitions');
+        this.elements.forEach((e) => {
+            lines.push(e.label);
+        });
+
+        lines.push('.arcs');
+        this.arcs.forEach((e) => {
+            if (e.sourceEl && e.targetEl) lines.push(e.source + ' ' + e.target);
+        });
+
+        this.setText(lines.join('\n'));
+        this.clearWarnings();
+    }
+
     /**
      * set reference from arcs to transitions and vice versa
      * @returns all references found?

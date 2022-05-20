@@ -19,7 +19,7 @@ export class AppComponent implements OnDestroy {
 
     private _sub: Subscription;
     private _fileSub: Subscription;
-    private _isRunValid: Valid | undefined;
+    private _isRunValid: Valid | null = null;
     private _runHint = '';
 
     constructor(
@@ -61,10 +61,13 @@ export class AppComponent implements OnDestroy {
         if (!result) return;
 
         this._displayService.registerRun(result);
-        this.textareaFc.setValue(newSource, { emitEvent: false });
+        this.updateTextarea(newSource);
     }
 
-    private updateValidation(run: Run | null, errors: Set<string>): void {
+    private updateValidation(
+        run: Run | null,
+        errors: Set<string> = new Set<string>()
+    ): void {
         this._runHint = [...errors, ...(run ? run.warnings : [])].join('\n');
 
         if (!run || errors.size > 0) {
@@ -72,12 +75,14 @@ export class AppComponent implements OnDestroy {
             this._isRunValid = Valid.Error;
         } else if (run.warnings.size > 0) {
             this._isRunValid = Valid.Warn;
-        } else {
+        } else if (!run.isEmpty()) {
             this._isRunValid = Valid.Success;
+        } else {
+            this._isRunValid = null;
         }
     }
 
-    get isRunValid(): number | undefined {
+    get isRunValid(): number | null {
         return this._isRunValid;
     }
 
@@ -93,6 +98,67 @@ export class AppComponent implements OnDestroy {
         if (event.dataTransfer?.files) {
             this._uploadService.uploadFiles(event.dataTransfer.files);
         }
+    }
+
+    public displayRunCount(): string {
+        return (
+            'Run: ' +
+            (this._displayService.getCurrentRunIndex() + 1) +
+            '/' +
+            this._displayService.runs.length
+        );
+    }
+
+    public hasPreviousRun(): boolean {
+        return this._displayService.hasPreviousRun();
+    }
+
+    public hasNextRun(): boolean {
+        return this._displayService.hasNextRun();
+    }
+
+    public isCurrentRunEmpty(): boolean {
+        return this._displayService.isCurrentRunEmpty();
+    }
+
+    public nextRun(): void {
+        const run = this._displayService.setNextRun();
+        this.updateTextarea(run.text);
+        this.updateValidation(run);
+    }
+
+    public previousRun(): void {
+        const run = this._displayService.setPreviousRun();
+        this.updateTextarea(run.text);
+        this.updateValidation(run);
+    }
+
+    public removeRun(): void {
+        const run = this._displayService.removeCurrentRun();
+        this.updateTextarea(run.text);
+        this.updateValidation(run);
+    }
+
+    public addRun(): void {
+        const run = this._displayService.addEmptyRun();
+        this.updateTextarea(run.text);
+        this.updateValidation(run);
+    }
+
+    public reset(): void {
+        this._displayService.clearRuns();
+        this.updateTextarea(this._displayService.currentRun.text);
+        this.updateValidation(this._displayService.currentRun);
+    }
+
+    public resolveWarnings(): void {
+        this._displayService.currentRun.resolveWarnings();
+        this.updateTextarea(this._displayService.currentRun.text);
+        this.updateValidation(this._displayService.currentRun);
+    }
+
+    private updateTextarea(content: string, emitEvent = false): void {
+        this.textareaFc.setValue(content, { emitEvent: emitEvent });
     }
 }
 
