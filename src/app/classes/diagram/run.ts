@@ -123,6 +123,6 @@ export class Run {
 export type Arc = {
     source: string;
     target: string;
-    sourceEl: Element | null;
-    targetEl: Element | null;
+    sourceEl?: Element;
+    targetEl?: Element;
 };

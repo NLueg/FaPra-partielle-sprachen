@@ -26,24 +26,17 @@
                 fxLayoutAlign="space-between"
             >
                 <span>Source file</span>
-                <mat-icon
-                    *ngIf="isRunValid === Valid.Success"
-                    class="color_success"
-                >
-                    check_circle
-                </mat-icon>
-                <mat-icon
-                    *ngIf="isRunValid === Valid.Warn"
-                    class="color_warning"
-                >
-                    warning_amber
-                </mat-icon>
-                <mat-icon
-                    *ngIf="isRunValid === Valid.Error"
-                    class="color_error"
-                >
-                    error_outline
-                </mat-icon>
+                <ng-container [ngSwitch]="runValidationStatus">
+                    <mat-icon *ngSwitchCase="'success'" class="color_success">
+                        check_circle
+                    </mat-icon>
+                    <mat-icon *ngSwitchCase="'warn'" class="color_warning">
+                        warning_amber
+                    </mat-icon>
+                    <mat-icon *ngSwitchCase="'error'" class="color_error">
+                        error_outline
+                    </mat-icon>
+                </ng-container>
             </mat-label>
             <textarea
                 matInput

@@ -38,7 +38,7 @@ hr {
 }
 
 mat-icon.color_success { 
-    color: #4CAF50;
+    color: var(--success-color);
 }
 
 mat-icon.color_warning {

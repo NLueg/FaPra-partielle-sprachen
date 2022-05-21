@@ -15,12 +15,11 @@ import { UploadService } from './services/upload/upload.service';
 })
 export class AppComponent implements OnDestroy {
     public textareaFc: FormControl;
-    public Valid = Valid;
 
     private _sub: Subscription;
     private _fileSub: Subscription;
-    private _isRunValid: Valid | null = null;
-    private _runHint = '';
+    runValidationStatus: Valid | null = null;
+    runHint = '';
 
     constructor(
         private _parserService: ParserService,
@@ -72,22 +71,14 @@ export class AppComponent implements OnDestroy {
 
         if (!run || errors.size > 0) {
             this.textareaFc.setErrors({ 'invalid run': true });
-            this._isRunValid = Valid.Error;
+            this.runValidationStatus = 'error';
         } else if (run.warnings.size > 0) {
-            this._isRunValid = Valid.Warn;
+            this.runValidationStatus = 'warn';
         } else if (!run.isEmpty()) {
-            this._isRunValid = Valid.Success;
+            this.runValidationStatus = 'success';
         } else {
             this._isRunValid = null;
         }
-    }
-
-    get isRunValid(): number | null {
-        return this._isRunValid;
-    }
-
-    get runHint(): string {
-        return this._runHint;
     }
 
     public openFileSelector(): void {
@@ -162,8 +153,4 @@ export class AppComponent implements OnDestroy {
     }
 }
 
-export enum Valid {
-    Error,
-    Warn,
-    Success,
-}
+type Valid = 'error' | 'warn' | 'success';
