@@ -1,8 +1,12 @@
+import { Arc } from './run';
+
 export class Element {
     private _x: number;
     private _y: number;
     private _label: string;
     private _svgElement: SVGElement | undefined;
+    private _incomingArcs: Arc[] = [];
+    private _outgoingArcs: Arc[] = [];
 
     constructor(label: string) {
         this._x = 0;
@@ -32,6 +36,27 @@ export class Element {
 
     set label(value: string) {
         this._label = value;
+    }
+
+    get incomingArcs(): Arc[] {
+        return this._incomingArcs;
+    }
+
+    get outogingArcs(): Arc[] {
+        return this._outgoingArcs;
+    }
+
+    public addIncomingArc(a: Arc): void {
+        this.incomingArcs.push(a);
+    }
+
+    public addOutgoingArc(a: Arc): void {
+        this.outogingArcs.push(a);
+    }
+
+    public resetArcs(): void {
+        this._incomingArcs.splice(0, this._incomingArcs.length);
+        this._outgoingArcs.splice(0, this._outgoingArcs.length);
     }
 
     public registerSvg(svg: SVGElement): void {

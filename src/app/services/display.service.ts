@@ -35,13 +35,14 @@ export class DisplayService implements OnDestroy {
         return this._runs;
     }
 
-    public addEmptyRun(): void {
+    public addEmptyRun(): Run {
         this.registerRun(new Run());
+        return this.currentRun;
     }
 
     public registerRun(run: Run): void {
         //add run or update current run if empty
-        if (this.currentRun.isEmpty()) {
+        if (this.currentRun.isEmpty() && this.runs.length > 0) {
             this.updateCurrentRun(run);
         } else {
             this.runs.push(run);
@@ -53,13 +54,17 @@ export class DisplayService implements OnDestroy {
         return this.runs.indexOf(run);
     }
 
+    public getCurrentRunIndex(): number {
+        return this.runs.indexOf(this.currentRun);
+    }
+
     public updateCurrentRun(run: Run): void {
-        const index = this.getRunIndex(this.currentRun);
+        const index = this.getCurrentRunIndex();
         this.runs[index] = run;
         this.display(run);
     }
 
-    public removeRun(run: Run): void {
+    public removeRun(run: Run): Run {
         const index = this.getRunIndex(run);
         if (index > -1) {
             this.runs.splice(index, 1);
@@ -70,14 +75,46 @@ export class DisplayService implements OnDestroy {
         } else {
             this.addEmptyRun(); //create new empty run
         }
+
+        return this.currentRun;
     }
 
-    public removeCurrentRun(): void {
-        this.removeRun(this.currentRun);
+    public removeCurrentRun(): Run {
+        return this.removeRun(this.currentRun);
     }
 
     public clearRuns(): void {
         this.runs.splice(0, this.runs.length);
         this.addEmptyRun();
+    }
+
+    public hasPreviousRun(): boolean {
+        return this.getCurrentRunIndex() > 0;
+    }
+
+    public hasNextRun(): boolean {
+        return this.getCurrentRunIndex() < this.runs.length - 1;
+    }
+
+    public isCurrentRunEmpty(): boolean {
+        return this.currentRun.isEmpty();
+    }
+
+    public setNextRun(): Run {
+        const index = this.getCurrentRunIndex();
+        if (this.runs.length - 1 > index) {
+            this.display(this.runs[index + 1]);
+        }
+
+        return this.currentRun;
+    }
+
+    public setPreviousRun(): Run {
+        const index = this.getCurrentRunIndex();
+        if (index > 0) {
+            this.display(this.runs[index - 1]);
+        }
+
+        return this.currentRun;
     }
 }
