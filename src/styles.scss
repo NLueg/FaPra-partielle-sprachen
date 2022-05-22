@@ -1,6 +1,11 @@
 /* You can add global styles to this file, and also import other style files */
 @import '~ngx-toastr/toastr';
 
+
+:root {
+    --success-color: #4CAF50;
+}
+
 html { height: 100%; }
 body {
     margin: 0;

@@ -67,7 +67,7 @@ export class AppComponent implements OnDestroy {
         run: Run | null,
         errors: Set<string> = new Set<string>()
     ): void {
-        this._runHint = [...errors, ...(run ? run.warnings : [])].join('\n');
+        this.runHint = [...errors, ...(run ? run.warnings : [])].join('\n');
 
         if (!run || errors.size > 0) {
             this.textareaFc.setErrors({ 'invalid run': true });
@@ -77,7 +77,7 @@ export class AppComponent implements OnDestroy {
         } else if (!run.isEmpty()) {
             this.runValidationStatus = 'success';
         } else {
-            this._isRunValid = null;
+            this.runValidationStatus = null;
         }
     }
 
