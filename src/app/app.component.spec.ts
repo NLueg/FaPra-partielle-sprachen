@@ -18,13 +18,51 @@ describe('AppComponent', () => {
         },
     };
 
+    const mockDisplayService = {
+        hasPreviousRun$(): any {
+            return {
+                subscribe: () => ({
+                    unsubscribe: jest.fn(),
+                }),
+            };
+        },
+        hasNextRun$(): any {
+            return {
+                subscribe: () => ({
+                    unsubscribe: jest.fn(),
+                }),
+            };
+        },
+        isCurrentRunEmpty$(): any {
+            return {
+                subscribe: () => ({
+                    unsubscribe: jest.fn(),
+                }),
+            };
+        },
+        getCurrentRunIndex$(): any {
+            return {
+                subscribe: () => ({
+                    unsubscribe: jest.fn(),
+                }),
+            };
+        },
+        getRunCount$(): any {
+            return {
+                subscribe: () => ({
+                    unsubscribe: jest.fn(),
+                }),
+            };
+        },
+    };
+
     beforeEach(async () => {
         await TestBed.configureTestingModule({
             imports: [RouterTestingModule],
             declarations: [AppComponent],
             providers: [
                 { provide: ParserService, useValue: {} },
-                { provide: DisplayService, useValue: {} },
+                { provide: DisplayService, useValue: mockDisplayService },
                 { provide: UploadService, useValue: mockUploadService },
             ],
             schemas: [CUSTOM_ELEMENTS_SCHEMA],
