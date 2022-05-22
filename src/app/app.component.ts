@@ -1,6 +1,6 @@
 import { Component, OnDestroy } from '@angular/core';
 import { FormControl } from '@angular/forms';
-import { debounceTime, Subscription } from 'rxjs';
+import { debounceTime, Observable, Subscription } from 'rxjs';
 
 import { Run } from './classes/diagram/run';
 import { DisplayService } from './services/display.service';
@@ -16,6 +16,12 @@ import { UploadService } from './services/upload/upload.service';
 export class AppComponent implements OnDestroy {
     public textareaFc: FormControl;
 
+    hasPreviousRun$: Observable<boolean>;
+    hasNextRun$: Observable<boolean>;
+    isCurrentRunEmpty$: Observable<boolean>;
+    getCurrentRunIndex$: Observable<number>;
+    getRunCount$: Observable<number>;
+
     private _sub: Subscription;
     private _fileSub: Subscription;
     runValidationStatus: Valid | null = null;
@@ -27,6 +33,13 @@ export class AppComponent implements OnDestroy {
         private _uploadService: UploadService
     ) {
         this.textareaFc = new FormControl();
+
+        this.hasPreviousRun$ = this._displayService.hasPreviousRun$();
+        this.hasNextRun$ = this._displayService.hasNextRun$();
+        this.isCurrentRunEmpty$ = this._displayService.isCurrentRunEmpty$();
+        this.getCurrentRunIndex$ = this._displayService.getCurrentRunIndex$();
+        this.getRunCount$ = this._displayService.getRunCount$();
+
         this._sub = this.textareaFc.valueChanges
             .pipe(debounceTime(400))
             .subscribe((val) => this.processSourceChange(val));
@@ -67,7 +80,7 @@ export class AppComponent implements OnDestroy {
         run: Run | null,
         errors: Set<string> = new Set<string>()
     ): void {
-        this._runHint = [...errors, ...(run ? run.warnings : [])].join('\n');
+        this.runHint = [...errors, ...(run ? run.warnings : [])].join('\n');
 
         if (!run || errors.size > 0) {
             this.textareaFc.setErrors({ 'invalid run': true });
@@ -77,7 +90,7 @@ export class AppComponent implements OnDestroy {
         } else if (!run.isEmpty()) {
             this.runValidationStatus = 'success';
         } else {
-            this._isRunValid = null;
+            this.runValidationStatus = null;
         }
     }
 
@@ -89,27 +102,6 @@ export class AppComponent implements OnDestroy {
         if (event.dataTransfer?.files) {
             this._uploadService.uploadFiles(event.dataTransfer.files);
         }
-    }
-
-    public displayRunCount(): string {
-        return (
-            'Run: ' +
-            (this._displayService.getCurrentRunIndex() + 1) +
-            '/' +
-            this._displayService.runs.length
-        );
-    }
-
-    public hasPreviousRun(): boolean {
-        return this._displayService.hasPreviousRun();
-    }
-
-    public hasNextRun(): boolean {
-        return this._displayService.hasNextRun();
-    }
-
-    public isCurrentRunEmpty(): boolean {
-        return this._displayService.isCurrentRunEmpty();
     }
 
     public nextRun(): void {

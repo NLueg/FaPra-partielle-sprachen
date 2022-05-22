@@ -47,12 +47,15 @@
             ></textarea>
             <mat-divider></mat-divider>
             <div fxLayout="row" fxLayoutAlign="space-evenly start">
-                <span class="run_info">{{ displayRunCount() }}</span>
+                <span class="run_info"
+                    >Run: {{ (getCurrentRunIndex$ | async)! + 1 }} /
+                    {{ getRunCount$ | async }}
+                </span>
                 <button
                     mat-icon-button
                     aria-label="Previous run"
                     matTooltip="Previous run"
-                    [disabled]="!hasPreviousRun()"
+                    [disabled]="(hasPreviousRun$ | async) === false"
                     (click)="previousRun()"
                 >
                     <mat-icon>navigate_before</mat-icon>
@@ -61,7 +64,7 @@
                     mat-icon-button
                     aria-label="Next run"
                     matTooltip="Next run"
-                    [disabled]="!hasNextRun()"
+                    [disabled]="(hasNextRun$ | async) === false"
                     (click)="nextRun()"
                 >
                     <mat-icon>navigate_next</mat-icon>
@@ -74,9 +77,9 @@
                     matTooltip="Delete current run"
                     color="warn"
                     [disabled]="
-                        isCurrentRunEmpty() &&
-                        !hasPreviousRun() &&
-                        !hasNextRun()
+                        (isCurrentRunEmpty$ | async) &&
+                        (hasPreviousRun$ | async) === false &&
+                        (hasNextRun$ | async) === false
                     "
                     (click)="removeRun()"
                 >
@@ -87,7 +90,7 @@
                     aria-label="Add empty run"
                     matTooltip="Add empty run"
                     color="primary"
-                    [disabled]="isCurrentRunEmpty()"
+                    [disabled]="isCurrentRunEmpty$ | async"
                     (click)="addRun()"
                 >
                     <mat-icon>add_circle</mat-icon>
@@ -103,7 +106,7 @@
                 </button>
             </div>
             <button
-                *ngIf="isRunValid === Valid.Warn"
+                *ngIf="runValidationStatus === 'warn'"
                 class="button_resolve"
                 color="accent"
                 matSuffix

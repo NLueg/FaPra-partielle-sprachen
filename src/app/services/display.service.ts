@@ -1,5 +1,5 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, map, Observable } from 'rxjs';
 
 import { Run } from '../classes/diagram/run';
 
@@ -9,9 +9,10 @@ import { Run } from '../classes/diagram/run';
 export class DisplayService implements OnDestroy {
     private _currentRun$: BehaviorSubject<Run>;
 
-    private readonly _runs: Run[] = [];
+    private readonly _runs$: BehaviorSubject<Run[]>;
 
     constructor() {
+        this._runs$ = new BehaviorSubject<Run[]>(new Array<Run>());
         this.runs.push(new Run());
         this._currentRun$ = new BehaviorSubject<Run>(this.runs[0]);
     }
@@ -29,10 +30,11 @@ export class DisplayService implements OnDestroy {
     }
     private display(net: Run): void {
         this._currentRun$.next(net);
+        this._runs$.next(this.runs);
     }
 
     public get runs(): Run[] {
-        return this._runs;
+        return this._runs$.getValue();
     }
 
     public addEmptyRun(): Run {
@@ -64,6 +66,9 @@ export class DisplayService implements OnDestroy {
         this.display(run);
     }
 
+    /**
+     * @returns new active/current run
+     */
     public removeRun(run: Run): Run {
         const index = this.getRunIndex(run);
         if (index > -1) {
@@ -79,6 +84,9 @@ export class DisplayService implements OnDestroy {
         return this.currentRun;
     }
 
+    /**
+     * @returns new active/current run
+     */
     public removeCurrentRun(): Run {
         return this.removeRun(this.currentRun);
     }
@@ -88,18 +96,33 @@ export class DisplayService implements OnDestroy {
         this.addEmptyRun();
     }
 
-    public hasPreviousRun(): boolean {
-        return this.getCurrentRunIndex() > 0;
+    public hasPreviousRun$(): Observable<boolean> {
+        return this._runs$.pipe(
+            map((runs) => runs.indexOf(this.currentRun) > 0)
+        );
     }
 
-    public hasNextRun(): boolean {
-        return this.getCurrentRunIndex() < this.runs.length - 1;
+    public hasNextRun$(): Observable<boolean> {
+        return this._runs$.pipe(
+            map((runs) => runs.indexOf(this.currentRun) < runs.length - 1)
+        );
     }
 
-    public isCurrentRunEmpty(): boolean {
-        return this.currentRun.isEmpty();
+    public isCurrentRunEmpty$(): Observable<boolean> {
+        return this._currentRun$.pipe(map((run) => run.isEmpty()));
     }
 
+    public getCurrentRunIndex$(): Observable<number> {
+        return this._currentRun$.pipe(map((run) => this.getCurrentRunIndex()));
+    }
+
+    public getRunCount$(): Observable<number> {
+        return this._runs$.pipe(map((runs) => runs.length));
+    }
+
+    /**
+     * @returns new active/current run
+     */
     public setNextRun(): Run {
         const index = this.getCurrentRunIndex();
         if (this.runs.length - 1 > index) {
@@ -109,6 +132,9 @@ export class DisplayService implements OnDestroy {
         return this.currentRun;
     }
 
+    /**
+     * @returns new active/current run
+     */
     public setPreviousRun(): Run {
         const index = this.getCurrentRunIndex();
         if (index > 0) {

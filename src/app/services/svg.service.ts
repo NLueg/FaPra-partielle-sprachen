@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 
+import { Arc } from '../classes/diagram/arc';
 import { Element } from '../classes/diagram/element';
-import { Arc, Run } from '../classes/diagram/run';
+import { Run } from '../classes/diagram/run';
 
 @Injectable({
     providedIn: 'root',

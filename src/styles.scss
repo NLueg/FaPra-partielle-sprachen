@@ -20,3 +20,13 @@ svg text {
 svg text{
     text-anchor: middle;
 }
+
+:root {
+    --success-color: #4CAF50;
+    --warn-color: #ff9800;
+    --error-color: #f44336
+}
+
+.mat-tooltip {
+    white-space: pre-line;
+}

@@ -116,8 +116,6 @@ export class ParserService {
                                 !run.addArc({
                                     source: splitLine[0],
                                     target: splitLine[1],
-                                    sourceEl: null,
-                                    targetEl: null,
                                 })
                             ) {
                                 run.addWarning(

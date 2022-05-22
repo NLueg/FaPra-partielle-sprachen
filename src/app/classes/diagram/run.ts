@@ -1,3 +1,4 @@
+import { Arc } from './arc';
 import { Element } from './element';
 
 export class Run {
@@ -119,10 +120,3 @@ export class Run {
         return check;
     }
 }
-
-export type Arc = {
-    source: string;
-    target: string;
-    sourceEl?: Element;
-    targetEl?: Element;
-};

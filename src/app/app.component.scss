@@ -42,19 +42,11 @@ mat-icon.color_success {
 }
 
 mat-icon.color_warning {
-    color: #ff9800;
+    color: var(--warn-color);
 }
 
 mat-icon.color_error {
-    color: #f44336;
-}
-
-.mat-tooltip {
-    white-space: pre-line;
-}
-
-::ng-deep .mat-tooltip {
-    white-space: pre-line;
+    color: var(--error-color);
 }
 
 .button_resolve {
