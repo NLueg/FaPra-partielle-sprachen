@@ -1,4 +1,4 @@
-import { Arc } from './run';
+import { Arc } from './arc';
 
 export class Element {
     private _x: number;
