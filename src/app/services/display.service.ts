@@ -1,5 +1,5 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { BehaviorSubject, map, Observable } from 'rxjs';
+import { BehaviorSubject, map, Observable, switchMap } from 'rxjs';
 
 import { Run } from '../classes/diagram/run';
 
@@ -28,12 +28,13 @@ export class DisplayService implements OnDestroy {
     public get currentRun(): Run {
         return this._currentRun$.getValue();
     }
+
     private display(net: Run): void {
         this._currentRun$.next(net);
         this._runs$.next(this.runs);
     }
 
-    public get runs(): Run[] {
+    private get runs(): Run[] {
         return this._runs$.getValue();
     }
 
@@ -52,11 +53,11 @@ export class DisplayService implements OnDestroy {
         }
     }
 
-    public getRunIndex(run: Run): number {
+    private getRunIndex(run: Run): number {
         return this.runs.indexOf(run);
     }
 
-    public getCurrentRunIndex(): number {
+    private getCurrentRunIndex(): number {
         return this.runs.indexOf(this.currentRun);
     }
 
@@ -69,7 +70,7 @@ export class DisplayService implements OnDestroy {
     /**
      * @returns new active/current run
      */
-    public removeRun(run: Run): Run {
+    private removeRun(run: Run): Run {
         const index = this.getRunIndex(run);
         if (index > -1) {
             this.runs.splice(index, 1);
@@ -113,7 +114,11 @@ export class DisplayService implements OnDestroy {
     }
 
     public getCurrentRunIndex$(): Observable<number> {
-        return this._currentRun$.pipe(map((run) => this.getCurrentRunIndex()));
+        return this._currentRun$.pipe(
+            switchMap((run) =>
+                this._runs$.pipe(map((runs) => runs.indexOf(run)))
+            )
+        );
     }
 
     public getRunCount$(): Observable<number> {
