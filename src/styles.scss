@@ -1,11 +1,6 @@
 /* You can add global styles to this file, and also import other style files */
 @import '~ngx-toastr/toastr';
 
-
-:root {
-    --success-color: #4CAF50;
-}
-
 html { height: 100%; }
 body {
     margin: 0;
@@ -29,7 +24,9 @@ svg text{
 :root {
     --success-color: #4CAF50;
     --warn-color: #ff9800;
-    --error-color: #f44336
+    --error-color: #f44336;
+
+    --spaces: 8px;
 }
 
 .mat-tooltip {

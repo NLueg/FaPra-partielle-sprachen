@@ -18,7 +18,7 @@ export class UploadService implements OnDestroy {
         this._upload$.complete();
     }
 
-    public get upload$(): Observable<string> {
+    public getUpload$(): Observable<string> {
         return this._upload$.asObservable();
     }
 
