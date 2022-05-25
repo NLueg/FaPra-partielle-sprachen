@@ -193,7 +193,7 @@ export class Run {
         }
     }
 
-    clearPositioningData() {
+    clearPositioningData(): void {
         this.arcs.forEach((a) => {
             a.breakpoints.splice(0, a.breakpoints.length);
         });
