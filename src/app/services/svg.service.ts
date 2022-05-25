@@ -21,7 +21,9 @@ export class SvgService {
 
             const arrow = createSvgForArc(arc, source, target);
             if (arrow) {
-                result.push(arrow);
+                arrow.forEach((a) => {
+                    result.push(a);
+                });
             }
         });
 
@@ -58,19 +60,76 @@ function createSvgForArc(
     arc: Arc,
     source: Element | undefined,
     target: Element | undefined
-): SVGElement | null {
+): SVGElement[] {
+    const elements: SVGElement[] = [];
+
     if (!source || !target) {
-        return null;
+        return elements;
     }
 
-    const arrow = createSvgElement('line');
-    arrow.setAttribute('stroke', 'black');
-    arrow.setAttribute('stroke-width', '1');
-    arrow.setAttribute('marker-end', 'url(#arrowhead)');
-    arrow.setAttribute('x1', `${source.x + 50}`);
-    arrow.setAttribute('y1', `${source.y + 25}`);
-    arrow.setAttribute('x2', `${target.x + 50}`);
-    arrow.setAttribute('y2', `${target.y + 25}`);
+    if (arc.breakpoints.length == 0) {
+        elements.push(
+            createLine(
+                source.x + 50,
+                source.y + 25,
+                target.x,
+                target.y + 25,
+                true
+            )
+        );
+    } else {
+        //source -> first breakpoint
+        elements.push(
+            createLine(
+                source.x + 50,
+                source.y + 25,
+                arc.breakpoints[0].x + 25,
+                arc.breakpoints[0].y + 25,
+                false
+            )
+        );
+        //breakpoint -> next breaktpoint
+        for (let i = 0; i < arc.breakpoints.length - 1; i++) {
+            elements.push(
+                createLine(
+                    arc.breakpoints[i].x + 25,
+                    arc.breakpoints[i].y + 25,
+                    arc.breakpoints[i + 1].x + 25,
+                    arc.breakpoints[i + 1].y + 25,
+                    false
+                )
+            );
+        }
+        //last breakpoint -> target
+        elements.push(
+            createLine(
+                arc.breakpoints[arc.breakpoints.length - 1].x + 25,
+                arc.breakpoints[arc.breakpoints.length - 1].y + 25,
+                target.x,
+                target.y + 25,
+                true
+            )
+        );
+    }
 
-    return arrow;
+    return elements;
+}
+
+function createLine(
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number,
+    showArrow: boolean
+): SVGElement {
+    const line = createSvgElement('line');
+    line.setAttribute('stroke', 'black');
+    line.setAttribute('stroke-width', '1');
+    if (showArrow) line.setAttribute('marker-end', 'url(#arrowhead)');
+    line.setAttribute('x1', `${x1}`);
+    line.setAttribute('y1', `${y1}`);
+    line.setAttribute('x2', `${x2}`);
+    line.setAttribute('y2', `${y2}`);
+
+    return line;
 }

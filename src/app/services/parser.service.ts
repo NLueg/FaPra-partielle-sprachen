@@ -116,6 +116,7 @@ export class ParserService {
                                 !run.addArc({
                                     source: splitLine[0],
                                     target: splitLine[1],
+                                    breakpoints: [],
                                 })
                             ) {
                                 run.addWarning(
@@ -156,7 +157,15 @@ export class ParserService {
                 );
             }
 
-            //Todo check circles in run
+            //check cycles in run
+            if (run.hasCycles()) {
+                run.addWarning(`File contains cycles`);
+                this.toastr.warning(
+                    `File contains cycles`,
+                    `Could not apply Sugiyama layout`
+                );
+            }
+
             return run;
         } else {
             errors.add(`File does not contain transitions and arcs`);
