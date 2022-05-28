@@ -182,17 +182,17 @@ export class LayoutService {
         const incoming = new Array<Connection>();
         const outgoing = new Array<Connection>();
         layers[layerIndex].forEach((e, index) => {
-            let layerInfo = {
+            const layerInfo = {
                 layers,
                 index,
                 layerIndex
-            }
+            };
             if (e instanceof Element) {
                 //Check outgoing and incomoing lines from element to the next/previous breakpoint or element
                 incoming.concat(this.findIncomingConnections(e.incomingArcs, layerInfo));
                 outgoing.concat(this.findOutgoingConnections(e.outgoingArcs, layerInfo));
             } else {
-                let connections = this.getElementArrowsFromBreakpoint(
+                const connections = this.getElementArrowsFromBreakpoint(
                     e, incoming, outgoing, layerInfo
                 );
                 incoming.concat(connections.incoming);
@@ -211,9 +211,9 @@ export class LayoutService {
         //check incoming and outgoing line from breakpoint to the next/previous breakpoint or element
         let prev: Element | Breakpoint | undefined;
         let next: Element | Breakpoint | undefined;
-        let layers = layerInfo.layers;
-        let index = layerInfo.index;
-        let layerIndex = layerInfo.layerIndex;
+        const layers = layerInfo.layers;
+        const index = layerInfo.index;
+        const layerIndex = layerInfo.layerIndex;
         const bIdx = breakpoint.arc.breakpoints.indexOf(breakpoint);
 
         if (bIdx == 0 && breakpoint.arc.sourceEl) {
@@ -253,10 +253,10 @@ export class LayoutService {
     private findIncomingConnections(
         arcs: Arc[],
         layerInfo: LayerInfoParameter) {
-        let layers = layerInfo.layers;
-        let index = layerInfo.index;
-        let layerIndex = layerInfo.layerIndex;
-        let incomings = new Array<Connection>();
+        const layers = layerInfo.layers;
+        const index = layerInfo.index;
+        const layerIndex = layerInfo.layerIndex;
+        const incomings = new Array<Connection>();
         arcs.forEach((arc) => {
             let sourcePos: number | undefined;
             if (arc.breakpoints.length > 0) {
@@ -287,10 +287,10 @@ export class LayoutService {
     private findOutgoingConnections(
         arcs: Arc[],
         layerInfo: LayerInfoParameter): Connection[] {
-        let layers = layerInfo.layers;
-        let index = layerInfo.index;
-        let layerIndex = layerInfo.layerIndex;
-        let outgoings = new Array<Connection>();
+        const layers = layerInfo.layers;
+        const index = layerInfo.index;
+        const layerIndex = layerInfo.layerIndex;
+        const outgoings = new Array<Connection>();
         arcs.forEach((arc) => {
             let targetPos: number | undefined;
             if (arc.breakpoints.length > 0) {
