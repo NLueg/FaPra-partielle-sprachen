@@ -1,8 +1,8 @@
-import {Injectable} from '@angular/core';
+import { Injectable } from '@angular/core';
 
-import {Arc, Breakpoint} from '../classes/diagram/arc';
-import {Element} from '../classes/diagram/element';
-import {Run} from '../classes/diagram/run';
+import { Arc, Breakpoint } from '../classes/diagram/arc';
+import { Element } from '../classes/diagram/element';
+import { Run } from '../classes/diagram/run';
 
 @Injectable({
     providedIn: 'root',
@@ -72,7 +72,6 @@ export class LayoutService {
      * @param layers layers with elements and breakpoints
      */
     private addBreakpoints(layers: Array<(Element | Breakpoint)[]>): void {
-
         for (let i = 0; i < layers.length - 1; i++) {
             layers[i].forEach((elm) => {
                 //element loop
@@ -185,21 +184,31 @@ export class LayoutService {
             const layerInfo = {
                 layers,
                 index,
-                layerIndex
+                layerIndex,
             };
             if (e instanceof Element) {
                 //Check outgoing and incomoing lines from element to the next/previous breakpoint or element
-                incoming.concat(this.findIncomingConnections(e.incomingArcs, layerInfo));
-                outgoing.concat(this.findOutgoingConnections(e.outgoingArcs, layerInfo));
+                incoming.concat(
+                    this.findIncomingConnections(e.incomingArcs, layerInfo)
+                );
+                outgoing.concat(
+                    this.findOutgoingConnections(e.outgoingArcs, layerInfo)
+                );
             } else {
                 const connections = this.getElementArrowsFromBreakpoint(
-                    e, incoming, outgoing, layerInfo
+                    e,
+                    incoming,
+                    outgoing,
+                    layerInfo
                 );
                 incoming.concat(connections.incoming);
                 outgoing.concat(connections.outgoing);
             }
         });
-        return this.calculateCrossings(incoming) + this.calculateCrossings(outgoing);
+        return (
+            this.calculateCrossings(incoming) +
+            this.calculateCrossings(outgoing)
+        );
     }
 
     private getElementArrowsFromBreakpoint(
@@ -222,7 +231,10 @@ export class LayoutService {
             prev = breakpoint.arc.breakpoints[bIdx - 1];
         }
 
-        if (bIdx == breakpoint.arc.breakpoints.length - 1 && breakpoint.arc.targetEl) {
+        if (
+            bIdx == breakpoint.arc.breakpoints.length - 1 &&
+            breakpoint.arc.targetEl
+        ) {
             next = breakpoint.arc.targetEl;
         } else if (breakpoint.arc.breakpoints.length > bIdx + 1) {
             next = breakpoint.arc.breakpoints[bIdx + 1];
@@ -240,7 +252,7 @@ export class LayoutService {
             });
         return {
             incoming,
-            outgoing
+            outgoing,
         };
     }
 
@@ -252,7 +264,8 @@ export class LayoutService {
      */
     private findIncomingConnections(
         arcs: Arc[],
-        layerInfo: LayerInfoParameter) {
+        layerInfo: LayerInfoParameter
+    ) {
         const layers = layerInfo.layers;
         const index = layerInfo.index;
         const layerIndex = layerInfo.layerIndex;
@@ -264,9 +277,7 @@ export class LayoutService {
                     arc.breakpoints[arc.breakpoints.length - 1]
                 );
             } else if (arc.sourceEl) {
-                sourcePos = layers[layerIndex - 1].indexOf(
-                    arc.sourceEl
-                );
+                sourcePos = layers[layerIndex - 1].indexOf(arc.sourceEl);
             }
 
             if (sourcePos)
@@ -286,7 +297,8 @@ export class LayoutService {
      */
     private findOutgoingConnections(
         arcs: Arc[],
-        layerInfo: LayerInfoParameter): Connection[] {
+        layerInfo: LayerInfoParameter
+    ): Connection[] {
         const layers = layerInfo.layers;
         const index = layerInfo.index;
         const layerIndex = layerInfo.layerIndex;
@@ -294,13 +306,9 @@ export class LayoutService {
         arcs.forEach((arc) => {
             let targetPos: number | undefined;
             if (arc.breakpoints.length > 0) {
-                targetPos = layers[layerIndex + 1].indexOf(
-                    arc.breakpoints[0]
-                );
+                targetPos = layers[layerIndex + 1].indexOf(arc.breakpoints[0]);
             } else if (arc.targetEl) {
-                targetPos = layers[layerIndex + 1].indexOf(
-                    arc.targetEl
-                );
+                targetPos = layers[layerIndex + 1].indexOf(arc.targetEl);
             }
 
             if (targetPos)
@@ -370,12 +378,12 @@ type Connection = {
 };
 
 type ElementArrows = {
-    incoming: Connection[],
-    outgoing: Connection[]
-}
+    incoming: Connection[];
+    outgoing: Connection[];
+};
 
 type LayerInfoParameter = {
-    layers: Array<(Element | Breakpoint)[]>,
-    layerIndex: number,
-    index: number,
-}
+    layers: Array<(Element | Breakpoint)[]>;
+    layerIndex: number;
+    index: number;
+};

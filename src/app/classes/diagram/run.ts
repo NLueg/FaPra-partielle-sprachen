@@ -1,5 +1,5 @@
-import {Arc} from './arc';
-import {Element} from './element';
+import { Arc } from './arc';
+import { Element } from './element';
 
 export class Run {
     private readonly _arcs: Array<Arc>;
