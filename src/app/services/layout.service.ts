@@ -1,8 +1,8 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 
-import { Breakpoint } from '../classes/diagram/arc';
-import { Element } from '../classes/diagram/element';
-import { Run } from '../classes/diagram/run';
+import {Arc, Breakpoint} from '../classes/diagram/arc';
+import {Element} from '../classes/diagram/element';
+import {Run} from '../classes/diagram/run';
 
 @Injectable({
     providedIn: 'root',
@@ -44,7 +44,7 @@ export class LayoutService {
     private assignLayers(run: Run): Array<Element[]> {
         const layers = new Array<Element[]>();
         const elements = [...run.elements];
-        let arcs = [...run.arcs.filter((a) => a.sourceEl && a.targetEl)]; //use only arcs with valid source and target
+        let arcs = run.arcs;
 
         while (elements.length > 0) {
             const layer = new Array<Element>();
@@ -55,7 +55,7 @@ export class LayoutService {
                 .forEach((e) => {
                     layer.push(e);
                     elements.splice(elements.indexOf(e), 1);
-                    arcs = arcs.filter((a) => e.outogingArcs.indexOf(a) === -1);
+                    arcs = arcs.filter((a) => e.outgoingArcs.indexOf(a) === -1);
                 });
             layers.push(layer);
         }
@@ -72,35 +72,32 @@ export class LayoutService {
      * @param layers layers with elements and breakpoints
      */
     private addBreakpoints(layers: Array<(Element | Breakpoint)[]>): void {
-        layers.forEach((layer, index) => {
-            //layer loop
-            if (index < layers.length - 1) {
-                //ignore last layer
-                layer.forEach((elm) => {
-                    //element loop
-                    if (elm instanceof Element) {
-                        elm.outogingArcs.forEach((a) => {
-                            //arc loop
-                            const target = a.targetEl;
-                            //find layer of target
-                            const targetLayerIndx = layers.findIndex(
-                                (l) => l.findIndex((e) => e === target) >= 0
-                            );
 
-                            for (let y = index + 1; y < targetLayerIndx; y++) {
-                                const b: Breakpoint = {
-                                    x: 0,
-                                    y: 0,
-                                    arc: a,
-                                };
-                                a.breakpoints.push(b);
-                                layers[y].push(b);
-                            }
-                        });
-                    }
-                });
-            }
-        });
+        for (let i = 0; i < layers.length - 1; i++) {
+            layers[i].forEach((elm) => {
+                //element loop
+                if (elm instanceof Element) {
+                    elm.outgoingArcs.forEach((a) => {
+                        //arc loop
+                        const target = a.targetEl;
+                        //find layer of target
+                        const targetLayerIndx = layers.findIndex(
+                            (l) => l.findIndex((e) => e === target) >= 0
+                        );
+
+                        for (let y = i + 1; y < targetLayerIndx; y++) {
+                            const b: Breakpoint = {
+                                x: 0,
+                                y: 0,
+                                arc: a,
+                            };
+                            a.breakpoints.push(b);
+                            layers[y].push(b);
+                        }
+                    });
+                }
+            });
+        }
     }
 
     /**
@@ -184,103 +181,156 @@ export class LayoutService {
     ): number {
         const incoming = new Array<Connection>();
         const outgoing = new Array<Connection>();
-
         layers[layerIndex].forEach((e, index) => {
+            let layerInfo = {
+                layers,
+                index,
+                layerIndex
+            }
             if (e instanceof Element) {
                 //Check outgoing and incomoing lines from element to the next/previous breakpoint or element
-                e.incomingArcs.forEach((arc) => {
-                    let sourcePos: number | undefined;
-                    if (arc.breakpoints.length > 0) {
-                        sourcePos = layers[layerIndex - 1].indexOf(
-                            arc.breakpoints[arc.breakpoints.length - 1]
-                        );
-                    } else if (arc.sourceEl) {
-                        sourcePos = layers[layerIndex - 1].indexOf(
-                            arc.sourceEl
-                        );
-                    }
-
-                    if (sourcePos)
-                        incoming.push({
-                            sourcePos: sourcePos,
-                            targetPos: index,
-                        });
-                });
-                e.outogingArcs.forEach((arc) => {
-                    let targetPos: number | undefined;
-                    if (arc.breakpoints.length > 0) {
-                        targetPos = layers[layerIndex + 1].indexOf(
-                            arc.breakpoints[0]
-                        );
-                    } else if (arc.targetEl) {
-                        targetPos = layers[layerIndex + 1].indexOf(
-                            arc.targetEl
-                        );
-                    }
-
-                    if (targetPos)
-                        outgoing.push({
-                            sourcePos: index,
-                            targetPos: targetPos,
-                        });
-                });
+                incoming.concat(this.findIncomingConnections(e.incomingArcs, layerInfo));
+                outgoing.concat(this.findOutgoingConnections(e.outgoingArcs, layerInfo));
             } else {
-                //check incoming and outgoing line from breakpoint to the next/previous breakpoint or element
-                let prev: Element | Breakpoint | undefined;
-                let next: Element | Breakpoint | undefined;
-                const bIdx = e.arc.breakpoints.indexOf(e);
-
-                if (bIdx == 0 && e.arc.sourceEl) {
-                    prev = e.arc.sourceEl;
-                } else if (bIdx > 0) {
-                    prev = e.arc.breakpoints[bIdx - 1];
-                }
-
-                if (bIdx == e.arc.breakpoints.length - 1 && e.arc.targetEl) {
-                    next = e.arc.targetEl;
-                } else if (e.arc.breakpoints.length > bIdx + 1) {
-                    next = e.arc.breakpoints[bIdx + 1];
-                }
-
-                if (prev)
-                    incoming.push({
-                        sourcePos: layers[layerIndex - 1].indexOf(prev),
-                        targetPos: index,
-                    });
-                if (next)
-                    outgoing.push({
-                        sourcePos: index,
-                        targetPos: layers[layerIndex + 1].indexOf(next),
-                    });
+                let connections = this.getElementArrowsFromBreakpoint(
+                    e, incoming, outgoing, layerInfo
+                );
+                incoming.concat(connections.incoming);
+                outgoing.concat(connections.outgoing);
             }
         });
+        return this.calculateCrossings(incoming) + this.calculateCrossings(outgoing);
+    }
 
+    private getElementArrowsFromBreakpoint(
+        breakpoint: Breakpoint,
+        incoming: Connection[],
+        outgoing: Connection[],
+        layerInfo: LayerInfoParameter
+    ): ElementArrows {
+        //check incoming and outgoing line from breakpoint to the next/previous breakpoint or element
+        let prev: Element | Breakpoint | undefined;
+        let next: Element | Breakpoint | undefined;
+        let layers = layerInfo.layers;
+        let index = layerInfo.index;
+        let layerIndex = layerInfo.layerIndex;
+        const bIdx = breakpoint.arc.breakpoints.indexOf(breakpoint);
+
+        if (bIdx == 0 && breakpoint.arc.sourceEl) {
+            prev = breakpoint.arc.sourceEl;
+        } else if (bIdx > 0) {
+            prev = breakpoint.arc.breakpoints[bIdx - 1];
+        }
+
+        if (bIdx == breakpoint.arc.breakpoints.length - 1 && breakpoint.arc.targetEl) {
+            next = breakpoint.arc.targetEl;
+        } else if (breakpoint.arc.breakpoints.length > bIdx + 1) {
+            next = breakpoint.arc.breakpoints[bIdx + 1];
+        }
+
+        if (prev)
+            incoming.push({
+                sourcePos: layers[layerIndex - 1].indexOf(prev),
+                targetPos: index,
+            });
+        if (next)
+            outgoing.push({
+                sourcePos: index,
+                targetPos: layers[layerIndex + 1].indexOf(next),
+            });
+        return {
+            incoming,
+            outgoing
+        };
+    }
+
+    /**
+     *
+     * @param arcs
+     * @param layerInfo
+     * @private
+     */
+    private findIncomingConnections(
+        arcs: Arc[],
+        layerInfo: LayerInfoParameter) {
+        let layers = layerInfo.layers;
+        let index = layerInfo.index;
+        let layerIndex = layerInfo.layerIndex;
+        let incomings = new Array<Connection>();
+        arcs.forEach((arc) => {
+            let sourcePos: number | undefined;
+            if (arc.breakpoints.length > 0) {
+                sourcePos = layers[layerIndex - 1].indexOf(
+                    arc.breakpoints[arc.breakpoints.length - 1]
+                );
+            } else if (arc.sourceEl) {
+                sourcePos = layers[layerIndex - 1].indexOf(
+                    arc.sourceEl
+                );
+            }
+
+            if (sourcePos)
+                incomings.push({
+                    sourcePos: sourcePos,
+                    targetPos: index,
+                });
+        });
+        return incomings;
+    }
+
+    /**
+     *
+     * @param arcs
+     * @param layerInfo
+     * @private
+     */
+    private findOutgoingConnections(
+        arcs: Arc[],
+        layerInfo: LayerInfoParameter): Connection[] {
+        let layers = layerInfo.layers;
+        let index = layerInfo.index;
+        let layerIndex = layerInfo.layerIndex;
+        let outgoings = new Array<Connection>();
+        arcs.forEach((arc) => {
+            let targetPos: number | undefined;
+            if (arc.breakpoints.length > 0) {
+                targetPos = layers[layerIndex + 1].indexOf(
+                    arc.breakpoints[0]
+                );
+            } else if (arc.targetEl) {
+                targetPos = layers[layerIndex + 1].indexOf(
+                    arc.targetEl
+                );
+            }
+
+            if (targetPos)
+                outgoings.push({
+                    sourcePos: index,
+                    targetPos: targetPos,
+                });
+        });
+        return outgoings;
+    }
+
+    /**
+     *
+     * @param conections
+     * @private
+     */
+    private calculateCrossings(conections: Array<Connection>): number {
         let crossings = 0;
-        incoming.forEach((e, index) => {
-            for (let i = index + 1; i < incoming.length; i++) {
+        conections.forEach((e, index) => {
+            for (let i = index + 1; i < conections.length; i++) {
                 if (
-                    (e.sourcePos < incoming[i].sourcePos &&
-                        e.targetPos > incoming[i].targetPos) ||
-                    (e.sourcePos > incoming[i].sourcePos &&
-                        e.targetPos < incoming[i].targetPos)
+                    (e.sourcePos < conections[i].sourcePos &&
+                        e.targetPos > conections[i].targetPos) ||
+                    (e.sourcePos > conections[i].sourcePos &&
+                        e.targetPos < conections[i].targetPos)
                 ) {
                     crossings++;
                 }
             }
         });
-        outgoing.forEach((e, index) => {
-            for (let i = index + 1; i < outgoing.length; i++) {
-                if (
-                    (e.sourcePos < outgoing[i].sourcePos &&
-                        e.targetPos > outgoing[i].targetPos) ||
-                    (e.sourcePos > outgoing[i].sourcePos &&
-                        e.targetPos < outgoing[i].targetPos)
-                ) {
-                    crossings++;
-                }
-            }
-        });
-
         return crossings;
     }
 
@@ -318,3 +368,14 @@ type Connection = {
     sourcePos: number;
     targetPos: number;
 };
+
+type ElementArrows = {
+    incoming: Connection[],
+    outgoing: Connection[]
+}
+
+type LayerInfoParameter = {
+    layers: Array<(Element | Breakpoint)[]>,
+    layerIndex: number,
+    index: number,
+}

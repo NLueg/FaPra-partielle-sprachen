@@ -42,7 +42,7 @@ export class Element {
         return this._incomingArcs;
     }
 
-    get outogingArcs(): Arc[] {
+    get outgoingArcs(): Arc[] {
         return this._outgoingArcs;
     }
 
@@ -51,7 +51,7 @@ export class Element {
     }
 
     public addOutgoingArc(a: Arc): void {
-        this.outogingArcs.push(a);
+        this.outgoingArcs.push(a);
     }
 
     public resetArcs(): void {

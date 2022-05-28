@@ -1,5 +1,5 @@
-import { Arc } from './arc';
-import { Element } from './element';
+import {Arc} from './arc';
+import {Element} from './element';
 
 export class Run {
     private readonly _arcs: Array<Arc>;
@@ -169,28 +169,31 @@ export class Run {
         visitedTransitions: Set<Element>,
         cyclicArcs: Arc[]
     ): void {
-        if (!visitedArcs.has(arc) && arc.targetEl) {
-            visitedArcs.add(arc);
-
-            //transition already visited in this sequence?
-            if (visitedTransitions.has(arc.targetEl)) {
-                cyclicArcs.push(arc);
-            } else {
-                visitedTransitions.add(arc.targetEl);
-
-                //continue with the sequences
-                arc.targetEl.outogingArcs.forEach((outArc) => {
-                    this.checkArcCycle(
-                        outArc,
-                        visitedArcs,
-                        visitedTransitions,
-                        cyclicArcs
-                    );
-                });
-
-                visitedTransitions.delete(arc.targetEl);
-            }
+        if (visitedArcs.has(arc) || !arc.targetEl) {
+            return;
         }
+        visitedArcs.add(arc);
+
+        //transition already visited in this sequence?
+
+        if (visitedTransitions.has(arc.targetEl)) {
+            cyclicArcs.push(arc);
+            return;
+        }
+        visitedTransitions.add(arc.targetEl);
+
+        //continue with the sequences
+
+        arc.targetEl.outgoingArcs.forEach((outArc) => {
+            this.checkArcCycle(
+                outArc,
+                visitedArcs,
+                visitedTransitions,
+                cyclicArcs
+            );
+        });
+
+        visitedTransitions.delete(arc.targetEl);
     }
 
     clearPositioningData(): void {
