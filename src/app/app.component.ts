@@ -136,7 +136,7 @@ export class AppComponent implements OnDestroy {
 
     public resolveWarnings(): void {
         this._displayService.currentRun.resolveWarnings();
-        this.updateTextarea(this._displayService.currentRun.text);
+        this.updateTextarea(this._displayService.currentRun.text, true);
         this.updateValidation(this._displayService.currentRun);
     }
 
