@@ -75,6 +75,8 @@ export class Run {
      * resolve warnings (removes duplicates and invalid arcs)
      */
     resolveWarnings(): void {
+        this.removeCycles();
+
         const lines = ['.type ps'];
         lines.push('.transitions');
         this.elements.forEach((e) => {
@@ -91,7 +93,7 @@ export class Run {
     }
 
     /**
-     * set reference from arcs to transitions and vice versa
+     * set references from arcs to transitions and vice versa
      * @returns all references found?
      */
     setRefs(): boolean {
@@ -120,5 +122,90 @@ export class Run {
         });
 
         return check;
+    }
+
+    public hasCycles(): boolean {
+        return this.getCycles().length > 0;
+    }
+
+    public removeCycles(): void {
+        this.getCycles().forEach((arc) => {
+            return this.arcs.splice(
+                this.arcs.findIndex((a) => a === arc),
+                1
+            );
+        });
+    }
+
+    /**
+     * check all arcs sequences for cycles
+     * @returns Last arcs in cyclic arc sequences
+     */
+    private getCycles(): Arc[] {
+        const visitedArcs = new Set<Arc>();
+        const cyclicArcs = new Array<Arc>();
+
+        this._arcs.forEach((arc) => {
+            const visitedTransitions = new Set<Element>();
+            if (arc.sourceEl) visitedTransitions.add(arc.sourceEl);
+            this.checkArcCycle(
+                arc,
+                visitedArcs,
+                visitedTransitions,
+                cyclicArcs
+            );
+        });
+        return cyclicArcs;
+    }
+
+    /**
+     * checks an arc sequence for cycles
+     * @param arc starting arc
+     * @param visitedArcs already visited arcs
+     * @param visitedTransitions already visited transition
+     * @param cyclicArcs last arcs when a cycle occurs
+     */
+    private checkArcCycle(
+        arc: Arc,
+        visitedArcs: Set<Arc>,
+        visitedTransitions: Set<Element>,
+        cyclicArcs: Arc[]
+    ): void {
+        if (visitedArcs.has(arc) || !arc.targetEl) {
+            return;
+        }
+        visitedArcs.add(arc);
+
+        //transition already visited in this sequence?
+
+        if (visitedTransitions.has(arc.targetEl)) {
+            cyclicArcs.push(arc);
+            return;
+        }
+        visitedTransitions.add(arc.targetEl);
+
+        //continue with the sequences
+
+        arc.targetEl.outgoingArcs.forEach((outArc) => {
+            this.checkArcCycle(
+                outArc,
+                visitedArcs,
+                visitedTransitions,
+                cyclicArcs
+            );
+        });
+
+        visitedTransitions.delete(arc.targetEl);
+    }
+
+    clearPositioningData(): void {
+        this.arcs.forEach((a) => {
+            a.breakpoints.splice(0, a.breakpoints.length);
+        });
+
+        this.elements.forEach((e) => {
+            e.x = 0;
+            e.y = 0;
+        });
     }
 }

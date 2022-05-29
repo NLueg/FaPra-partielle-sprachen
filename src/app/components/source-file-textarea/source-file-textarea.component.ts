@@ -114,7 +114,7 @@ export class SourceFileTextareaComponent implements OnDestroy {
             .pipe(first())
             .subscribe((currentRun) => {
                 currentRun.resolveWarnings();
-                this.updateShownRun(currentRun);
+                this.updateShownRun(currentRun, true);
             });
     }
 
@@ -139,8 +139,8 @@ export class SourceFileTextareaComponent implements OnDestroy {
         this.textareaFc.setValue(newSource);
     }
 
-    private updateShownRun(run: Run): void {
-        this.textareaFc.setValue(run.text);
+    private updateShownRun(run: Run, emitEvent = false): void {
+        this.textareaFc.setValue(run.text, { emitEvent: emitEvent });
         this.updateValidation(run);
     }
 
