@@ -76,6 +76,7 @@ export class DisplayService implements OnDestroy {
 
         if (runs.length > 0) {
             this._currentRun$.next(runs[Math.max(index - 1, 0)]); //set previous run as active
+            this._runs$.next(runs);
         } else {
             this.addEmptyRun(); //create new empty run
         }
