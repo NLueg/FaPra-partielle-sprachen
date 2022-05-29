@@ -14,6 +14,7 @@ import { ToastrModule } from 'ngx-toastr';
 import { AppComponent } from './app.component';
 import { DisplayComponent } from './components/display/display.component';
 import { FooterComponent } from './components/footer/footer.component';
+import { SourceFileTextareaComponent } from './components/source-file-textarea/source-file-textarea.component';
 import { TemplateButtonComponent } from './components/template-button/template-button.component';
 
 @NgModule({
@@ -22,6 +23,7 @@ import { TemplateButtonComponent } from './components/template-button/template-b
         DisplayComponent,
         FooterComponent,
         TemplateButtonComponent,
+        SourceFileTextareaComponent,
     ],
     imports: [
         BrowserModule,

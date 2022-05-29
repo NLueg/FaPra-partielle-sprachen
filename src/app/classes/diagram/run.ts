@@ -66,7 +66,9 @@ export class Run {
     }
 
     isEmpty(): boolean {
-        return this.arcs.length + this.elements.length === 0;
+        return (
+            !this.text.trim() && this.arcs.length + this.elements.length === 0
+        );
     }
 
     /**

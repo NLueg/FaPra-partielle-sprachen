@@ -31,26 +31,3 @@ hr {
     margin-bottom: 30px;
     width: 100%;
 }
-
-.source_label mat-icon {
-    font-size: 25px;
-    padding-right: 10px;
-}
-
-mat-icon.color_success { 
-    color: var(--success-color);
-}
-
-mat-icon.color_warning {
-    color: var(--warn-color);
-}
-
-mat-icon.color_error {
-    color: var(--error-color);
-}
-
-.button_resolve {
-    position: absolute;
-    right: 0px;
-    bottom: 8px;
-}

@@ -28,7 +28,7 @@ export class TemplateButtonComponent {
         target.classList.remove('mouse-hover');
     }
 
-    processMouseClick(e: MouseEvent): void {
+    processMouseClick(): void {
         this.buttonAction.emit();
     }
 
