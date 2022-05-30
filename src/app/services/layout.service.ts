@@ -178,8 +178,10 @@ export class LayoutService {
         layers: Array<(Element | Breakpoint)[]>,
         layerIndex: number
     ): number {
-        const incoming = new Array<Connection>();
-        const outgoing = new Array<Connection>();
+        const connections: ElementArrows = {
+            incoming: [],
+            outgoing: [],
+        };
         layers[layerIndex].forEach((e, index) => {
             const layerInfo = {
                 layers,
@@ -188,38 +190,32 @@ export class LayoutService {
             };
             if (e instanceof Element) {
                 //Check outgoing and incomoing lines from element to the next/previous breakpoint or element
-                incoming.concat(
-                    this.findIncomingConnections(e.incomingArcs, layerInfo)
+                connections.incoming.push(
+                    ...this.findIncomingConnections(e.incomingArcs, layerInfo)
                 );
-                outgoing.concat(
-                    this.findOutgoingConnections(e.outgoingArcs, layerInfo)
+                connections.outgoing.push(
+                    ...this.findOutgoingConnections(e.outgoingArcs, layerInfo)
                 );
             } else {
-                const connections = this.getElementArrowsFromBreakpoint(
-                    e,
-                    incoming,
-                    outgoing,
-                    layerInfo
-                );
-                incoming.concat(connections.incoming);
-                outgoing.concat(connections.outgoing);
+                this.getElementArrowsFromBreakpoint(connections, e, layerInfo);
             }
         });
+
         return (
-            this.calculateCrossings(incoming) +
-            this.calculateCrossings(outgoing)
+            this.calculateCrossings(connections.incoming) +
+            this.calculateCrossings(connections.outgoing)
         );
     }
 
     private getElementArrowsFromBreakpoint(
+        connections: ElementArrows,
         breakpoint: Breakpoint,
-        incoming: Connection[],
-        outgoing: Connection[],
         layerInfo: LayerInfoParameter
-    ): ElementArrows {
+    ): void {
         //check incoming and outgoing line from breakpoint to the next/previous breakpoint or element
         let prev: Element | Breakpoint | undefined;
         let next: Element | Breakpoint | undefined;
+
         const layers = layerInfo.layers;
         const index = layerInfo.index;
         const layerIndex = layerInfo.layerIndex;
@@ -241,19 +237,15 @@ export class LayoutService {
         }
 
         if (prev)
-            incoming.push({
+            connections.incoming.push({
                 sourcePos: layers[layerIndex - 1].indexOf(prev),
                 targetPos: index,
             });
         if (next)
-            outgoing.push({
+            connections.outgoing.push({
                 sourcePos: index,
                 targetPos: layers[layerIndex + 1].indexOf(next),
             });
-        return {
-            incoming,
-            outgoing,
-        };
     }
 
     /**
@@ -322,18 +314,18 @@ export class LayoutService {
 
     /**
      *
-     * @param conections
+     * @param connections
      * @private
      */
-    private calculateCrossings(conections: Array<Connection>): number {
+    private calculateCrossings(connections: Array<Connection>): number {
         let crossings = 0;
-        conections.forEach((e, index) => {
-            for (let i = index + 1; i < conections.length; i++) {
+        connections.forEach((e, index) => {
+            for (let i = index + 1; i < connections.length; i++) {
                 if (
-                    (e.sourcePos < conections[i].sourcePos &&
-                        e.targetPos > conections[i].targetPos) ||
-                    (e.sourcePos > conections[i].sourcePos &&
-                        e.targetPos < conections[i].targetPos)
+                    (e.sourcePos < connections[i].sourcePos &&
+                        e.targetPos > connections[i].targetPos) ||
+                    (e.sourcePos > connections[i].sourcePos &&
+                        e.targetPos < connections[i].targetPos)
                 ) {
                     crossings++;
                 }
