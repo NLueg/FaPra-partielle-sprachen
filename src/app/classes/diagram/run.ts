@@ -106,29 +106,25 @@ export class Run {
             const source = this.elements.find((e) => e.label == a.source);
             const target = this.elements.find((e) => e.label == a.target);
 
-            if (source) {
+            if (!source || !target) {
+                check = false;
+                this.arcs.slice(this.arcs.indexOf(a), 1);
+            } else {
                 a.sourceEl = source;
                 source.addOutgoingArc(a);
-            } else {
-                check = false;
-            }
-
-            if (target) {
                 a.targetEl = target;
                 target.addIncomingArc(a);
-            } else {
-                check = false;
             }
         });
 
         return check;
     }
 
-    public hasCycles(): boolean {
+    hasCycles(): boolean {
         return this.getCycles().length > 0;
     }
 
-    public removeCycles(): void {
+    private removeCycles(): void {
         this.getCycles().forEach((arc) => {
             return this.arcs.splice(
                 this.arcs.findIndex((a) => a === arc),
