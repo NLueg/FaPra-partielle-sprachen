@@ -1,5 +1,7 @@
 import { Component } from '@angular/core';
 
+import { DisplayService } from './services/display.service';
+import { DownloadService } from './services/download/download.service';
 import { UploadService } from './services/upload/upload.service';
 
 @Component({
@@ -8,7 +10,11 @@ import { UploadService } from './services/upload/upload.service';
     styleUrls: ['./app.component.scss'],
 })
 export class AppComponent {
-    constructor(private _uploadService: UploadService) {}
+    constructor(
+        private _displayService: DisplayService,
+        private _uploadService: UploadService,
+        private _downloadService: DownloadService
+    ) {}
 
     public openFileSelector(): void {
         this._uploadService.openFileSelector();
@@ -18,5 +24,14 @@ export class AppComponent {
         if (event.dataTransfer?.files) {
             this._uploadService.uploadFiles(event.dataTransfer.files);
         }
+    }
+
+    public downloadRuns(): void {
+        this._downloadService.downloadRuns(this._displayService.runs);
+    }
+    public downloadCurrentRun(): void {
+        this._downloadService.downloadCurrentRun(
+            this._displayService.currentRun
+        );
     }
 }
