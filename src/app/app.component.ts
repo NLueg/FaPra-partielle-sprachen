@@ -11,7 +11,6 @@ import { UploadService } from './services/upload/upload.service';
 })
 export class AppComponent {
     constructor(
-        private _displayService: DisplayService,
         private _uploadService: UploadService,
         private _downloadService: DownloadService
     ) {}
@@ -27,11 +26,9 @@ export class AppComponent {
     }
 
     public downloadRuns(): void {
-        this._downloadService.downloadRuns(this._displayService.runs);
+        this._downloadService.downloadRuns();
     }
     public downloadCurrentRun(): void {
-        this._downloadService.downloadCurrentRun(
-            this._displayService.currentRun
-        );
+        this._downloadService.downloadCurrentRun();
     }
 }
