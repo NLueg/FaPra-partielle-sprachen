@@ -119,8 +119,14 @@
             </button>
         </mat-form-field>
         <app-template-button
-            buttonText="Right button"
-            buttonIcon="grade"
+            buttonText="Download Current Run"
+            buttonIcon="download"
+            (buttonAction)="downloadCurrentRun()"
+        ></app-template-button>
+        <app-template-button
+            buttonText="Download All"
+            buttonIcon="download"
+            (buttonAction)="downloadRuns()"
         ></app-template-button>
     </div>
 

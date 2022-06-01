@@ -4,6 +4,7 @@ import { debounceTime, Observable, Subscription } from 'rxjs';
 
 import { Run } from './classes/diagram/run';
 import { DisplayService } from './services/display.service';
+import { DownloadService } from './services/download/download.service';
 import { ParserService } from './services/parser.service';
 import { exampleContent } from './services/upload/example-file';
 import { UploadService } from './services/upload/upload.service';
@@ -30,7 +31,8 @@ export class AppComponent implements OnDestroy {
     constructor(
         private _parserService: ParserService,
         private _displayService: DisplayService,
-        private _uploadService: UploadService
+        private _uploadService: UploadService,
+        private _downloadService: DownloadService
     ) {
         this.textareaFc = new FormControl();
 
@@ -96,6 +98,15 @@ export class AppComponent implements OnDestroy {
 
     public openFileSelector(): void {
         this._uploadService.openFileSelector();
+    }
+
+    public downloadRuns(): void {
+        this._downloadService.downloadRuns(this._displayService.runs);
+    }
+    public downloadCurrentRun(): void {
+        this._downloadService.downloadCurrentRun(
+            this._displayService.currentRun
+        );
     }
 
     public dropFiles(event: DragEvent): void {
