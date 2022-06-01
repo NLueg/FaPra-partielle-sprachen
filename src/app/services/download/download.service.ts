@@ -1,8 +1,7 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { ToastrService } from 'ngx-toastr';
-import { Observable, Subject } from 'rxjs';
+import { first, Subject } from 'rxjs';
 
-import { Run } from '../../classes/diagram/run';
+import { DisplayService } from '../display.service';
 
 @Injectable({
     providedIn: 'root',
@@ -10,7 +9,7 @@ import { Run } from '../../classes/diagram/run';
 export class DownloadService implements OnDestroy {
     private _download$: Subject<string>;
 
-    constructor(private toastr: ToastrService) {
+    constructor(private _displayService: DisplayService) {
         this._download$ = new Subject<string>();
     }
 
@@ -18,31 +17,31 @@ export class DownloadService implements OnDestroy {
         this._download$.complete();
     }
 
-    public get download$(): Observable<string> {
-        return this._download$.asObservable();
+    public downloadRuns(): void {
+        this._displayService.runs$.pipe(first()).subscribe((runs) => {
+            const timestamp = Date.now();
+
+            runs.forEach((run, index) => {
+                const myFileContent = run.text.trim();
+                const myFileName = timestamp + '_run_' + index + '.ps';
+                const dlink: HTMLAnchorElement = document.createElement('a');
+                dlink.download = myFileName;
+                dlink.href = 'data:text/plain;charset=utf-16,' + myFileContent;
+                dlink.click();
+                dlink.remove();
+            });
+        });
     }
-    public downloadRuns(runs: Run[]): void {
-        const timestamp = Date.now();
-        let index = 1;
-        runs.forEach((run) => {
+
+    public downloadCurrentRun(): void {
+        this._displayService.currentRun$.pipe(first()).subscribe((run) => {
             const myFileContent = run.text.trim();
-            const myFileName = timestamp + '_run_' + index + '.ps';
-            index++;
+            const myFileName = Date.now() + '_run' + '.ps';
             const dlink: HTMLAnchorElement = document.createElement('a');
             dlink.download = myFileName;
             dlink.href = 'data:text/plain;charset=utf-16,' + myFileContent;
             dlink.click();
             dlink.remove();
         });
-    }
-
-    public downloadCurrentRun(run: Run): void {
-        const myFileContent = run.text.trim();
-        const myFileName = Date.now() + '_run' + '.ps';
-        const dlink: HTMLAnchorElement = document.createElement('a');
-        dlink.download = myFileName;
-        dlink.href = 'data:text/plain;charset=utf-16,' + myFileContent;
-        dlink.click();
-        dlink.remove();
     }
 }

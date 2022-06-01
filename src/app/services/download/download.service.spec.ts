@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
-import { ToastrService } from 'ngx-toastr';
 
+import { DisplayService } from '../display.service';
 import { DownloadService } from './download.service';
 
 describe('ParserService', () => {
@@ -8,7 +8,7 @@ describe('ParserService', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            providers: [{ provide: ToastrService, useValue: {} }],
+            providers: [{ provide: DisplayService, useValue: {} }],
         });
         service = TestBed.inject(DownloadService);
     });

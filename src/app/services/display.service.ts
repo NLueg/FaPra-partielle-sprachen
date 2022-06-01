@@ -22,12 +22,8 @@ export class DisplayService implements OnDestroy {
         this._currentRun$.complete();
     }
 
-    public get currentRun(): Run {
-        return this._currentRun$.getValue();
-    }
-
-    public get runs(): Run[] {
-        return this._runs$.getValue();
+    public get runs$(): Observable<Run[]> {
+        return this._runs$.asObservable();
     }
 
     public get currentRun$(): Observable<Run> {
