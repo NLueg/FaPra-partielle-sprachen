@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 
-import { Element } from '../classes/diagram/element';
-import { Run } from '../classes/diagram/run';
+import { hasCycles } from '../../classes/diagram/functions/cycles.fn';
+import { Run } from '../../classes/diagram/run';
+import { addArc, addElement, setRefs } from './parser-helper.fn';
 
 type ParsingStates = 'initial' | 'type' | 'transitions' | 'arcs';
 const transitionsAttribute = '.transitions';
@@ -16,9 +17,12 @@ export class ParserService {
 
     parse(content: string, errors: Set<string>): Run | null {
         const contentLines = content.split('\n');
-        const run: Run = new Run();
-
-        run.setText(content);
+        const run: Run = {
+            text: content,
+            arcs: [],
+            elements: [],
+            warnings: [],
+        };
 
         let currentParsingState: ParsingStates = 'initial';
         let fileContainsTransitions = false;
@@ -73,7 +77,7 @@ export class ParserService {
                         break;
                     } else if (trimmedLine !== arcsAttribute) {
                         if (trimmedLine.split(' ').length !== 1) {
-                            run.addWarning(
+                            run.warnings.push(
                                 `Transition names are not allow to contain blank`
                             );
                             this.toastr.warning(
@@ -82,11 +86,13 @@ export class ParserService {
                             );
                         }
                         if (
-                            !run.addElement(
-                                new Element(trimmedLine.split(' ')[0])
-                            )
+                            !addElement(run, {
+                                label: trimmedLine.split(' ')[0],
+                                incomingArcs: [],
+                                outgoingArcs: [],
+                            })
                         ) {
-                            run.addWarning(
+                            run.warnings.push(
                                 `File contains duplicate transition (${
                                     trimmedLine.split(' ')[0]
                                 })`
@@ -113,13 +119,13 @@ export class ParserService {
                         if (trimmedLine.split(' ').length === 2) {
                             const splitLine = trimmedLine.split(' ');
                             if (
-                                !run.addArc({
+                                !addArc(run, {
                                     source: splitLine[0],
                                     target: splitLine[1],
                                     breakpoints: [],
                                 })
                             ) {
-                                run.addWarning(
+                                run.warnings.push(
                                     `File contains duplicate arc (${splitLine[0]} ${splitLine[1]})`
                                 );
                                 this.toastr.warning(
@@ -128,7 +134,7 @@ export class ParserService {
                                 );
                             }
                         } else {
-                            run.addWarning(`File contains invalid arcs`);
+                            run.warnings.push(`File contains invalid arcs`);
                             this.toastr.warning(
                                 `File contains invalid arcs`,
                                 `Invalid arcs are ingnored`
@@ -147,8 +153,8 @@ export class ParserService {
             }
         }
         if (fileContainsTransitions && fileContainsArcs) {
-            if (!run.setRefs()) {
-                run.addWarning(
+            if (!setRefs(run)) {
+                run.warnings.push(
                     `File contains arcs for non existing transitions`
                 );
                 this.toastr.warning(
@@ -158,8 +164,8 @@ export class ParserService {
             }
 
             //check cycles in run
-            if (run.hasCycles()) {
-                run.addWarning(`File contains cycles`);
+            if (hasCycles(run)) {
+                run.warnings.push(`File contains cycles`);
                 this.toastr.warning(
                     `File contains cycles`,
                     `Could not apply Sugiyama layout`

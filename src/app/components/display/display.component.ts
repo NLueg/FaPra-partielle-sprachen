@@ -1,10 +1,10 @@
 import { Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { map, Subscription } from 'rxjs';
 
 import { Run } from '../../classes/diagram/run';
 import { DisplayService } from '../../services/display.service';
 import { LayoutService } from '../../services/layout.service';
-import { SvgService } from '../../services/svg.service';
+import { SvgService } from '../../services/svg/svg.service';
 
 @Component({
     selector: 'app-display',
@@ -21,10 +21,9 @@ export class DisplayComponent implements OnDestroy {
         private _svgService: SvgService,
         private _displayService: DisplayService
     ) {
-        this._sub = this._displayService.currentRun$.subscribe((currentRun) => {
-            this._layoutService.layout(currentRun);
-            this.draw(currentRun);
-        });
+        this._sub = this._displayService.currentRun$
+            .pipe(map((currentRun) => this._layoutService.layout(currentRun)))
+            .subscribe((modifiedRun) => this.draw(modifiedRun));
     }
 
     ngOnDestroy(): void {

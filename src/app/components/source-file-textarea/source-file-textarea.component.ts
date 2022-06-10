@@ -8,9 +8,10 @@ import {
     Subscription,
 } from 'rxjs';
 
-import { Run } from '../../classes/diagram/run';
+import { resolveWarnings } from '../../classes/diagram/functions/resolve-warnings.fn';
+import { isRunEmpty, Run } from '../../classes/diagram/run';
 import { DisplayService } from '../../services/display.service';
-import { ParserService } from '../../services/parser.service';
+import { ParserService } from '../../services/parser/parser.service';
 import { exampleContent } from '../../services/upload/example-file';
 import { UploadService } from '../../services/upload/upload.service';
 
@@ -113,7 +114,7 @@ export class SourceFileTextareaComponent implements OnDestroy {
         this._displayService.currentRun$
             .pipe(first())
             .subscribe((currentRun) => {
-                currentRun.resolveWarnings();
+                currentRun = resolveWarnings(currentRun);
                 this.updateShownRun(currentRun, true);
             });
     }
@@ -122,8 +123,6 @@ export class SourceFileTextareaComponent implements OnDestroy {
         const errors = new Set<string>();
         const result = this._parserService.parse(newSource, errors);
         this.updateValidation(result, errors);
-
-        console.log(result);
 
         if (!result) return;
 
@@ -134,8 +133,6 @@ export class SourceFileTextareaComponent implements OnDestroy {
         const errors = new Set<string>();
         const result = this._parserService.parse(newSource, errors);
         this.updateValidation(result, errors);
-
-        console.log(result);
 
         if (!result) return;
 
@@ -157,9 +154,9 @@ export class SourceFileTextareaComponent implements OnDestroy {
         if (!run || errors.size > 0) {
             this.textareaFc.setErrors({ 'invalid run': true });
             this.runValidationStatus = 'error';
-        } else if (run.warnings.size > 0) {
+        } else if (run.warnings.length > 0) {
             this.runValidationStatus = 'warn';
-        } else if (!run.isEmpty()) {
+        } else if (!isRunEmpty(run)) {
             this.runValidationStatus = 'success';
         } else {
             this.runValidationStatus = null;
