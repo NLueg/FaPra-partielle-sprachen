@@ -123,6 +123,8 @@ export class SourceFileTextareaComponent implements OnDestroy {
         const result = this._parserService.parse(newSource, errors);
         this.updateValidation(result, errors);
 
+        console.log(result);
+
         if (!result) return;
 
         this._displayService.updateCurrentRun(result);
@@ -132,6 +134,8 @@ export class SourceFileTextareaComponent implements OnDestroy {
         const errors = new Set<string>();
         const result = this._parserService.parse(newSource, errors);
         this.updateValidation(result, errors);
+
+        console.log(result);
 
         if (!result) return;
 

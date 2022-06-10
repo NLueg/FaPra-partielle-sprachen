@@ -182,6 +182,7 @@ export class LayoutService {
             incoming: [],
             outgoing: [],
         };
+        console.log(layers);
         layers[layerIndex].forEach((e, index) => {
             const layerInfo = {
                 layers,
@@ -258,6 +259,10 @@ export class LayoutService {
         arcs: Arc[],
         layerInfo: LayerInfoParameter
     ) {
+        // TODO: Am Anfang ein Arc zu viel
+        console.log(arcs);
+        console.log(layerInfo);
+
         const layers = layerInfo.layers;
         const index = layerInfo.index;
         const layerIndex = layerInfo.layerIndex;
