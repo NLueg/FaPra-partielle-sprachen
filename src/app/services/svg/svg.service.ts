@@ -48,7 +48,7 @@ function createSvgForElement(element: Element): SVGElement[] {
     text.setAttribute('x', `${(element.x ?? 0) + 25}`);
     text.setAttribute('y', `${(element.y ?? 0) + 75}`);
 
-    registerSvg(svg, element);
+    registerSvg(svg);
 
     return [svg, text];
 }

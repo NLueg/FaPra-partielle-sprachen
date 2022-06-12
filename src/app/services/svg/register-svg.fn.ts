@@ -1,14 +1,12 @@
-import { Element } from '../../classes/diagram/element';
-
-export function registerSvg(svg: SVGElement, element: Element): void {
-    svg.onmousedown = () => handleMouseDown(svg, element);
-    svg.onmouseup = () => handleMouseUp(svg, element);
+export function registerSvg(svg: SVGElement): void {
+    svg.onmousedown = () => handleMouseDown(svg);
+    svg.onmouseup = () => handleMouseUp(svg);
 }
 
-function handleMouseDown(svg: SVGElement, element: Element) {
+function handleMouseDown(svg: SVGElement) {
     svg.setAttribute('stroke', 'red');
 }
 
-function handleMouseUp(svg: SVGElement, element: Element) {
+function handleMouseUp(svg: SVGElement) {
     svg.setAttribute('stroke', 'black');
 }
