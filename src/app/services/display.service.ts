@@ -1,7 +1,16 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { BehaviorSubject, map, Observable, switchMap } from 'rxjs';
 
-import { Run } from '../classes/diagram/run';
+import { isRunEmpty, Run } from '../classes/diagram/run';
+
+function getEmptyRun(): Run {
+    return {
+        text: '',
+        arcs: [],
+        elements: [],
+        warnings: [],
+    };
+}
 
 @Injectable({
     providedIn: 'root',
@@ -12,8 +21,7 @@ export class DisplayService implements OnDestroy {
     private readonly _runs$: BehaviorSubject<Run[]>;
 
     constructor() {
-        const emptyRun = new Run();
-
+        const emptyRun = getEmptyRun();
         this._runs$ = new BehaviorSubject<Run[]>([emptyRun]);
         this._currentRun$ = new BehaviorSubject<Run>(emptyRun);
     }
@@ -31,7 +39,7 @@ export class DisplayService implements OnDestroy {
     }
 
     public addEmptyRun(): Run {
-        this.registerRun(new Run());
+        this.registerRun(getEmptyRun());
         return this._currentRun$.getValue();
     }
 
@@ -39,7 +47,7 @@ export class DisplayService implements OnDestroy {
         const runs = this._runs$.getValue();
 
         //add run or update current run if empty
-        if (this._currentRun$.getValue().isEmpty() && runs.length > 0) {
+        if (isRunEmpty(this._currentRun$.getValue()) && runs.length > 0) {
             this.updateCurrentRun(run);
         } else {
             runs.push(run);
@@ -124,7 +132,7 @@ export class DisplayService implements OnDestroy {
     }
 
     public isCurrentRunEmpty$(): Observable<boolean> {
-        return this._currentRun$.pipe(map((run) => run.isEmpty()));
+        return this._currentRun$.pipe(map((run) => isRunEmpty(run)));
     }
 
     public getCurrentRunIndex$(): Observable<number> {

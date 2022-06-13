@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 
 import { DisplayService } from '../../services/display.service';
-import { ParserService } from '../../services/parser.service';
+import { ParserService } from '../../services/parser/parser.service';
 import { UploadService } from '../../services/upload/upload.service';
 import { SourceFileTextareaComponent } from './source-file-textarea.component';
 

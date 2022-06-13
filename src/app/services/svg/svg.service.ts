@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 
-import { Arc } from '../classes/diagram/arc';
-import { Element } from '../classes/diagram/element';
-import { Run } from '../classes/diagram/run';
+import { Arc } from '../../classes/diagram/arc';
+import { Element } from '../../classes/diagram/element';
+import { Run } from '../../classes/diagram/run';
+import { registerSvg } from './register-svg.fn';
 
 @Injectable({
     providedIn: 'root',
@@ -34,8 +35,8 @@ export class SvgService {
 function createSvgForElement(element: Element): SVGElement[] {
     const svg = createSvgElement('rect');
 
-    svg.setAttribute('x', `${element.x}`);
-    svg.setAttribute('y', `${element.y}`);
+    svg.setAttribute('x', `${element.x ?? 0}`);
+    svg.setAttribute('y', `${element.y ?? 0}`);
     svg.setAttribute('width', '50');
     svg.setAttribute('height', '50');
     svg.setAttribute('stroke', 'black');
@@ -44,10 +45,10 @@ function createSvgForElement(element: Element): SVGElement[] {
 
     const text = createSvgElement('text');
     text.textContent = element.label;
-    text.setAttribute('x', `${element.x + 25}`);
-    text.setAttribute('y', `${element.y + 75}`);
+    text.setAttribute('x', `${(element.x ?? 0) + 25}`);
+    text.setAttribute('y', `${(element.y ?? 0) + 75}`);
 
-    element.registerSvg(svg);
+    registerSvg(svg);
 
     return [svg, text];
 }
@@ -70,10 +71,10 @@ function createSvgForArc(
     if (arc.breakpoints.length == 0) {
         elements.push(
             createLine(
-                source.x + 50,
-                source.y + 25,
-                target.x,
-                target.y + 25,
+                (source.x ?? 0) + 50,
+                (source.y ?? 0) + 25,
+                target.x ?? 0,
+                (target.y ?? 0) + 25,
                 true
             )
         );
@@ -81,8 +82,8 @@ function createSvgForArc(
         //source -> first breakpoint
         elements.push(
             createLine(
-                source.x + 50,
-                source.y + 25,
+                (source.x ?? 0) + 50,
+                (source.y ?? 0) + 25,
                 arc.breakpoints[0].x + 25,
                 arc.breakpoints[0].y + 25,
                 false
@@ -105,8 +106,8 @@ function createSvgForArc(
             createLine(
                 arc.breakpoints[arc.breakpoints.length - 1].x + 25,
                 arc.breakpoints[arc.breakpoints.length - 1].y + 25,
-                target.x,
-                target.y + 25,
+                target.x ?? 0,
+                (target.y ?? 0) + 25,
                 true
             )
         );
