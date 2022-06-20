@@ -17,13 +17,17 @@ export class DownloadService implements OnDestroy {
         this._download$.complete();
     }
 
-    public downloadRuns(): void {
+    public downloadRuns(name?: string): void {
         this._displayService.runs$.pipe(first()).subscribe((runs) => {
             const timestamp = Date.now();
-
             runs.forEach((run, index) => {
                 const myFileContent = run.text.trim();
-                const myFileName = timestamp + '_run_' + index + '.ps';
+                let myFileName = '';
+                if (name == '') {
+                    myFileName = timestamp + '_run_' + (index + 1) + '.ps';
+                } else {
+                    myFileName = name + '_run_' + (index + 1) + '.ps';
+                }
                 const dlink: HTMLAnchorElement = document.createElement('a');
                 dlink.download = myFileName;
                 dlink.href = 'data:text/plain;charset=utf-16,' + myFileContent;
@@ -33,10 +37,16 @@ export class DownloadService implements OnDestroy {
         });
     }
 
-    public downloadCurrentRun(): void {
+    public downloadCurrentRun(name?: string): void {
         this._displayService.currentRun$.pipe(first()).subscribe((run) => {
             const myFileContent = run.text.trim();
-            const myFileName = Date.now() + '_run' + '.ps';
+            let myFileName = '';
+            if (name == '') {
+                myFileName = Date.now() + '_run' + '.ps';
+            } else {
+                myFileName = name + '_run' + '.ps';
+            }
+
             const dlink: HTMLAnchorElement = document.createElement('a');
             dlink.download = myFileName;
             dlink.href = 'data:text/plain;charset=utf-16,' + myFileContent;

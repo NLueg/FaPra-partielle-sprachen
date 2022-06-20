@@ -1,0 +1,34 @@
+<app-template-button
+    buttonText="Download"
+    buttonIcon="download"
+    (buttonAction)="changeHideDownload()"
+></app-template-button>
+<form [hidden]="_hideDownload">
+    <div>
+        <label>Name</label>
+        <input
+            type="text"
+            placeholder="Enter Name"
+            id="name"
+            value="{{ _name }}"
+            (input)="changeName($event)"
+        />
+    </div>
+    <div>
+        <mat-radio-group>
+            <mat-radio-button
+                value="all"
+                (click)="changeCurrentDownloadSelection('all')"
+                checked="true"
+                >Save All</mat-radio-button
+            >
+            <mat-radio-button
+                value="current"
+                (click)="changeCurrentDownloadSelection('current')"
+                >Save Current Run</mat-radio-button
+            >
+        </mat-radio-group>
+    </div>
+    <button class="btn" (click)="changeHideDownload()">Cancel</button>
+    <button class="btn" (click)="download()">Save</button>
+</form>
