@@ -1,5 +1,5 @@
 import { Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
-import { map, Subscription } from 'rxjs';
+import { map, Unsubscribable } from 'rxjs';
 
 import { Run } from '../../classes/diagram/run';
 import { DisplayService } from '../../services/display.service';
@@ -14,7 +14,7 @@ import { SvgService } from '../../services/svg/svg.service';
 export class DisplayComponent implements OnDestroy {
     @ViewChild('drawingArea') drawingArea: ElementRef<SVGElement> | undefined;
 
-    private _sub: Subscription;
+    private _sub: Unsubscribable;
 
     constructor(
         private _layoutService: LayoutService,

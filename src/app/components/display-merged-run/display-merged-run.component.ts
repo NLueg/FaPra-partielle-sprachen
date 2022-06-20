@@ -1,5 +1,5 @@
 import { Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
-import { map, Subscription, tap } from 'rxjs';
+import { map, tap, Unsubscribable } from 'rxjs';
 
 import { Run } from '../../classes/diagram/run';
 import { LayoutService } from '../../services/layout.service';
@@ -14,7 +14,7 @@ import { MergeService } from './merge.service';
 export class DisplayMergedRunComponent implements OnDestroy {
     @ViewChild('drawingArea') drawingArea: ElementRef<SVGElement> | undefined;
 
-    private _sub: Subscription;
+    private _sub: Unsubscribable;
 
     constructor(
         mergeService: MergeService,
@@ -24,6 +24,7 @@ export class DisplayMergedRunComponent implements OnDestroy {
         this._sub = mergeService
             .getMergedRuns$()
             .pipe(
+                tap((runs) => console.log('Merged runs:', runs)),
                 map((currentRuns) =>
                     currentRuns.map((run) => this.layoutService.layout(run))
                 ),

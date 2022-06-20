@@ -59,11 +59,30 @@ export class LayoutService {
             );
             //filter all elements without incoming arcs => add them to the current layer and remove their outgoing arcs
             elements
-                .filter((e) => elementsWithIncomingArcs.indexOf(e) === -1)
-                .forEach((e) => {
-                    layer.push(e);
-                    elements.splice(elements.indexOf(e), 1);
-                    arcs = arcs.filter((a) => e.outgoingArcs.indexOf(a) === -1);
+                .filter(
+                    (element) =>
+                        elementsWithIncomingArcs.findIndex(
+                            (elementWithIncomingArcs) =>
+                                elementWithIncomingArcs?.label === element.label
+                        ) === -1
+                )
+                .forEach((element) => {
+                    layer.push(element);
+
+                    const indexOfElement = elements.findIndex(
+                        (innerElement) => innerElement.label === element.label
+                    );
+                    elements.splice(indexOfElement, 1);
+
+                    arcs = arcs.filter((a) => {
+                        const indexInOutgoingArcs =
+                            element.outgoingArcs.findIndex(
+                                (arc) =>
+                                    arc.source === a.source &&
+                                    arc.target === a.target
+                            );
+                        return indexInOutgoingArcs === -1;
+                    });
                 });
             layers.push(layer);
         }
