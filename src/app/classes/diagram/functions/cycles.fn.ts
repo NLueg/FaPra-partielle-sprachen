@@ -12,43 +12,61 @@ export function getCycles(run: Run): Arc[] {
 
     run.arcs.forEach((arc) => {
         const visitedTransitions = new Set<Element>();
-        if (arc.sourceEl) visitedTransitions.add(arc.sourceEl);
-        checkArcCycle(arc, visitedArcs, visitedTransitions, cyclicArcs);
+
+        const source = run.elements.find(
+            (element) => element.label === arc.source
+        );
+        if (source) {
+            visitedTransitions.add(source);
+        }
+
+        checkArcCycle(run, arc, visitedArcs, visitedTransitions, cyclicArcs);
     });
     return cyclicArcs;
 }
 
 /**
  * checks an arc sequence for cycles
+ * @param currentRun run to parse
  * @param arc starting arc
  * @param visitedArcs already visited arcs
  * @param visitedTransitions already visited transition
  * @param cyclicArcs last arcs when a cycle occurs
  */
 function checkArcCycle(
+    currentRun: Run,
     arc: Arc,
     visitedArcs: Set<Arc>,
     visitedTransitions: Set<Element>,
     cyclicArcs: Arc[]
 ): void {
-    if (visitedArcs.has(arc) || !arc.targetEl) {
+    const target = currentRun.elements.find(
+        (element) => element.label === arc.target
+    );
+    if (visitedArcs.has(arc) || !target) {
         return;
     }
     visitedArcs.add(arc);
 
     //transition already visited in this sequence?
 
-    if (visitedTransitions.has(arc.targetEl)) {
+    if (visitedTransitions.has(target)) {
         cyclicArcs.push(arc);
         return;
     }
-    visitedTransitions.add(arc.targetEl);
+    visitedTransitions.add(target);
 
     //continue with the sequences
 
-    arc.targetEl.outgoingArcs.forEach((outArc) => {
-        checkArcCycle(outArc, visitedArcs, visitedTransitions, cyclicArcs);
+    target.outgoingArcs.forEach((outArc) => {
+        checkArcCycle(
+            currentRun,
+            outArc,
+            visitedArcs,
+            visitedTransitions,
+            cyclicArcs
+        );
     });
 
-    visitedTransitions.delete(arc.targetEl);
+    visitedTransitions.delete(target);
 }

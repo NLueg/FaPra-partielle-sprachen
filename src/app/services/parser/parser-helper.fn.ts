@@ -43,9 +43,7 @@ export function setRefs(run: Run): boolean {
             check = false;
             run.arcs.slice(run.arcs.indexOf(a), 1);
         } else {
-            a.sourceEl = source;
             source.outgoingArcs.push(a);
-            a.targetEl = target;
             target.incomingArcs.push(a);
         }
     });
