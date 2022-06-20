@@ -32,3 +32,14 @@ svg text{
 .mat-tooltip {
     white-space: pre-line;
 }
+
+mat-tab-group {
+    .mat-tab-header {
+        border: 0;
+    }
+
+    .mat-tab-label-container .mat-tab-label {
+        width: 50%;
+    }
+}
+
