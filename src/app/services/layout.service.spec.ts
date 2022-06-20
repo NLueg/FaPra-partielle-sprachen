@@ -15,7 +15,6 @@ describe('LayoutService', () => {
         expect(service).toBeTruthy();
     });
 
-    // TODO: Breakpoints are recursive
     it('should layout example content correctly', () => {
         const result = service.layout(exampleInput);
         expect(result).toEqual({
