@@ -32,3 +32,13 @@ svg text{
 .mat-tooltip {
     white-space: pre-line;
 }
+
+.move-helper {
+    /*fill-opacity: 0;
+    position: relative;
+    z-index: 10;
+    &:hover {
+        fill-opacity: 0.5;
+        transition: fill-opacity .25s ease-out;
+    }*/
+}
