@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { FlexLayoutModule } from '@angular/flex-layout';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -47,6 +47,7 @@ import { TemplateButtonComponent } from './components/template-button/template-b
         }),
         MatTabsModule,
         MatRadioModule,
+        FormsModule,
     ],
     providers: [],
     bootstrap: [AppComponent],

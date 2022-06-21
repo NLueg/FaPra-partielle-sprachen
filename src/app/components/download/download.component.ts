@@ -8,7 +8,7 @@ import { DownloadService } from '../../services/download/download.service';
     styleUrls: ['./download.component.scss'],
 })
 export class DownloadComponent implements OnInit {
-    _name = '';
+    _downloadName = '';
     _currentDownloadSelection = 'all';
     _hideDownload = true;
     constructor(private _downloadService: DownloadService) {}
@@ -17,24 +17,17 @@ export class DownloadComponent implements OnInit {
 
     // let downloadName: string = 'hello';
 
-    changeName(eventData: Event): void {
-        this._name = (<HTMLInputElement>eventData.target).value;
-    }
-
-    changeCurrentDownloadSelection(selection: string): void {
-        this._currentDownloadSelection = selection;
-    }
-
     changeHideDownload(): void {
         this._hideDownload = !this._hideDownload;
-        this._name = '';
+        this._downloadName = '';
+        this._currentDownloadSelection = 'all';
     }
 
     public download(): void {
         if (this._currentDownloadSelection === 'all') {
-            this._downloadService.downloadRuns(this._name);
+            this._downloadService.downloadRuns(this._downloadName);
         } else if (this._currentDownloadSelection === 'current') {
-            this._downloadService.downloadCurrentRun(this._name);
+            this._downloadService.downloadCurrentRun(this._downloadName);
         }
     }
 }

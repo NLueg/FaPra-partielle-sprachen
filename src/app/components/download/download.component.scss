@@ -1,0 +1,37 @@
+:host{
+    width: 100%;
+    max-width: 350px;
+    ;
+
+    .download-field{
+        margin-top: 40px;
+        align-items: center;
+
+    }
+
+    .radio-button{
+        margin:10px 20px;
+    }
+    .input-field{
+        margin:10px 20px; 
+    }
+    
+    .buttons{
+        margin:10px 20px
+    }
+    
+    .btn{
+        margin-right: 10px;
+    }
+    
+    input[type=radio]{
+        margin-left: 10px;
+    }
+
+    input[type=text]{
+        margin-left: 10px;
+    }
+        
+    
+}
+
