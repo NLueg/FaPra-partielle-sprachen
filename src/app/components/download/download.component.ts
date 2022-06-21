@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 
 import { DownloadService } from '../../services/download/download.service';
 
@@ -7,15 +7,11 @@ import { DownloadService } from '../../services/download/download.service';
     templateUrl: './download.component.html',
     styleUrls: ['./download.component.scss'],
 })
-export class DownloadComponent implements OnInit {
+export class DownloadComponent {
     _downloadName = '';
     _currentDownloadSelection = 'all';
     _hideDownload = true;
     constructor(private _downloadService: DownloadService) {}
-
-    ngOnInit(): void {}
-
-    // let downloadName: string = 'hello';
 
     changeHideDownload(): void {
         this._hideDownload = !this._hideDownload;

@@ -24,9 +24,9 @@ export class DownloadService implements OnDestroy {
                 const myFileContent = run.text.trim();
                 let myFileName = '';
                 if (name == '') {
-                    myFileName = timestamp + '_run_' + (index + 1) + '.ps';
+                    myFileName = `${timestamp}_run_${index + 1}.ps`;
                 } else {
-                    myFileName = name + '_run_' + (index + 1) + '.ps';
+                    myFileName = `${name}_run_${index + 1}.ps`;
                 }
                 const dlink: HTMLAnchorElement = document.createElement('a');
                 dlink.download = myFileName;
@@ -42,9 +42,9 @@ export class DownloadService implements OnDestroy {
             const myFileContent = run.text.trim();
             let myFileName = '';
             if (name == '') {
-                myFileName = Date.now() + '_run' + '.ps';
+                myFileName = Date.now() + '_run.ps';
             } else {
-                myFileName = name + '_run' + '.ps';
+                myFileName = name + '_run.ps';
             }
 
             const dlink: HTMLAnchorElement = document.createElement('a');
