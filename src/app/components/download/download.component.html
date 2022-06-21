@@ -1,0 +1,41 @@
+<div fxLayout="column" fxLayoutAlign="start center">
+    <app-template-button
+        buttonText="Download"
+        buttonIcon="download"
+        (buttonAction)="changeHideDownload()"
+    ></app-template-button>
+    <form [hidden]="_hideDownload" class="download-field">
+        <div class="input-field">
+            <span> Name:</span>
+            <input
+                type="text"
+                name="text"
+                id="text"
+                value="_downloadName"
+                placeholder="Enter Name"
+                [(ngModel)]="_downloadName"
+            />
+        </div>
+        <div class="radio-button">
+            <span> Download:</span>
+            <input
+                type="radio"
+                name="selection"
+                value="all"
+                [(ngModel)]="_currentDownloadSelection"
+            />
+            <span>All</span>
+            <input
+                type="radio"
+                name="selection"
+                value="current"
+                [(ngModel)]="_currentDownloadSelection"
+            />
+            <span>Current Run</span>
+        </div>
+        <div class="buttons">
+            <button class="btn" (click)="changeHideDownload()">Cancel</button>
+            <button class="btn" (click)="download()">Save</button>
+        </div>
+    </form>
+</div>
