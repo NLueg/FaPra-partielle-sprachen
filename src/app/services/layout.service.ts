@@ -54,9 +54,11 @@ export class LayoutService {
 
         while (elements.length > 0) {
             const layer = new Array<Element>();
-            const elementsWithIncomingArcs = arcs.map((a) =>
-                elements.find((element) => element.label === a.target)
-            );
+            const elementsWithIncomingArcs = arcs
+                .filter((a) => elements.find((e) => e.label == a.source))
+                .map((a) =>
+                    elements.find((element) => element.label === a.target)
+                );
             //filter all elements without incoming arcs => add them to the current layer and remove their outgoing arcs
             elements
                 .filter(

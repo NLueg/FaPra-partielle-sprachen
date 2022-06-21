@@ -82,19 +82,14 @@ function mergeRuns(
     );
     if (!foundElement) {
         baseRun.elements.push(startElementOfRunToMerge);
-        return;
+    } else {
+        foundElement.outgoingArcs = mergeArcs(
+            foundElement.outgoingArcs,
+            startElementOfRunToMerge.outgoingArcs
+        );
     }
 
     baseRun.arcs = mergeArcs(baseRun.arcs, runToMerge.arcs);
-
-    foundElement.outgoingArcs = mergeArcs(
-        foundElement.outgoingArcs,
-        startElementOfRunToMerge.outgoingArcs
-    );
-    foundElement.incomingArcs = mergeArcs(
-        foundElement.incomingArcs,
-        startElementOfRunToMerge.incomingArcs
-    );
 
     for (const outgoingArc of startElementOfRunToMerge.outgoingArcs) {
         const element = runToMerge.elements.find(
