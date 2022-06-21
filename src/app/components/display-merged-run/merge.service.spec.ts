@@ -175,6 +175,23 @@ describe('MergeService', () => {
                         incomingArcs: [
                             {
                                 breakpoints: [],
+                                source: 't5',
+                                target: 't6',
+                            },
+                        ],
+                        label: 't6',
+                        outgoingArcs: [
+                            {
+                                breakpoints: [],
+                                source: 't6',
+                                target: 't3',
+                            },
+                        ],
+                    },
+                    {
+                        incomingArcs: [
+                            {
+                                breakpoints: [],
                                 source: 't6',
                                 target: 't3',
                             },

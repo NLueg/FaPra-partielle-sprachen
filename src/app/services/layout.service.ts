@@ -18,15 +18,16 @@ export class LayoutService {
     private static readonly ELEMENT_HEIGHT = 80;
     private static readonly LAYER_WIDTH = 100;
 
-    layout(run: Run): Run {
+    layout(run: Run, positionOffset = 0): { run: Run; diagrammHeight: number } {
         const runClone: Run = clonedeep(run);
+        let diagrammHeight = 0;
 
         //if run hast no cycles use sugiyama layout
         if (!hasCycles(runClone)) {
             const layers: Array<Layer[]> = this.assignLayers(runClone);
             this.addBreakpoints(runClone, layers);
             this.minimizeCrossing(runClone, layers);
-            this.calculatePosition(layers);
+            diagrammHeight = this.calculatePosition(layers, positionOffset);
         } else {
             runClone.elements.forEach((el) => {
                 el.x =
@@ -37,7 +38,8 @@ export class LayoutService {
                     LayoutService.OFFSET;
             });
         }
-        return runClone;
+
+        return { run: runClone, diagrammHeight };
     }
 
     /**
@@ -399,8 +401,12 @@ export class LayoutService {
     /**
      * Sets the position of elements and breakpoints based on their layer and location in the layer
      * @param layers layers with elements and breakpoints
+     * @param verticalOffset vertical offset for the current diagramm
      */
-    private calculatePosition(layers: Array<Layer[]>): void {
+    private calculatePosition(
+        layers: Array<Layer[]>,
+        verticalOffset: number
+    ): number {
         let height = LayoutService.MIN_HEIGHT;
 
         //calculate the diagram height based on the largest layer
@@ -420,9 +426,14 @@ export class LayoutService {
 
             layer.forEach((el, idx) => {
                 el.x = offsetX;
-                el.y = offsetY * (idx + 1) + idx * LayoutService.ELEMENT_HEIGHT;
+                el.y =
+                    offsetY * (idx + 1) +
+                    idx * LayoutService.ELEMENT_HEIGHT +
+                    verticalOffset;
             });
         });
+
+        return height;
     }
 }
 

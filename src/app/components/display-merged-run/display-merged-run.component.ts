@@ -25,12 +25,33 @@ export class DisplayMergedRunComponent implements OnDestroy {
             .getMergedRuns$()
             .pipe(
                 tap((runs) => console.log('Merged runs:', runs)),
-                map((currentRuns) =>
-                    currentRuns.map((run) => this.layoutService.layout(run))
-                ),
-                tap(() => this.clearDrawingArea())
+                map((currentRuns) => this.layoutMergedRuns(currentRuns)),
+                tap(({ totalDiagrammHeight }) =>
+                    this.clearDrawingArea(totalDiagrammHeight)
+                )
             )
-            .subscribe((modifiedRuns) => this.draw(modifiedRuns));
+            .subscribe(({ runs }) => this.draw(runs));
+    }
+
+    private layoutMergedRuns(currentRuns: Run[]): {
+        runs: Run[];
+        totalDiagrammHeight: number;
+    } {
+        let totalDiagrammHeight = 0;
+
+        const runs = currentRuns.map((currentRun) => {
+            const { run, diagrammHeight } = this.layoutService.layout(
+                currentRun,
+                totalDiagrammHeight
+            );
+            totalDiagrammHeight += diagrammHeight;
+            return run;
+        });
+
+        return {
+            runs,
+            totalDiagrammHeight,
+        };
     }
 
     ngOnDestroy(): void {
@@ -51,7 +72,7 @@ export class DisplayMergedRunComponent implements OnDestroy {
         }
     }
 
-    private clearDrawingArea() {
+    private clearDrawingArea(totalDiagrammHeight: number) {
         const drawingArea = this.drawingArea?.nativeElement;
         if (drawingArea?.childElementCount === undefined) {
             return;
@@ -60,5 +81,7 @@ export class DisplayMergedRunComponent implements OnDestroy {
         while (drawingArea.childElementCount > 1 /* keep arrowhead marker */) {
             drawingArea.removeChild(drawingArea.lastChild as ChildNode);
         }
+
+        drawingArea.style.height = `${totalDiagrammHeight}px`;
     }
 }

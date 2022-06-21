@@ -16,8 +16,8 @@ describe('LayoutService', () => {
     });
 
     it('should layout example content correctly', () => {
-        const result = service.layout(exampleInput);
-        expect(result).toEqual({
+        const { run } = service.layout(exampleInput);
+        expect(run).toEqual({
             arcs: [
                 {
                     breakpoints: [],

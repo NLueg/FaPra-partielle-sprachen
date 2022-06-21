@@ -22,7 +22,9 @@ export class DisplayComponent implements OnDestroy {
         private _displayService: DisplayService
     ) {
         this._sub = this._displayService.currentRun$
-            .pipe(map((currentRun) => this._layoutService.layout(currentRun)))
+            .pipe(
+                map((currentRun) => this._layoutService.layout(currentRun).run)
+            )
             .subscribe((modifiedRun) => this.draw(modifiedRun));
     }
 
