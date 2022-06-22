@@ -2,6 +2,7 @@ import { Injectable, OnDestroy } from '@angular/core';
 import { BehaviorSubject, map, Observable, switchMap } from 'rxjs';
 
 import { isRunEmpty, Run } from '../classes/diagram/run';
+import { CoordinatesInfo } from '../components/display/display.component';
 
 function getEmptyRun(): Run {
     return {
@@ -20,14 +21,31 @@ export class DisplayService implements OnDestroy {
 
     private readonly _runs$: BehaviorSubject<Run[]>;
 
+    private coordinatesInfo: BehaviorSubject<CoordinatesInfo>;
+
     constructor() {
         const emptyRun = getEmptyRun();
         this._runs$ = new BehaviorSubject<Run[]>([emptyRun]);
         this._currentRun$ = new BehaviorSubject<Run>(emptyRun);
+        this.coordinatesInfo = new BehaviorSubject<CoordinatesInfo>({
+            transitionName: '',
+            coordinates: {
+                x: 0,
+                y: 0,
+            },
+        });
     }
 
     ngOnDestroy(): void {
         this._currentRun$.complete();
+    }
+
+    public setCoordsInfo(coordsInfo: CoordinatesInfo): void {
+        this.coordinatesInfo.next(coordsInfo);
+    }
+
+    public coordsInfoAdded(): Observable<CoordinatesInfo> {
+        return this.coordinatesInfo.asObservable();
     }
 
     public get runs$(): Observable<Run[]> {

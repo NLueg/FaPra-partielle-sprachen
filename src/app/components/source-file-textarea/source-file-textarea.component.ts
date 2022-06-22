@@ -14,6 +14,7 @@ import { DisplayService } from '../../services/display.service';
 import { ParserService } from '../../services/parser/parser.service';
 import { exampleContent } from '../../services/upload/example-file';
 import { UploadService } from '../../services/upload/upload.service';
+import { CoordinatesInfo } from '../display/display.component';
 
 type Valid = 'error' | 'warn' | 'success';
 
@@ -25,6 +26,7 @@ type Valid = 'error' | 'warn' | 'success';
 export class SourceFileTextareaComponent implements OnDestroy {
     private _sub: Subscription;
     private _fileSub: Subscription;
+    private _coordsSub: Subscription;
 
     textareaFc: FormControl;
 
@@ -67,6 +69,11 @@ export class SourceFileTextareaComponent implements OnDestroy {
         this._sub = this.textareaFc.valueChanges
             .pipe(debounceTime(400))
             .subscribe((val) => this.processSourceChange(val));
+
+        this._coordsSub = this._displayService
+            .coordsInfoAdded()
+            .pipe(debounceTime(400))
+            .subscribe((val) => this.addCoordinatesInfo(val));
 
         this._fileSub = this._uploadService
             .getUpload$()
@@ -138,6 +145,22 @@ export class SourceFileTextareaComponent implements OnDestroy {
 
         this._displayService.registerRun(result);
         this.textareaFc.setValue(newSource);
+    }
+
+    private addCoordinatesInfo(coordinatesInfo: CoordinatesInfo): void {
+        if (coordinatesInfo.transitionName !== '') {
+            const currentValue = this.textareaFc.value;
+            const coordsString =
+                coordinatesInfo.transitionName +
+                ' [' +
+                coordinatesInfo.coordinates.x +
+                ',' +
+                +coordinatesInfo.coordinates.y +
+                ']';
+            const replacePattern = new RegExp(coordinatesInfo.transitionName);
+            const newValue = currentValue.replace(replacePattern, coordsString);
+            this.textareaFc.setValue(newValue, { emitEvent: false });
+        }
     }
 
     private updateShownRun(run: Run, emitEvent = false): void {

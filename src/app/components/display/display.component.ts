@@ -21,7 +21,6 @@ export class DisplayComponent implements OnDestroy {
     private _globalChanges: Coordinates = { x: 0, y: 0 };
     private _localChanges: Coordinates = { x: 0, y: 0 };
     private _movedChildElement?: HTMLElement;
-    private _overlappedChildElement?: HTMLElement;
 
     constructor(
         private _layoutService: LayoutService,
@@ -167,7 +166,7 @@ export class DisplayComponent implements OnDestroy {
                 _this.moveDraggable(element);
             }
         };
-        element.onmouseleave = function (event) {
+        element.onmouseleave = function () {
             _this._childElementInFocus = false;
         };
         element.onmouseup = function (event) {
@@ -180,24 +179,29 @@ export class DisplayComponent implements OnDestroy {
         };
     }
 
-    private moveDraggable(e: HTMLElement) {
+    private moveDraggable(movedElement: HTMLElement) {
         const y = this._localChanges.y;
-        const attributePraefix = this.getAttributePraefix(e);
+        const attributePraefix = this.getAttributePraefix(movedElement);
         const yAttribute = attributePraefix + 'y';
         const xAttribute = attributePraefix + 'x';
-        const currentY = parseInt(e.getAttribute(yAttribute) ?? '0');
-        const newY = +parseInt(e.getAttribute(yAttribute) ?? '0') + +y;
-        const currentX = parseInt(e.getAttribute(xAttribute) ?? '0');
-        const originalY = parseInt(e.getAttribute('original-y') ?? '0');
+        const currentY = parseInt(movedElement.getAttribute(yAttribute) ?? '0');
+        const newY =
+            +parseInt(movedElement.getAttribute(yAttribute) ?? '0') + +y;
+        const currentX = parseInt(movedElement.getAttribute(xAttribute) ?? '0');
+        const originalY = parseInt(
+            movedElement.getAttribute('original-y') ?? '0'
+        );
         if (originalY === 0) {
-            e.setAttribute('original-y', `${currentY}`);
+            movedElement.setAttribute('original-y', `${currentY}`);
         }
 
-        const passedElement = this.checkForPassedElement(e) as HTMLElement;
+        const passedElement = this.checkForPassedElement(
+            movedElement
+        ) as HTMLElement;
         if (passedElement !== null) {
-            this.handlePassedElement(e, passedElement);
+            this.handlePassedElement(movedElement, passedElement);
         } else {
-            this.moveElement(e, newY, currentY, currentX);
+            this.moveElement(movedElement, newY, currentY, currentX);
         }
     }
 
@@ -222,39 +226,67 @@ export class DisplayComponent implements OnDestroy {
     ) {
         const nodeTypeOfMovingElement = movingElement.nodeName;
         const nodeTypeOfPassedElement = passedElement.nodeName;
-        const newYPassed =
-            parseInt(movingElement.getAttribute('original-y') ?? '0') + 25;
-        let newYMoving = parseInt(passedElement.getAttribute('cy') ?? '0') - 25;
-        let currentXMoving =
-            parseInt(movingElement.getAttribute('cx') ?? '0') - 25;
-        let currentXPassed = parseInt(passedElement.getAttribute('cx') ?? '0');
-        let currentYMoving =
-            parseInt(movingElement.getAttribute('cy') ?? '0') - 25;
-        let currentYPassed = parseInt(passedElement.getAttribute('cy') ?? '0');
-
+        let currentYPassed;
+        let currentXPassed;
+        let currentYMoving;
+        let currentXMoving;
+        let newYMoving;
+        let newYPassed;
         if (nodeTypeOfPassedElement === 'rect') {
             currentXPassed = parseInt(passedElement.getAttribute('x') ?? '0');
-
-            console.log(currentXPassed);
-            currentYPassed = parseInt(movingElement.getAttribute('y') ?? '0');
-            newYMoving = parseInt(passedElement.getAttribute('y') ?? '0') + 25;
+            currentYPassed = parseInt(passedElement.getAttribute('y') ?? '0');
+        } else {
+            currentXPassed = parseInt(passedElement.getAttribute('cx') ?? '0');
+            currentYPassed = parseInt(passedElement.getAttribute('cy') ?? '0');
         }
         if (nodeTypeOfMovingElement === 'rect') {
             currentXMoving = parseInt(movingElement.getAttribute('x') ?? '0');
             currentYMoving = parseInt(movingElement.getAttribute('y') ?? '0');
+            if (nodeTypeOfPassedElement === 'circle') {
+                newYMoving =
+                    parseInt(passedElement.getAttribute('cy') ?? '0') - 25;
+                newYPassed =
+                    parseInt(movingElement.getAttribute('original-y') ?? '0') +
+                    25;
+            } else {
+                newYMoving = parseInt(passedElement.getAttribute('y') ?? '0');
+                newYPassed = parseInt(
+                    movingElement.getAttribute('original-y') ?? '0'
+                );
+            }
+        } else {
+            currentXMoving = parseInt(movingElement.getAttribute('cx') ?? '0');
+            currentYMoving = parseInt(movingElement.getAttribute('xy') ?? '0');
+            if (nodeTypeOfPassedElement === 'circle') {
+                newYMoving = parseInt(passedElement.getAttribute('cy') ?? '0');
+                newYPassed = parseInt(
+                    movingElement.getAttribute('original-y') ?? '0'
+                );
+            } else {
+                newYMoving =
+                    parseInt(passedElement.getAttribute('y') ?? '0') + 25;
+                newYPassed =
+                    parseInt(movingElement.getAttribute('original-y') ?? '0') -
+                    25;
+            }
         }
-        this.moveElement(
-            movingElement,
-            newYMoving,
-            currentYMoving,
-            currentXMoving
-        );
+
         this.moveElement(
             passedElement,
             newYPassed,
             currentYPassed,
             currentXPassed
         );
+        this.moveElement(
+            movingElement,
+            newYMoving,
+            currentYMoving,
+            currentXMoving
+        );
+        this.persistCoords(movingElement);
+        this.persistCoords(passedElement);
+        movingElement.setAttribute('original-y', `${newYMoving}`);
+        passedElement.setAttribute('original-y', `${newYPassed}`);
         this._childElementInFocus = false;
         this._movedChildElement = undefined;
         this._mouseMove = false;
@@ -265,21 +297,36 @@ export class DisplayComponent implements OnDestroy {
     ): HTMLElement | null {
         let relevantY = 0;
         let relevantX = 0;
+        let relevantXRect = 0;
         let circleSelector;
         let rectSelector;
         if (movingElement.nodeName === 'circle') {
-            relevantX = parseInt(movingElement.getAttribute('cx') ?? '0') + -25;
+            relevantX = parseInt(movingElement.getAttribute('cx') ?? '0');
+            relevantXRect =
+                parseInt(movingElement.getAttribute('cx') ?? '0') + -25;
             relevantY = parseInt(movingElement.getAttribute('cy') ?? '0');
             const relevantYRect1 = relevantY + 25;
             const relevantYRect2 = relevantY - 25;
+            const relevantYCircle1 = relevantY - 1;
+            const relevantYCircle2 = relevantY + 1;
             rectSelector =
                 'rect[y="' +
                 relevantYRect1 +
                 '"][x="' +
-                relevantX +
+                relevantXRect +
                 '"], rect[y="' +
                 relevantYRect2 +
                 '"][x="' +
+                relevantXRect +
+                '"]';
+            circleSelector =
+                'circle[cy="' +
+                relevantYCircle1 +
+                '"][cx="' +
+                relevantX +
+                '"], circle[cy="' +
+                relevantYCircle2 +
+                '"][cx="' +
                 relevantX +
                 '"]';
         }
@@ -336,19 +383,29 @@ export class DisplayComponent implements OnDestroy {
     }
 
     private moveInfoElement(currentX: number, currentY: number, newY: number) {
-        const currentXForInfolement = +currentX + +25;
-        const currentYInfolement = +currentY + 75;
         const newYInfolement = newY + 75;
+        const infoElement = this.getInfoElement(currentX, currentY);
+        if (infoElement !== null) {
+            infoElement.setAttribute('y', `${newYInfolement}`);
+        }
+    }
+
+    /**
+     *
+     * @param x
+     * @param y
+     * @private
+     */
+    private getInfoElement(x: number, y: number): HTMLElement {
+        const currentXForInfolement = +x + +25;
+        const currentYInfolement = +y + 75;
         const selector =
             'text[y="' +
             currentYInfolement +
             '"][x="' +
             currentXForInfolement +
             '"]';
-        const infoElement = document.querySelector(selector) as HTMLElement;
-        if (infoElement !== null) {
-            infoElement.setAttribute('y', `${newYInfolement}`);
-        }
+        return document.querySelector(selector) as HTMLElement;
     }
 
     private moveLines(
@@ -397,6 +454,28 @@ export class DisplayComponent implements OnDestroy {
         }
     }
 
+    persistCoords(element: HTMLElement): void {
+        if (element.nodeName === 'rect') {
+            const currentY = parseInt(element.getAttribute('y') ?? '0');
+            const originalY = parseInt(
+                element.getAttribute('original-y') ?? '0'
+            );
+            const x = parseInt(element.getAttribute('x') ?? '0');
+            if (currentY !== originalY) {
+                const infoText =
+                    this.getInfoElement(x, currentY).textContent ?? '';
+                this._displayService.setCoordsInfo({
+                    transitionName: infoText,
+                    coordinates: {
+                        x: x,
+                        y: currentY,
+                    },
+                });
+                const observable = this._displayService.coordsInfoAdded();
+            }
+        }
+    }
+
     private initMouseDownForDraggable(event: MouseEvent) {
         this._childElementInFocus = true;
         this._globalChanges = {
@@ -416,6 +495,11 @@ export class DisplayComponent implements OnDestroy {
         };
     }
 }
+
+export type CoordinatesInfo = {
+    transitionName: string;
+    coordinates: Coordinates;
+};
 
 export type Coordinates = {
     x: number;
