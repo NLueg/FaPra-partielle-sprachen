@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 
-import { DownloadService } from './services/download/download.service';
 import { UploadService } from './services/upload/upload.service';
 
 @Component({
@@ -9,10 +8,7 @@ import { UploadService } from './services/upload/upload.service';
     styleUrls: ['./app.component.scss'],
 })
 export class AppComponent {
-    constructor(
-        private _uploadService: UploadService,
-        private _downloadService: DownloadService
-    ) {}
+    constructor(private _uploadService: UploadService) {}
 
     public openFileSelector(): void {
         this._uploadService.openFileSelector();
