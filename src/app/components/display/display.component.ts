@@ -53,4 +53,9 @@ export class DisplayComponent implements OnDestroy {
             drawingArea.removeChild(drawingArea.lastChild as ChildNode);
         }
     }
+    public resetDrawing(): void {
+        this._sub = this._displayService.currentRun$
+            .pipe(map((currentRun) => this._layoutService.layout(currentRun)))
+            .subscribe((modifiedRun) => this.draw(modifiedRun));
+    }
 }

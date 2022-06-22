@@ -23,11 +23,4 @@ export class AppComponent {
             this._uploadService.uploadFiles(event.dataTransfer.files);
         }
     }
-
-    public downloadRuns(): void {
-        this._downloadService.downloadRuns();
-    }
-    public downloadCurrentRun(): void {
-        this._downloadService.downloadCurrentRun();
-    }
 }

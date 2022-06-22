@@ -17,7 +17,7 @@ export class DisplayMergedRunComponent implements OnDestroy {
     private _sub: Subscription;
 
     constructor(
-        mergeService: MergeService,
+        private mergeService: MergeService,
         private layoutService: LayoutService,
         private svgService: SvgService
     ) {
@@ -59,5 +59,17 @@ export class DisplayMergedRunComponent implements OnDestroy {
         while (drawingArea.childElementCount > 1 /* keep arrowhead marker */) {
             drawingArea.removeChild(drawingArea.lastChild as ChildNode);
         }
+    }
+
+    public resetDrawing(): void {
+        this._sub = this.mergeService
+            .getMergedRuns$()
+            .pipe(
+                map((currentRuns) =>
+                    currentRuns.map((run) => this.layoutService.layout(run))
+                ),
+                tap(() => this.clearDrawingArea())
+            )
+            .subscribe((modifiedRuns) => this.draw(modifiedRuns));
     }
 }
