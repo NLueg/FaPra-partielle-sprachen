@@ -9,6 +9,9 @@
     <mat-tab-group>
         <mat-tab label="Separate Runs">
             <app-display class="padding full-size"></app-display>
+            <button (click)="emitEventToChild()" class="reset-button">
+                Reset
+            </button>
         </mat-tab>
         <mat-tab label="Merged Runs">
             <app-display-merged-run
@@ -25,7 +28,9 @@
             (dropAction)="dropFiles($event)"
         ></app-template-button>
 
-        <app-source-file-textarea></app-source-file-textarea>
+        <app-source-file-textarea
+            [events]="eventsSubject.asObservable()"
+        ></app-source-file-textarea>
 
         <app-download></app-download>
     </div>

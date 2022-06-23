@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, Input, OnDestroy } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import {
     debounceTime,
@@ -24,6 +24,8 @@ type Valid = 'error' | 'warn' | 'success';
     styleUrls: ['./source-file-textarea.component.scss'],
 })
 export class SourceFileTextareaComponent implements OnDestroy {
+    private eventsSubscription: Subscription | undefined;
+    @Input() events: Observable<void> | undefined;
     private _sub: Subscription;
     private _fileSub: Subscription;
     private _coordsSub: Subscription;
@@ -82,11 +84,17 @@ export class SourceFileTextareaComponent implements OnDestroy {
         this.textareaFc.setValue(exampleContent);
     }
 
+    ngOnInit(): void {
+        this.eventsSubscription = this.events?.subscribe(() =>
+            this.removeCoordinates()
+        );
+    }
+
     ngOnDestroy(): void {
+        this.eventsSubscription?.unsubscribe();
         this._sub.unsubscribe();
         this._fileSub.unsubscribe();
     }
-
     nextRun(): void {
         const run = this._displayService.setNextRun();
         this.updateShownRun(run);
@@ -166,6 +174,22 @@ export class SourceFileTextareaComponent implements OnDestroy {
             const newValue = currentValue.replace(replacePattern, coordsString);
             this.textareaFc.setValue(newValue, { emitEvent: false });
         }
+    }
+
+    public removeCoordinates(): void {
+        const contentLines = this.textareaFc.value.split('\n');
+        let newText = '';
+        let first = true;
+        for (const line of contentLines) {
+            if (first) {
+                newText = newText + line.split('[')[0];
+                first = false;
+            } else {
+                newText = newText + '\n' + line.split('[')[0];
+            }
+        }
+        this.textareaFc.setValue(newText);
+        this.processSourceChange(newText);
     }
 
     private updateShownRun(run: Run, emitEvent = false): void {
