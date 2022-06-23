@@ -14,6 +14,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ToastrModule } from 'ngx-toastr';
 
 import { AppComponent } from './app.component';
+import { CanvasComponent } from './components/canvas/canvas.component';
 import { DisplayComponent } from './components/display/display.component';
 import { DisplayMergedRunComponent } from './components/display-merged-run/display-merged-run.component';
 import { DownloadComponent } from './components/download/download.component';
@@ -30,6 +31,7 @@ import { TemplateButtonComponent } from './components/template-button/template-b
         SourceFileTextareaComponent,
         DisplayMergedRunComponent,
         DownloadComponent,
+        CanvasComponent,
     ],
     imports: [
         BrowserModule,

@@ -14,7 +14,7 @@ import { DisplayService } from '../../services/display.service';
 import { ParserService } from '../../services/parser/parser.service';
 import { exampleContent } from '../../services/upload/example-file';
 import { UploadService } from '../../services/upload/upload.service';
-import { CoordinatesInfo } from '../display/display.component';
+import { CoordinatesInfo } from '../canvas/canvas.component';
 
 type Valid = 'error' | 'warn' | 'success';
 
