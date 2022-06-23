@@ -151,13 +151,18 @@ export class SourceFileTextareaComponent implements OnDestroy {
         if (coordinatesInfo.transitionName !== '') {
             const currentValue = this.textareaFc.value;
             const coordsString =
+                '\n' +
                 coordinatesInfo.transitionName +
                 ' [' +
                 coordinatesInfo.coordinates.x +
                 ',' +
                 +coordinatesInfo.coordinates.y +
-                ']';
-            const replacePattern = new RegExp(coordinatesInfo.transitionName);
+                ']\n';
+            const patternString =
+                '\\n' +
+                coordinatesInfo.transitionName +
+                '( \\[\\d+,\\d+\\])?\\n';
+            const replacePattern = new RegExp(patternString, 'g');
             const newValue = currentValue.replace(replacePattern, coordsString);
             this.textareaFc.setValue(newValue, { emitEvent: false });
         }

@@ -66,48 +66,47 @@ export class DisplayComponent implements OnDestroy {
     }
 
     private registerCanvasMouseHandler(drawingArea: SVGElement) {
-        const _this = this;
-        drawingArea.onmousedown = function (e) {
-            _this._mouseMove = true;
-            _this._globalChanges = {
+        drawingArea.onmousedown = (e) => {
+            this._mouseMove = true;
+            this._globalChanges = {
                 x: e.offsetX,
                 y: e.offsetY,
             };
         };
-        drawingArea.onmousemove = function (e) {
-            _this.updateChangeState(e);
+        drawingArea.onmousemove = (e) => {
+            this.updateChangeState(e);
 
-            if (_this._movedChildElement && !_this._childElementInFocus) {
-                _this.moveDraggable(_this._movedChildElement);
+            if (this._movedChildElement && !this._childElementInFocus) {
+                this.moveDraggable(this._movedChildElement);
             }
             if (
-                _this._mouseMove &&
-                !_this._childElementInFocus &&
-                !_this._movedChildElement
+                this._mouseMove &&
+                !this._childElementInFocus &&
+                !this._movedChildElement
             ) {
-                if (!_this._globalChangesProcessed) {
-                    _this._globalChangesProcessed = true;
+                if (!this._globalChangesProcessed) {
+                    this._globalChangesProcessed = true;
                 }
-                _this.moveRun(drawingArea);
+                this.moveRun(drawingArea);
             }
         };
-        drawingArea.onmouseup = function () {
-            _this._globalChangesProcessed = false;
-            _this._childElementInFocus = false;
-            _this._mouseMove = false;
-            if (_this._movedChildElement !== undefined) {
-                _this.resetDraggable(_this._movedChildElement);
+        drawingArea.onmouseup = () => {
+            this._globalChangesProcessed = false;
+            this._childElementInFocus = false;
+            this._mouseMove = false;
+            if (this._movedChildElement !== undefined) {
+                this.resetDraggable(this._movedChildElement);
             }
-            _this._movedChildElement = undefined;
+            this._movedChildElement = undefined;
         };
-        drawingArea.onmouseleave = function () {
-            _this._globalChangesProcessed = false;
-            _this._mouseMove = false;
-            if (_this._movedChildElement !== undefined) {
-                _this.resetDraggable(_this._movedChildElement);
+        drawingArea.onmouseleave = () => {
+            this._globalChangesProcessed = false;
+            this._mouseMove = false;
+            if (this._movedChildElement !== undefined) {
+                this.resetDraggable(this._movedChildElement);
             }
-            _this._childElementInFocus = false;
-            _this._movedChildElement = undefined;
+            this._childElementInFocus = false;
+            this._movedChildElement = undefined;
         };
     }
 
@@ -143,39 +142,37 @@ export class DisplayComponent implements OnDestroy {
     }
 
     private registerSingleMouseHandler(drawingArea: SVGElement) {
-        const _this = this;
         for (let i = 0; i < drawingArea.children.length; i++) {
             const e = drawingArea.children[i] as HTMLElement;
             if (e.nodeName === 'rect' || e.nodeName === 'circle') {
-                _this.registerMouseHandlerForDraggable(e);
+                this.registerMouseHandlerForDraggable(e);
             }
         }
     }
 
     private registerMouseHandlerForDraggable(element: HTMLElement) {
-        const _this = this;
-        element.onmousedown = function (event) {
-            _this.initMouseDownForDraggable(event);
+        element.onmousedown = (e) => {
+            this.initMouseDownForDraggable(e);
         };
-        element.onmousemove = function (event) {
-            if (_this._childElementInFocus) {
-                if (!_this._globalChangesProcessed) {
-                    _this._globalChangesProcessed = true;
+        element.onmousemove = (e) => {
+            if (this._childElementInFocus) {
+                if (!this._globalChangesProcessed) {
+                    this._globalChangesProcessed = true;
                 }
-                _this.updateChangeState(event);
-                _this.moveDraggable(element);
+                this.updateChangeState(e);
+                this.moveDraggable(element);
             }
         };
-        element.onmouseleave = function () {
-            _this._childElementInFocus = false;
+        element.onmouseleave = () => {
+            this._childElementInFocus = false;
         };
-        element.onmouseup = function (event) {
-            if (_this._childElementInFocus) {
-                _this.resetDraggable(element);
+        element.onmouseup = (e) => {
+            if (this._childElementInFocus) {
+                this.resetDraggable(element);
             }
-            _this._childElementInFocus = false;
-            _this._movedChildElement = undefined;
-            _this.updateChangeState(event);
+            this._childElementInFocus = false;
+            this._movedChildElement = undefined;
+            this.updateChangeState(e);
         };
     }
 
@@ -256,12 +253,16 @@ export class DisplayComponent implements OnDestroy {
             }
         } else {
             currentXMoving = parseInt(movingElement.getAttribute('cx') ?? '0');
-            currentYMoving = parseInt(movingElement.getAttribute('xy') ?? '0');
+            currentYMoving = parseInt(movingElement.getAttribute('cy') ?? '0');
             if (nodeTypeOfPassedElement === 'circle') {
+                let offset = 2;
+                if (currentYMoving > currentYPassed) {
+                    offset = -2;
+                }
+                newYPassed =
+                    parseInt(movingElement.getAttribute('original-y') ?? '0') +
+                    offset;
                 newYMoving = parseInt(passedElement.getAttribute('cy') ?? '0');
-                newYPassed = parseInt(
-                    movingElement.getAttribute('original-y') ?? '0'
-                );
             } else {
                 newYMoving =
                     parseInt(passedElement.getAttribute('y') ?? '0') + 25;
@@ -283,8 +284,8 @@ export class DisplayComponent implements OnDestroy {
             currentYMoving,
             currentXMoving
         );
-        this.persistCoords(movingElement);
         this.persistCoords(passedElement);
+        this.persistCoords(movingElement);
         movingElement.setAttribute('original-y', `${newYMoving}`);
         passedElement.setAttribute('original-y', `${newYPassed}`);
         this._childElementInFocus = false;
@@ -307,8 +308,8 @@ export class DisplayComponent implements OnDestroy {
             relevantY = parseInt(movingElement.getAttribute('cy') ?? '0');
             const relevantYRect1 = relevantY + 25;
             const relevantYRect2 = relevantY - 25;
-            const relevantYCircle1 = relevantY - 1;
-            const relevantYCircle2 = relevantY + 1;
+            const relevantYCircle1 = relevantY - 2;
+            const relevantYCircle2 = relevantY + 2;
             rectSelector =
                 'rect[y="' +
                 relevantYRect1 +
@@ -334,9 +335,9 @@ export class DisplayComponent implements OnDestroy {
             relevantX = parseInt(movingElement.getAttribute('x') ?? '0');
             const relevantXCircle = relevantX + 25;
             relevantY = parseInt(movingElement.getAttribute('y') ?? '0');
-            const relevantYCircle1 = relevantY + 1;
-            const relevantYRect2 = relevantY - 1;
-            const relevantYCircle2 = relevantY + 24;
+            const relevantYCircle1 = relevantY + 2;
+            const relevantYRect2 = relevantY - 2;
+            const relevantYCircle2 = relevantY + 23;
             circleSelector =
                 'circle[cy="' +
                 relevantYCircle1 +
@@ -405,7 +406,9 @@ export class DisplayComponent implements OnDestroy {
             '"][x="' +
             currentXForInfolement +
             '"]';
-        return document.querySelector(selector) as HTMLElement;
+        return this.drawingArea?.nativeElement.querySelector(
+            selector
+        ) as HTMLElement;
     }
 
     private moveLines(

@@ -21,6 +21,7 @@ describe('SourceFileTextareaComponent', () => {
         isCurrentRunEmpty$: () => of(undefined),
         getCurrentRunIndex$: () => of(undefined),
         getRunCount$: () => of(undefined),
+        coordsInfoAdded: () => of(undefined),
     };
 
     beforeEach(async () => {
