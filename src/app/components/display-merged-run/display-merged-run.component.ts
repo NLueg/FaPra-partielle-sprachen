@@ -1,5 +1,5 @@
-import { Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
-import { map, Subscription, tap } from 'rxjs';
+import { Component } from '@angular/core';
+import { map, Observable, tap } from 'rxjs';
 
 import { Run } from '../../classes/diagram/run';
 import { LayoutService } from '../../services/layout.service';
@@ -11,53 +11,44 @@ import { MergeService } from './merge.service';
     templateUrl: './display-merged-run.component.html',
     styleUrls: ['./display-merged-run.component.scss'],
 })
-export class DisplayMergedRunComponent implements OnDestroy {
-    @ViewChild('drawingArea') drawingArea: ElementRef<SVGElement> | undefined;
-
-    private _sub: Subscription;
+export class DisplayMergedRunComponent {
+    svgElements$: Observable<{ list: SVGElement[]; height: number }>;
 
     constructor(
         mergeService: MergeService,
         private layoutService: LayoutService,
         private svgService: SvgService
     ) {
-        this._sub = mergeService
-            .getMergedRuns$()
-            .pipe(
-                map((currentRuns) =>
-                    currentRuns.map((run) => this.layoutService.layout(run))
+        this.svgElements$ = mergeService.getMergedRuns$().pipe(
+            tap((runs) => console.log('Merged runs:', runs)),
+            map((currentRuns) => this.layoutMergedRuns(currentRuns)),
+            map(({ runs, totalDiagrammHeight }) => ({
+                list: runs.flatMap((run) =>
+                    this.svgService.createSvgElements(run)
                 ),
-                tap(() => this.clearDrawingArea())
-            )
-            .subscribe((modifiedRuns) => this.draw(modifiedRuns));
+                height: totalDiagrammHeight,
+            }))
+        );
     }
 
-    ngOnDestroy(): void {
-        this._sub.unsubscribe();
-    }
+    private layoutMergedRuns(currentRuns: Run[]): {
+        runs: Run[];
+        totalDiagrammHeight: number;
+    } {
+        let totalDiagrammHeight = 0;
 
-    private draw(modifiedRuns: Run[]) {
-        if (this.drawingArea === undefined) {
-            console.debug('drawing area not ready yet');
-            return;
-        }
+        const runs = currentRuns.map((currentRun) => {
+            const { run, diagrammHeight } = this.layoutService.layout(
+                currentRun,
+                totalDiagrammHeight
+            );
+            totalDiagrammHeight += diagrammHeight;
+            return run;
+        });
 
-        for (const run of modifiedRuns) {
-            const elements = this.svgService.createSvgElements(run);
-            for (const element of elements) {
-                this.drawingArea.nativeElement.appendChild(element);
-            }
-        }
-    }
-
-    private clearDrawingArea() {
-        const drawingArea = this.drawingArea?.nativeElement;
-        if (drawingArea?.childElementCount === undefined) {
-            return;
-        }
-
-        while (drawingArea.childElementCount > 1 /* keep arrowhead marker */) {
-            drawingArea.removeChild(drawingArea.lastChild as ChildNode);
-        }
+        return {
+            runs,
+            totalDiagrammHeight,
+        };
     }
 }

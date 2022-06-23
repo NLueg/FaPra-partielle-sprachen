@@ -2,7 +2,7 @@ import { Injectable, OnDestroy } from '@angular/core';
 import { BehaviorSubject, map, Observable, switchMap } from 'rxjs';
 
 import { isRunEmpty, Run } from '../classes/diagram/run';
-import { CoordinatesInfo } from '../components/display/display.component';
+import { CoordinatesInfo } from '../components/canvas/canvas.component';
 
 function getEmptyRun(): Run {
     return {

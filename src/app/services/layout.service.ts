@@ -18,15 +18,16 @@ export class LayoutService {
     private static readonly ELEMENT_HEIGHT = 80;
     private static readonly LAYER_WIDTH = 100;
 
-    layout(run: Run): Run {
+    layout(run: Run, positionOffset = 0): { run: Run; diagrammHeight: number } {
         const runClone: Run = clonedeep(run);
+        let diagrammHeight = 0;
 
         //if run hast no cycles use sugiyama layout
         if (!hasCycles(runClone)) {
             const layers: Array<Layer[]> = this.assignLayers(runClone);
-            this.addBreakpoints(layers);
-            this.minimizeCrossing(layers);
-            this.calculatePosition(layers);
+            this.addBreakpoints(runClone, layers);
+            this.minimizeCrossing(runClone, layers);
+            diagrammHeight = this.calculatePosition(layers, positionOffset);
         } else {
             runClone.elements.forEach((el) => {
                 el.x =
@@ -37,7 +38,8 @@ export class LayoutService {
                     LayoutService.OFFSET;
             });
         }
-        return runClone;
+
+        return { run: runClone, diagrammHeight };
     }
 
     /**
@@ -54,14 +56,37 @@ export class LayoutService {
 
         while (elements.length > 0) {
             const layer = new Array<Element>();
-            const elementsWithIncomingArcs = arcs.map((a) => a.targetEl);
+            const elementsWithIncomingArcs = arcs
+                .filter((a) => elements.find((e) => e.label == a.source))
+                .map((a) =>
+                    elements.find((element) => element.label === a.target)
+                );
             //filter all elements without incoming arcs => add them to the current layer and remove their outgoing arcs
             elements
-                .filter((e) => elementsWithIncomingArcs.indexOf(e) === -1)
-                .forEach((e) => {
-                    layer.push(e);
-                    elements.splice(elements.indexOf(e), 1);
-                    arcs = arcs.filter((a) => e.outgoingArcs.indexOf(a) === -1);
+                .filter(
+                    (element) =>
+                        elementsWithIncomingArcs.findIndex(
+                            (elementWithIncomingArcs) =>
+                                elementWithIncomingArcs?.label === element.label
+                        ) === -1
+                )
+                .forEach((element) => {
+                    layer.push(element);
+
+                    const indexOfElement = elements.findIndex(
+                        (innerElement) => innerElement.label === element.label
+                    );
+                    elements.splice(indexOfElement, 1);
+
+                    arcs = arcs.filter((a) => {
+                        const indexInOutgoingArcs =
+                            element.outgoingArcs.findIndex(
+                                (arc) =>
+                                    arc.source === a.source &&
+                                    arc.target === a.target
+                            );
+                        return indexInOutgoingArcs === -1;
+                    });
                 });
             layers.push(layer);
         }
@@ -75,9 +100,10 @@ export class LayoutService {
      *   3. Loop through all outgoing arcs of the element
      *    4. check distance/layers between arc source and target
      *     5. add breakpoint to arc for each enclosed layer
+     * @param currentRun run to parse
      * @param layers layers with elements and breakpoints
      */
-    private addBreakpoints(layers: Array<Layer[]>): void {
+    private addBreakpoints(currentRun: Run, layers: Array<Layer[]>): void {
         for (let i = 0; i < layers.length - 1; i++) {
             layers[i]
                 .flatMap((element) =>
@@ -87,7 +113,9 @@ export class LayoutService {
                 )
                 .forEach((a: Arc) => {
                     //arc loop
-                    const target = a.targetEl;
+                    const target = currentRun.elements.find(
+                        (element) => element.label === a.target
+                    );
                     //find layer of target
                     const targetLayerIndex = layers.findIndex(
                         (l) => l.findIndex((e) => e === target) >= 0
@@ -110,12 +138,13 @@ export class LayoutService {
      * Rearrange order of elements/breakpoints per layer to minimize crossing of lines
      * For every layer check to optimal ordering with the lowest crossing of incoming and outgoing lines
      * Note: This will not always find the optimal order throughout all layers!
+     * @param currentRun run to parse
      * @param layers layers with elements and breakpoints
      */
-    private minimizeCrossing(layers: Array<Layer[]>): void {
+    private minimizeCrossing(currentRun: Run, layers: Array<Layer[]>): void {
         layers.forEach((layer, index) => {
             const layerTmp = new Array<Layer>();
-            this.reorderLayer(layers, layer, index, 0, layerTmp);
+            this.reorderLayer(currentRun, layers, layer, index, 0, layerTmp);
             layer.splice(0, layer.length);
             layer.push(...layerTmp);
         });
@@ -123,6 +152,7 @@ export class LayoutService {
 
     /**
      * Find the optimal order for a single layer
+     * @param currentRun run to parse
      * @param layers all layers
      * @param layer current layer
      * @param layerIndex index of current layer
@@ -131,17 +161,22 @@ export class LayoutService {
      * @returns number of crossings
      */
     private reorderLayer(
+        currentRun: Run,
         layers: Array<Layer[]>,
         layer: Layer[],
         layerIndex: number,
         currentLayerPositon: number,
         reorderedLayer: Layer[]
     ): number {
-        let min = this.countCrossings(layers, layerIndex);
+        let min = this.countCrossings(currentRun, layers, layerIndex);
         let minLayer = layer;
 
         if (currentLayerPositon == layer.length - 1) {
-            const crossings = this.countCrossings(layers, layerIndex);
+            const crossings = this.countCrossings(
+                currentRun,
+                layers,
+                layerIndex
+            );
             if (crossings < min) {
                 min = crossings;
                 minLayer = [...layer];
@@ -155,6 +190,7 @@ export class LayoutService {
 
                 const layerTmp = new Array<Layer>();
                 const crossings = this.reorderLayer(
+                    currentRun,
                     layers,
                     layer,
                     layerIndex,
@@ -177,11 +213,16 @@ export class LayoutService {
 
     /**
      * Identifies the number of crossing between the actual and previous/next layer
+     * @param currentRun run to parse
      * @param layers all layers
      * @param layerIndex index of the current layer
      * @returns number of crossings
      */
-    private countCrossings(layers: Array<Layer[]>, layerIndex: number): number {
+    private countCrossings(
+        currentRun: Run,
+        layers: Array<Layer[]>,
+        layerIndex: number
+    ): number {
         const connections: ElementArrows = {
             incoming: [],
             outgoing: [],
@@ -202,6 +243,7 @@ export class LayoutService {
                 );
             } else {
                 this.getElementArrowsFromBreakpoint(
+                    currentRun,
                     connections,
                     e as Breakpoint,
                     layerInfo
@@ -216,6 +258,7 @@ export class LayoutService {
     }
 
     private getElementArrowsFromBreakpoint(
+        currentRun: Run,
         connections: ElementArrows,
         breakpoint: Breakpoint,
         layerInfo: LayerInfoParameter
@@ -229,17 +272,23 @@ export class LayoutService {
         const layerIndex = layerInfo.layerIndex;
         const breakpointIndex = breakpoint.arc.breakpoints.indexOf(breakpoint);
 
-        if (breakpointIndex == 0 && breakpoint.arc.sourceEl) {
-            prev = breakpoint.arc.sourceEl;
+        const source = currentRun.elements.find(
+            (element) => element.label === breakpoint.arc.source
+        );
+        if (breakpointIndex == 0 && source) {
+            prev = source;
         } else if (breakpointIndex > 0) {
             prev = breakpoint.arc.breakpoints[breakpointIndex - 1];
         }
 
+        const target = currentRun.elements.find(
+            (element) => element.label === breakpoint.arc.target
+        );
         if (
             breakpointIndex == breakpoint.arc.breakpoints.length - 1 &&
-            breakpoint.arc.targetEl
+            target
         ) {
-            next = breakpoint.arc.targetEl;
+            next = target;
         } else if (breakpoint.arc.breakpoints.length > breakpointIndex + 1) {
             next = breakpoint.arc.breakpoints[breakpointIndex + 1];
         }
@@ -279,8 +328,10 @@ export class LayoutService {
                 sourcePos = layers[layerIndex - 1].indexOf(
                     arc.breakpoints[arc.breakpoints.length - 1]
                 );
-            } else if (arc.sourceEl) {
-                sourcePos = layers[layerIndex - 1].indexOf(arc.sourceEl);
+            } else {
+                sourcePos = layers[layerIndex - 1].findIndex(
+                    (layer) => 'label' in layer && layer.label === arc.source
+                );
             }
 
             if (sourcePos)
@@ -310,8 +361,10 @@ export class LayoutService {
             let targetPos: number | undefined;
             if (arc.breakpoints.length > 0) {
                 targetPos = layers[layerIndex + 1].indexOf(arc.breakpoints[0]);
-            } else if (arc.targetEl) {
-                targetPos = layers[layerIndex + 1].indexOf(arc.targetEl);
+            } else {
+                targetPos = layers[layerIndex + 1].findIndex(
+                    (layer) => 'label' in layer && layer.label === arc.target
+                );
             }
 
             if (targetPos)
@@ -348,8 +401,12 @@ export class LayoutService {
     /**
      * Sets the position of elements and breakpoints based on their layer and location in the layer
      * @param layers layers with elements and breakpoints
+     * @param verticalOffset vertical offset for the current diagramm
      */
-    private calculatePosition(layers: Array<Layer[]>): void {
+    private calculatePosition(
+        layers: Array<Layer[]>,
+        verticalOffset: number
+    ): number {
         let height = LayoutService.MIN_HEIGHT;
 
         //calculate the diagram height based on the largest layer
@@ -369,9 +426,14 @@ export class LayoutService {
 
             layer.forEach((el, idx) => {
                 el.x = offsetX;
-                el.y = offsetY * (idx + 1) + idx * LayoutService.ELEMENT_HEIGHT;
+                el.y =
+                    offsetY * (idx + 1) +
+                    idx * LayoutService.ELEMENT_HEIGHT +
+                    verticalOffset;
             });
         });
+
+        return height;
     }
 }
 

@@ -1,16 +1,7 @@
-<svg #drawingArea class="canvas">
-    <defs>
-        <marker
-            id="arrowhead"
-            viewBox="0 0 10 10"
-            refX="13.5"
-            refY="4.5"
-            markerUnits="strokeWidth"
-            markerWidth="15"
-            markerHeight="9"
-            orient="auto"
-        >
-            <polygon points="0 0, 15 4.5, 0 9" fill="#000000" />
-        </marker>
-    </defs>
-</svg>
+<div class="svg-scroller">
+    <app-canvas
+        *ngIf="svgElements$ | async as svgElements"
+        [svgElements]="svgElements.list"
+        [canvasHeight]="svgElements.height"
+    ></app-canvas>
+</div>

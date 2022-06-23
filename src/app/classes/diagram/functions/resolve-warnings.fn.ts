@@ -14,9 +14,19 @@ export function resolveWarnings(run: Run): Run {
     });
 
     lines.push('.arcs');
-    run.arcs.forEach((e) => {
-        if (e.sourceEl && e.targetEl) lines.push(e.source + ' ' + e.target);
-    });
+    lines.push(
+        ...run.arcs
+            .filter((arc) => {
+                const source = run.elements.find(
+                    (element) => element.label === arc.source
+                );
+                const target = run.elements.find(
+                    (element) => element.label === arc.target
+                );
+                return source && target;
+            })
+            .map((arc) => arc.source + ' ' + arc.target)
+    );
 
     run.text = lines.join('\n');
     run.warnings = [];
