@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { Subject } from 'rxjs';
 
 import { DownloadService } from './services/download/download.service';
 import { UploadService } from './services/upload/upload.service';
@@ -13,6 +14,11 @@ export class AppComponent {
         private _uploadService: UploadService,
         private _downloadService: DownloadService
     ) {}
+    eventsSubject: Subject<void> = new Subject<void>();
+
+    emitEventToChild(): void {
+        this.eventsSubject.next();
+    }
 
     public openFileSelector(): void {
         this._uploadService.openFileSelector();
