@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 
-import { DisplayService } from './services/display.service';
 import { DownloadService } from './services/download/download.service';
 import { UploadService } from './services/upload/upload.service';
 

@@ -42,3 +42,12 @@ svg text{
         transition: fill-opacity .25s ease-out;
     }
 }
+mat-tab-group {
+    .mat-tab-header {
+        border: 0;
+    }
+
+    .mat-tab-label-container .mat-tab-label {
+        width: 50%;
+    }
+}

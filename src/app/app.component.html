@@ -6,7 +6,16 @@
     <h2>Partial language</h2>
 
     <!--    Main content    -->
-    <app-display class="padding full-size"></app-display>
+    <mat-tab-group>
+        <mat-tab label="Separate Runs">
+            <app-display class="padding full-size"></app-display>
+        </mat-tab>
+        <mat-tab label="Merged Runs">
+            <app-display-merged-run
+                class="padding full-size"
+            ></app-display-merged-run>
+        </mat-tab>
+    </mat-tab-group>
 
     <div fxLayout="row" fxLayoutAlign="space-evenly start">
         <app-template-button
@@ -18,21 +27,8 @@
 
         <app-source-file-textarea></app-source-file-textarea>
 
-        <app-template-button
-            buttonText="Right button"
-            buttonIcon="grade"
-            buttonText="Download Current Run"
-            buttonIcon="download"
-            (buttonAction)="downloadCurrentRun()"
-        ></app-template-button>
-        <app-template-button
-            buttonText="Download All"
-            buttonIcon="download"
-            (buttonAction)="downloadRuns()"
-        ></app-template-button>
+        <app-download></app-download>
     </div>
 
-    <!--  Footer  -->
-    <hr />
     <app-footer></app-footer>
 </div>
