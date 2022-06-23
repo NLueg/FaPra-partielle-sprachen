@@ -185,7 +185,6 @@ export class SourceFileTextareaComponent implements OnDestroy {
         }
         this.textareaFc.setValue(newText);
         this.processSourceChange(newText);
-        console.log(newText);
     }
 
     private updateShownRun(run: Run, emitEvent = false): void {
