@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 
-import { Arc } from '../../classes/diagram/arc';
+import { Arc, Breakpoint } from '../../classes/diagram/arc';
 import { Element } from '../../classes/diagram/element';
 import { Run } from '../../classes/diagram/run';
 import { registerSvg } from './register-svg.fn';
@@ -89,7 +89,7 @@ function createSvgForArc(
                 false
             )
         );
-        //breakpoint -> next breaktpoint
+        //breakpoint -> next breakpoint
         for (let i = 0; i < arc.breakpoints.length - 1; i++) {
             elements.push(
                 createLine(
@@ -111,6 +111,10 @@ function createSvgForArc(
                 true
             )
         );
+        elements.push(createCircle(arc.breakpoints[0]));
+        for (let i = 0; i < arc.breakpoints.length - 1; i++) {
+            elements.push(createCircle(arc.breakpoints[i + 1]));
+        }
     }
 
     return elements;
@@ -133,4 +137,15 @@ function createLine(
     line.setAttribute('y2', `${y2}`);
 
     return line;
+}
+
+function createCircle(breakpoint: Breakpoint): SVGElement {
+    const x = breakpoint.x + 25;
+    const y = breakpoint.y + 25;
+    const circle = createSvgElement('circle');
+    circle.setAttribute('r', `10`);
+    circle.setAttribute('cx', `${x}`);
+    circle.setAttribute('cy', `${y}`);
+    circle.setAttribute('class', `move-helper`);
+    return circle;
 }
