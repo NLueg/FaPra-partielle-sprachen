@@ -11,7 +11,7 @@ export function resolveWarnings(run: Run): Run {
     const lines = ['.type ps'];
     lines.push('.transitions');
     run.elements.forEach((e) => {
-        if(e.x && e.y) lines.push(`${e.label} [${e.x}, ${e.y}]`);
+        if (e.x && e.y) lines.push(`${e.label} [${e.x}, ${e.y}]`);
         else lines.push(e.label);
     });
 
@@ -27,7 +27,9 @@ export function resolveWarnings(run: Run): Run {
                 );
                 return source && target;
             })
-            .map((arc) => arc.source + ' ' + arc.target + getBreakpointInfo(arc))
+            .map(
+                (arc) => arc.source + ' ' + arc.target + getBreakpointInfo(arc)
+            )
     );
 
     run.text = lines.join('\n');
@@ -37,7 +39,7 @@ export function resolveWarnings(run: Run): Run {
 
 function getBreakpointInfo(arc: Arc): string {
     let text = '';
-    if(arc.breakpoints.length > 0) {
+    if (arc.breakpoints.length > 0) {
         text = '';
         arc.breakpoints.forEach((breakpoint) => {
             text += `[${breakpoint.x + 25}, ${breakpoint.y + 25}]`;

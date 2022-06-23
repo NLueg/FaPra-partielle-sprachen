@@ -81,8 +81,8 @@ export class ParserService {
                         break;
                     } else if (trimmedLine !== arcsAttribute) {
                         let label: string;
-                        let posX = 0,
-                            posY = 0;
+                        let posX: number | undefined;
+                        let posY: number | undefined;
                         if (!ParserService.transitionRegex.test(trimmedLine)) {
                             label = trimmedLine.split(' ')[0];
                             run.warnings.push(`Invalid transition definition`);
