@@ -24,7 +24,7 @@ export class DisplayMergedRunComponent {
             map((currentRuns) => this.layoutMergedRuns(currentRuns)),
             map(({ runs, totalDiagrammHeight }) => ({
                 list: runs.flatMap((run) =>
-                    this.svgService.createSvgElements(run)
+                    this.svgService.createSvgElements(run, true)
                 ),
                 height: totalDiagrammHeight,
             }))

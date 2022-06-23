@@ -1,4 +1,4 @@
-import { Component, Input, OnDestroy } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import {
     debounceTime,
@@ -23,7 +23,7 @@ type Valid = 'error' | 'warn' | 'success';
     templateUrl: './source-file-textarea.component.html',
     styleUrls: ['./source-file-textarea.component.scss'],
 })
-export class SourceFileTextareaComponent implements OnDestroy {
+export class SourceFileTextareaComponent implements OnDestroy, OnInit {
     private eventsSubscription: Subscription | undefined;
     @Input() events: Observable<void> | undefined;
     private _sub: Subscription;
@@ -192,7 +192,7 @@ export class SourceFileTextareaComponent implements OnDestroy {
         this.processSourceChange(newText);
     }
 
-    private updateShownRun(run: Run, emitEvent = false): void {
+    private updateShownRun(run: Run, emitEvent = true): void {
         this.textareaFc.setValue(run.text, { emitEvent: emitEvent });
         this.updateValidation(run);
     }
