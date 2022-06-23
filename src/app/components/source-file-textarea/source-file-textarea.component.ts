@@ -172,7 +172,7 @@ export class SourceFileTextareaComponent implements OnDestroy {
                 '( \\[\\d+,\\d+\\])?\\n';
             const replacePattern = new RegExp(patternString, 'g');
             const newValue = currentValue.replace(replacePattern, coordsString);
-            this.textareaFc.setValue(newValue, { emitEvent: false });
+            this.textareaFc.setValue(newValue, { emitEvent: true });
         }
     }
 
