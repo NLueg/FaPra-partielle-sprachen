@@ -15,9 +15,13 @@ const arcsAttribute = '.arcs';
 })
 export class ParserService {
     constructor(private toastr: ToastrService) {}
-    static transitionRegex = /^([^\[ ]+)(\s?\[\d+,\s?\d+\])?$/;
-    static arcRegex = /^([^\[ ]+)\s([^\[ ]+)(\s?\[\d+,\s?\d+\])*$/;
-    static breakpointRegex = /\[\d+,\s?\d+\]/;
+    static transitionRegex = new RegExp(
+        '^([^\\[ ]+)(\\s?\\[\\d+,\\s?\\d+\\])?$'
+    );
+    static arcRegex = new RegExp(
+        '^([^\\[ ]+)\\s([^\\[ ]+)(\\s?\\[\\d+,\\s?\\d+\\])*$'
+    );
+    static breakpointRegex = new RegExp('\\[\\d+,\\s?\\d+\\]');
 
     parse(content: string, errors: Set<string>): Run | null {
         const contentLines = content.split('\n');
