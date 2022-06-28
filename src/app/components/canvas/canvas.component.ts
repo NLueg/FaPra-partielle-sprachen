@@ -6,6 +6,7 @@ import {
     SimpleChanges,
     ViewChild,
 } from '@angular/core';
+import { ColorService } from 'src/app/services/color.service';
 
 import { DisplayService } from '../../services/display.service';
 import { LayoutService } from '../../services/layout.service';
@@ -31,15 +32,18 @@ export class CanvasComponent implements OnChanges {
     private _globalChanges: Coordinates = { x: 0, y: 0 };
     private _localChanges: Coordinates = { x: 0, y: 0 };
     private _movedChildElement?: HTMLElement;
+    highlightColor: string | undefined;
 
     constructor(
         private _layoutService: LayoutService,
         private _svgService: SvgService,
-        private _displayService: DisplayService
+        private _displayService: DisplayService,
+        private _colorService: ColorService
     ) {
         this._mouseMove = false;
         this._childElementInFocus = false;
         this._globalChangesProcessed = false;
+        this.highlightColor = this._colorService.getHighlightColor();
     }
 
     ngOnChanges(changes: SimpleChanges): void {

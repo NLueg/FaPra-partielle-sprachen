@@ -14,10 +14,10 @@ export class AppComponent {
         private _uploadService: UploadService,
         private _downloadService: DownloadService
     ) {}
-    eventsSubject: Subject<void> = new Subject<void>();
+    eventSubject: Subject<void> = new Subject<void>();
 
     emitEventToChild(): void {
-        this.eventsSubject.next();
+        this.eventSubject.next();
     }
 
     public openFileSelector(): void {

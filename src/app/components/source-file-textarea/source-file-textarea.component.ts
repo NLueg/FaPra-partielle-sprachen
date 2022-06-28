@@ -24,11 +24,10 @@ type Valid = 'error' | 'warn' | 'success';
     styleUrls: ['./source-file-textarea.component.scss'],
 })
 export class SourceFileTextareaComponent implements OnDestroy, OnInit {
-    private eventsSubscription: Subscription | undefined;
-    @Input() events: Observable<void> | undefined;
     private _sub: Subscription;
     private _fileSub: Subscription;
     private _coordsSub: Subscription;
+    private _resetEventSubscription!: Subscription;
 
     textareaFc: FormControl;
 
@@ -37,6 +36,8 @@ export class SourceFileTextareaComponent implements OnDestroy, OnInit {
     isCurrentRunEmpty$: Observable<boolean>;
     getCurrentRunIndex$: Observable<number>;
     getRunCount$: Observable<number>;
+    @Input()
+    resetEvent!: Observable<void>;
 
     runValidationStatus: Valid | null = null;
     runHint = '';
@@ -85,13 +86,13 @@ export class SourceFileTextareaComponent implements OnDestroy, OnInit {
     }
 
     ngOnInit(): void {
-        this.eventsSubscription = this.events?.subscribe(() =>
+        this._resetEventSubscription = this.resetEvent.subscribe(() =>
             this.removeCoordinates()
         );
     }
 
     ngOnDestroy(): void {
-        this.eventsSubscription?.unsubscribe();
+        this._resetEventSubscription.unsubscribe();
         this._sub.unsubscribe();
         this._fileSub.unsubscribe();
     }

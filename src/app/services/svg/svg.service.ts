@@ -1,34 +1,39 @@
-import { Injectable } from '@angular/core';
-import { distinctUntilChanged } from 'rxjs';
+import { Injectable, OnInit } from '@angular/core';
+import { distinctUntilChanged, Subscription } from 'rxjs';
 
 import { Arc, Breakpoint } from '../../classes/diagram/arc';
 import { Element } from '../../classes/diagram/element';
 import { Run } from '../../classes/diagram/run';
+import { ColorService } from '../color.service';
 import { DisplayService } from '../display.service';
 import { registerSvg } from './register-svg.fn';
 
-const highlightColor = 'pink';
+let highlightColor: string;
 
 @Injectable({
     providedIn: 'root',
 })
 export class SvgService {
-    constructor(public displayService: DisplayService) {}
+    constructor(
+        public displayService: DisplayService,
+        private _colorService: ColorService
+    ) {
+        highlightColor = this._colorService.getHighlightColor();
+    }
+
     public createSvgElements(run: Run, merge: boolean): Array<SVGElement> {
         const result: Array<SVGElement> = [];
 
         run.elements.forEach((el) => {
             let currentRun = false;
-            this.displayService.currentRun$
-                .pipe(distinctUntilChanged())
-                .subscribe((run) => {
-                    run.elements.forEach((element) => {
-                        if (element.label == el.label) {
-                            currentRun = true;
-                            return;
-                        }
-                    });
+            this.displayService.currentRun$.subscribe((run) => {
+                run.elements.forEach((element) => {
+                    if (element.label == el.label) {
+                        currentRun = true;
+                        return;
+                    }
                 });
+            });
             result.push(...createSvgForElement(el, currentRun && merge));
         });
 
@@ -36,19 +41,17 @@ export class SvgService {
             const source = run.elements.find((el) => el.label === arc.source);
             const target = run.elements.find((el) => el.label === arc.target);
             let currentRun = false;
-            this.displayService.currentRun$
-                .pipe(distinctUntilChanged())
-                .subscribe((run) => {
-                    run.arcs.forEach((currentArc) => {
-                        if (
-                            currentArc.source == arc.source &&
-                            currentArc.target == arc.target
-                        ) {
-                            currentRun = true;
-                            return;
-                        }
-                    });
+            this.displayService.currentRun$.subscribe((run) => {
+                run.arcs.forEach((currentArc) => {
+                    if (
+                        currentArc.source == arc.source &&
+                        currentArc.target == arc.target
+                    ) {
+                        currentRun = true;
+                        return;
+                    }
                 });
+            });
 
             const arrow = createSvgForArc(
                 arc,

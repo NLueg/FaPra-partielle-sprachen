@@ -29,7 +29,7 @@
         ></app-template-button>
 
         <app-source-file-textarea
-            [events]="eventsSubject.asObservable()"
+            [resetEvent]="eventSubject.asObservable()"
         ></app-source-file-textarea>
 
         <app-download></app-download>

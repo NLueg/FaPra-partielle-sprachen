@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
-import { map, Observable, tap } from 'rxjs';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { map, Observable, Subscription, tap } from 'rxjs';
+import { DisplayService } from 'src/app/services/display.service';
 
 import { Run } from '../../classes/diagram/run';
 import { LayoutService } from '../../services/layout.service';
@@ -11,24 +12,32 @@ import { MergeService } from './merge.service';
     templateUrl: './display-merged-run.component.html',
     styleUrls: ['./display-merged-run.component.scss'],
 })
-export class DisplayMergedRunComponent {
-    svgElements$: Observable<{ list: SVGElement[]; height: number }>;
+export class DisplayMergedRunComponent implements OnInit, OnDestroy {
+    svgElements$?: Observable<{ list: SVGElement[]; height: number }>;
+    private _sub?: Subscription;
 
     constructor(
-        mergeService: MergeService,
+        private mergeService: MergeService,
         private layoutService: LayoutService,
-        private svgService: SvgService
-    ) {
-        this.svgElements$ = mergeService.getMergedRuns$().pipe(
-            tap((runs) => console.log('Merged runs:', runs)),
-            map((currentRuns) => this.layoutMergedRuns(currentRuns)),
-            map(({ runs, totalDiagrammHeight }) => ({
-                list: runs.flatMap((run) =>
-                    this.svgService.createSvgElements(run, true)
-                ),
-                height: totalDiagrammHeight,
-            }))
-        );
+        private svgService: SvgService,
+        private _displayService: DisplayService
+    ) {}
+    ngOnInit(): void {
+        this._sub = this._displayService.runs$.subscribe(() => {
+            this.svgElements$ = this.mergeService.getMergedRuns$().pipe(
+                tap((runs) => console.log('Merged runs:', runs)),
+                map((currentRuns) => this.layoutMergedRuns(currentRuns)),
+                map(({ runs, totalDiagrammHeight }) => ({
+                    list: runs.flatMap((run) =>
+                        this.svgService.createSvgElements(run, true)
+                    ),
+                    height: totalDiagrammHeight,
+                }))
+            );
+        });
+    }
+    ngOnDestroy(): void {
+        this._sub?.unsubscribe();
     }
 
     private layoutMergedRuns(currentRuns: Run[]): {

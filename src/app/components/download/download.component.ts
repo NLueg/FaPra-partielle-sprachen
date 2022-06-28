@@ -25,5 +25,6 @@ export class DownloadComponent {
         } else if (this._currentDownloadSelection === 'current') {
             this._downloadService.downloadCurrentRun(this._downloadName);
         }
+        this.changeHideDownload();
     }
 }
