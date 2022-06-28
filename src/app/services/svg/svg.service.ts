@@ -1,5 +1,4 @@
-import { Injectable, OnInit } from '@angular/core';
-import { distinctUntilChanged, Subscription } from 'rxjs';
+import { Injectable } from '@angular/core';
 
 import { Arc, Breakpoint } from '../../classes/diagram/arc';
 import { Element } from '../../classes/diagram/element';
