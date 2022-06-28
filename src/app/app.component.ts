@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { Subject } from 'rxjs';
 
-import { DownloadService } from './services/download/download.service';
 import { UploadService } from './services/upload/upload.service';
 
 @Component({
@@ -10,10 +9,7 @@ import { UploadService } from './services/upload/upload.service';
     styleUrls: ['./app.component.scss'],
 })
 export class AppComponent {
-    constructor(
-        private _uploadService: UploadService,
-        private _downloadService: DownloadService
-    ) {}
+    constructor(private _uploadService: UploadService) {}
     eventSubject: Subject<void> = new Subject<void>();
 
     emitEventToChild(): void {
