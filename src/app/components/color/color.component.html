@@ -1,0 +1,15 @@
+<label class="container">
+    <input
+        type="color"
+        id="color"
+        name="color"
+        [(ngModel)]="highlightColor"
+        (input)="changeColor()"
+    />
+    <label for="color">Highlight Current Run</label>
+    <input
+        type="checkbox"
+        [(ngModel)]="currentHighlightSelection"
+        (change)="changeHighlightSelection()"
+    />
+</label>

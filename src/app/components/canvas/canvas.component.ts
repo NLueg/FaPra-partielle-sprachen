@@ -43,7 +43,9 @@ export class CanvasComponent implements OnChanges {
         this._mouseMove = false;
         this._childElementInFocus = false;
         this._globalChangesProcessed = false;
-        this.highlightColor = this._colorService.getHighlightColor();
+        _colorService.getHighlightColor().subscribe((color) => {
+            this.highlightColor = color;
+        });
     }
 
     ngOnChanges(changes: SimpleChanges): void {

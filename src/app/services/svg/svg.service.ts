@@ -17,7 +17,9 @@ export class SvgService {
         public displayService: DisplayService,
         private _colorService: ColorService
     ) {
-        highlightColor = this._colorService.getHighlightColor();
+        _colorService.getHighlightColor().subscribe((color) => {
+            highlightColor = color;
+        });
     }
 
     public createSvgElements(run: Run, merge: boolean): Array<SVGElement> {

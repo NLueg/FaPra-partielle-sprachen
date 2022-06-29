@@ -15,12 +15,14 @@ import { ToastrModule } from 'ngx-toastr';
 
 import { AppComponent } from './app.component';
 import { CanvasComponent } from './components/canvas/canvas.component';
+import { ColorComponent } from './components/color/color.component';
 import { DisplayComponent } from './components/display/display.component';
 import { DisplayMergedRunComponent } from './components/display-merged-run/display-merged-run.component';
 import { DownloadComponent } from './components/download/download.component';
 import { FooterComponent } from './components/footer/footer.component';
 import { SourceFileTextareaComponent } from './components/source-file-textarea/source-file-textarea.component';
 import { TemplateButtonComponent } from './components/template-button/template-button.component';
+import { ColorService } from './services/color.service';
 
 @NgModule({
     declarations: [
@@ -32,6 +34,7 @@ import { TemplateButtonComponent } from './components/template-button/template-b
         DisplayMergedRunComponent,
         DownloadComponent,
         CanvasComponent,
+        ColorComponent,
     ],
     imports: [
         BrowserModule,
@@ -51,7 +54,7 @@ import { TemplateButtonComponent } from './components/template-button/template-b
         MatRadioModule,
         FormsModule,
     ],
-    providers: [],
+    providers: [ColorService],
     bootstrap: [AppComponent],
 })
 export class AppModule {}

@@ -1,5 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { map, Observable, Subscription, tap } from 'rxjs';
+import { ColorService } from 'src/app/services/color.service';
 import { DisplayService } from 'src/app/services/display.service';
 
 import { Run } from '../../classes/diagram/run';
@@ -15,29 +16,50 @@ import { MergeService } from './merge.service';
 export class DisplayMergedRunComponent implements OnInit, OnDestroy {
     svgElements$?: Observable<{ list: SVGElement[]; height: number }>;
     private _sub?: Subscription;
+    private _colorSub?: Subscription;
+    private _highlightSub?: Subscription;
+    private highlight = false;
 
     constructor(
         private mergeService: MergeService,
         private layoutService: LayoutService,
         private svgService: SvgService,
-        private _displayService: DisplayService
+        private _displayService: DisplayService,
+        private _colorService: ColorService
     ) {}
     ngOnInit(): void {
         this._sub = this._displayService.runs$.subscribe(() => {
-            this.svgElements$ = this.mergeService.getMergedRuns$().pipe(
-                tap((runs) => console.log('Merged runs:', runs)),
-                map((currentRuns) => this.layoutMergedRuns(currentRuns)),
-                map(({ runs, totalDiagrammHeight }) => ({
-                    list: runs.flatMap((run) =>
-                        this.svgService.createSvgElements(run, true)
-                    ),
-                    height: totalDiagrammHeight,
-                }))
-            );
+            this.update();
         });
+        this._colorSub = this._colorService
+            .getHighlightColor()
+            .subscribe(() => {
+                this.update();
+            });
+        this._highlightSub = this._colorService
+            .getHighlightSelection()
+            .subscribe((highlight) => {
+                this.highlight = highlight;
+                this.update();
+            });
     }
     ngOnDestroy(): void {
         this._sub?.unsubscribe();
+        this._colorSub?.unsubscribe();
+        this._highlightSub?.unsubscribe();
+    }
+
+    private update(): void {
+        this.svgElements$ = this.mergeService.getMergedRuns$().pipe(
+            tap((runs) => console.log('Merged runs:', runs)),
+            map((currentRuns) => this.layoutMergedRuns(currentRuns)),
+            map(({ runs, totalDiagrammHeight }) => ({
+                list: runs.flatMap((run) =>
+                    this.svgService.createSvgElements(run, this.highlight)
+                ),
+                height: totalDiagrammHeight,
+            }))
+        );
     }
 
     private layoutMergedRuns(currentRuns: Run[]): {
