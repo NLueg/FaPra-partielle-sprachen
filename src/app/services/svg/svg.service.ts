@@ -5,7 +5,6 @@ import { Element } from '../../classes/diagram/element';
 import { Run } from '../../classes/diagram/run';
 import { ColorService } from '../color.service';
 import { DisplayService } from '../display.service';
-import { registerSvg } from './register-svg.fn';
 
 let highlightColor: string;
 
