@@ -6,8 +6,8 @@ import {
     SimpleChanges,
     ViewChild,
 } from '@angular/core';
-import { ColorService } from 'src/app/services/color.service';
 
+import { ColorService } from '../../services/color.service';
 import { DisplayService } from '../../services/display.service';
 import { LayoutService } from '../../services/layout.service';
 import { SvgService } from '../../services/svg/svg.service';
@@ -485,7 +485,6 @@ export class CanvasComponent implements OnChanges {
                         y: currentY,
                     },
                 });
-                const observable = this._displayService.coordsInfoAdded();
             }
         }
     }

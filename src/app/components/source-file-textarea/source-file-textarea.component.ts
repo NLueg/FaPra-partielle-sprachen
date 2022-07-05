@@ -5,6 +5,7 @@ import {
     distinctUntilChanged,
     first,
     Observable,
+    of,
     Subscription,
 } from 'rxjs';
 
@@ -36,8 +37,9 @@ export class SourceFileTextareaComponent implements OnDestroy, OnInit {
     isCurrentRunEmpty$: Observable<boolean>;
     getCurrentRunIndex$: Observable<number>;
     getRunCount$: Observable<number>;
+
     @Input()
-    resetEvent!: Observable<void>;
+    resetEvent: Observable<void> = of(undefined);
 
     runValidationStatus: Valid | null = null;
     runHint = '';

@@ -1,9 +1,9 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { map, Observable, Subscription, tap } from 'rxjs';
-import { ColorService } from 'src/app/services/color.service';
-import { DisplayService } from 'src/app/services/display.service';
 
 import { Run } from '../../classes/diagram/run';
+import { ColorService } from '../../services/color.service';
+import { DisplayService } from '../../services/display.service';
 import { LayoutService } from '../../services/layout.service';
 import { SvgService } from '../../services/svg/svg.service';
 import { MergeService } from './merge.service';
