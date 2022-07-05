@@ -22,7 +22,6 @@ import { DownloadComponent } from './components/download/download.component';
 import { FooterComponent } from './components/footer/footer.component';
 import { SourceFileTextareaComponent } from './components/source-file-textarea/source-file-textarea.component';
 import { TemplateButtonComponent } from './components/template-button/template-button.component';
-import { ColorService } from './services/color.service';
 
 @NgModule({
     declarations: [
@@ -54,7 +53,6 @@ import { ColorService } from './services/color.service';
         MatRadioModule,
         FormsModule,
     ],
-    providers: [ColorService],
     bootstrap: [AppComponent],
 })
 export class AppModule {}
