@@ -116,6 +116,19 @@ export class LayoutService {
                     const target = currentRun.elements.find(
                         (element) => element.label === a.target
                     );
+
+                    const source = currentRun.elements.find(
+                        (element) => element.label === a.source
+                    );
+
+                    //ignore breakpoints for manual positioned transitions
+                    if (
+                        a.breakpoints.length > 0 ||
+                        (target && (target.x || target.y)) ||
+                        (source && (source.x || source.y))
+                    )
+                        return;
+
                     //find layer of target
                     const targetLayerIndex = layers.findIndex(
                         (l) => l.findIndex((e) => e === target) >= 0
@@ -425,11 +438,13 @@ export class LayoutService {
             const offsetX = LayoutService.LAYER_WIDTH * (index + 1);
 
             layer.forEach((el, idx) => {
-                el.x = offsetX;
-                el.y =
-                    offsetY * (idx + 1) +
-                    idx * LayoutService.ELEMENT_HEIGHT +
-                    verticalOffset;
+                //ignore new coordinates if manual coordinates are available
+                if (!el.x) el.x = offsetX;
+                if (!el.y)
+                    el.y =
+                        offsetY * (idx + 1) +
+                        idx * LayoutService.ELEMENT_HEIGHT +
+                        verticalOffset;
             });
         });
 
