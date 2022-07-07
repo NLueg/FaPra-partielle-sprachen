@@ -1,3 +1,8 @@
+import {
+    arcsAttribute,
+    transitionsAttribute,
+    typeKey,
+} from '../../../services/parser/parsing-constants';
 import { Arc } from '../arc';
 import { Run } from '../run';
 import { getCycles } from './cycles.fn';
@@ -8,14 +13,20 @@ import { getCycles } from './cycles.fn';
 export function resolveWarnings(run: Run): Run {
     removeCycles(run);
 
-    const lines = ['.type ps'];
-    lines.push('.transitions');
+    run.text = generateTextForRun(run);
+    run.warnings = [];
+    return run;
+}
+
+export function generateTextForRun(run: Run): string {
+    const lines = [typeKey];
+    lines.push(transitionsAttribute);
     run.elements.forEach((e) => {
         if (e.x && e.y) lines.push(`${e.label} [${e.x}, ${e.y}]`);
         else lines.push(e.label);
     });
 
-    lines.push('.arcs');
+    lines.push(arcsAttribute);
     lines.push(
         ...run.arcs
             .filter((arc) => {
@@ -31,10 +42,7 @@ export function resolveWarnings(run: Run): Run {
                 (arc) => arc.source + ' ' + arc.target + getBreakpointInfo(arc)
             )
     );
-
-    run.text = lines.join('\n');
-    run.warnings = [];
-    return run;
+    return lines.join('\n');
 }
 
 function getBreakpointInfo(arc: Arc): string {

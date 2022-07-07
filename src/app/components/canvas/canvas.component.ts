@@ -44,14 +44,11 @@ export class CanvasComponent implements OnChanges {
 
     ngOnChanges(changes: SimpleChanges): void {
         if (changes['svgElements'] && this.drawingArea) {
-            console.log(this.svgElements);
-
             this.clearDrawingArea();
 
             for (const element of this.svgElements) {
                 this.drawingArea.nativeElement.appendChild(element);
             }
-            console.log(this.drawingArea.nativeElement.children);
             this.registerCanvasMouseHandler(this.drawingArea.nativeElement);
             this.registerSingleMouseHandler(this.drawingArea.nativeElement);
         }
@@ -479,7 +476,6 @@ export class CanvasComponent implements OnChanges {
                         y: currentY,
                     },
                 });
-                const observable = this._displayService.coordsInfoAdded();
             }
         }
     }

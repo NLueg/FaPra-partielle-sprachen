@@ -6,14 +6,14 @@
     <h2>Partial language</h2>
 
     <!--    Main content    -->
-    <mat-tab-group>
-        <mat-tab label="Separate Runs">
+    <mat-tab-group (selectedIndexChange)="updateTabIndex($event)">
+        <mat-tab id="separate" label="Separate Runs">
             <app-display class="padding full-size"></app-display>
             <button (click)="emitEventToChild()" class="reset-button">
                 Reset
             </button>
         </mat-tab>
-        <mat-tab label="Merged Runs">
+        <mat-tab id="merged" label="Merged Runs">
             <app-display-merged-run
                 class="padding full-size"
             ></app-display-merged-run>
@@ -32,7 +32,9 @@
             [events]="eventsSubject.asObservable()"
         ></app-source-file-textarea>
 
-        <app-download></app-download>
+        <app-download
+            [contentToDownload]="selectedDataToDownload"
+        ></app-download>
     </div>
 
     <app-footer></app-footer>

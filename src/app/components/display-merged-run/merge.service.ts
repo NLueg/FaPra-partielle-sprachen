@@ -4,6 +4,7 @@ import { map, Observable, shareReplay } from 'rxjs';
 
 import { Arc } from '../../classes/diagram/arc';
 import { Element } from '../../classes/diagram/element';
+import { generateTextForRun } from '../../classes/diagram/functions/resolve-warnings.fn';
 import { Run } from '../../classes/diagram/run';
 import { DisplayService } from '../../services/display.service';
 
@@ -52,6 +53,7 @@ export class MergeService {
             }
         }
 
+        baseRun.text = generateTextForRun(baseRun);
         return [baseRun, ...this.mergeRuns(runsToCheck)];
     }
 }
