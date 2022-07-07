@@ -1,6 +1,8 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { first, Subject } from 'rxjs';
 
+import { MergeService } from '../../components/display-merged-run/merge.service';
+import { DownloadableContent } from '../../components/download/download.const';
 import { DisplayService } from '../display.service';
 
 @Injectable({
@@ -9,7 +11,10 @@ import { DisplayService } from '../display.service';
 export class DownloadService implements OnDestroy {
     private _download$: Subject<string>;
 
-    constructor(private _displayService: DisplayService) {
+    constructor(
+        private _displayService: DisplayService,
+        private _mergeService: MergeService
+    ) {
         this._download$ = new Subject<string>();
     }
 
@@ -17,41 +22,43 @@ export class DownloadService implements OnDestroy {
         this._download$.complete();
     }
 
-    public downloadRuns(name?: string): void {
-        this._displayService.runs$.pipe(first()).subscribe((runs) => {
+    downloadRuns(name: string, contentToDownload: DownloadableContent): void {
+        const runsToDownload =
+            contentToDownload === 'mergeRuns'
+                ? this._mergeService.getMergedRuns$()
+                : this._displayService.runs$;
+
+        runsToDownload.pipe(first()).subscribe((runs) => {
             const timestamp = Date.now();
             runs.forEach((run, index) => {
-                const myFileContent = run.text.trim();
-                let myFileName = '';
-                if (name == '') {
-                    myFileName = `${timestamp}_run_${index + 1}.ps`;
+                let fileName = '';
+                if (!name) {
+                    fileName = `${timestamp}_run_${index + 1}.ps`;
                 } else {
-                    myFileName = `${name}_run_${index + 1}.ps`;
+                    fileName = `${name}_run_${index + 1}.ps`;
                 }
-                const dlink: HTMLAnchorElement = document.createElement('a');
-                dlink.download = myFileName;
-                dlink.href = 'data:text/plain;charset=utf-16,' + myFileContent;
-                dlink.click();
-                dlink.remove();
+                downloadFile(fileName, run.text.trim());
             });
         });
     }
 
-    public downloadCurrentRun(name?: string): void {
+    downloadCurrentRun(name: string): void {
         this._displayService.currentRun$.pipe(first()).subscribe((run) => {
-            const myFileContent = run.text.trim();
-            let myFileName = '';
-            if (name == '') {
-                myFileName = Date.now() + '_run.ps';
+            let fileName = '';
+            if (!name) {
+                fileName = Date.now() + '_run.ps';
             } else {
-                myFileName = name + '_run.ps';
+                fileName = name + '_run.ps';
             }
-
-            const dlink: HTMLAnchorElement = document.createElement('a');
-            dlink.download = myFileName;
-            dlink.href = 'data:text/plain;charset=utf-16,' + myFileContent;
-            dlink.click();
-            dlink.remove();
+            downloadFile(fileName, run.text.trim());
         });
     }
+}
+
+function downloadFile(name: string, content: string): void {
+    const downloadLink: HTMLAnchorElement = document.createElement('a');
+    downloadLink.download = name;
+    downloadLink.href = 'data:text/plain;charset=utf-16,' + content;
+    downloadLink.click();
+    downloadLink.remove();
 }

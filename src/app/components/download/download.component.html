@@ -1,40 +1,45 @@
 <div fxLayout="column" fxLayoutAlign="start center">
     <app-template-button
-        buttonText="Download"
+        [buttonText]="
+            'Download ' +
+            (contentToDownload === 'separateRuns'
+                ? ' run(s)'
+                : ' merged run(s)')
+        "
         buttonIcon="download"
-        (buttonAction)="changeHideDownload()"
+        (buttonAction)="toggleHideDownload()"
     ></app-template-button>
-    <form [hidden]="_hideDownload" class="download-field">
+    <form [hidden]="hideDownload" class="download-field">
         <div class="input-field">
-            <span> Name:</span>
+            <label>Name:</label>
             <input
                 type="text"
                 name="text"
                 id="text"
                 value="_downloadName"
                 placeholder="Enter Name"
-                [(ngModel)]="_downloadName"
+                [(ngModel)]="downloadName"
             />
         </div>
-        <div class="radio-button">
-            <span> Download:</span>
+        <div class="radio-button" *ngIf="contentToDownload !== 'mergeRuns'">
+            <span>Download:</span>
             <input
                 type="radio"
                 name="selection"
                 value="all"
-                [(ngModel)]="_currentDownloadSelection"
+                [(ngModel)]="currentDownloadSelection"
             />
-            <span>All</span>
+            <label>All</label>
             <input
                 type="radio"
                 name="selection"
                 value="current"
-                [(ngModel)]="_currentDownloadSelection"
+                [(ngModel)]="currentDownloadSelection"
             />
-            <span>Current Run</span>
+            <label>Current Run</label>
         </div>
         <div class="buttons">
-            <button class="btn" (click)="changeHideDownload()">Cancel</button>
+            <button class="btn" (click)="toggleHideDownload()">Cancel</button>
             <button class="btn" (click)="download()">Save</button>
         </div>
     </form>

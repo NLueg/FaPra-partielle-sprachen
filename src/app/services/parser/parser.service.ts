@@ -5,10 +5,13 @@ import { Breakpoint } from 'src/app/classes/diagram/arc';
 import { hasCycles } from '../../classes/diagram/functions/cycles.fn';
 import { Run } from '../../classes/diagram/run';
 import { addArc, addElement, setRefs } from './parser-helper.fn';
+import {
+    arcsAttribute,
+    transitionsAttribute,
+    typeKey,
+} from './parsing-constants';
 
 type ParsingStates = 'initial' | 'type' | 'transitions' | 'arcs';
-const transitionsAttribute = '.transitions';
-const arcsAttribute = '.arcs';
 
 @Injectable({
     providedIn: 'root',
@@ -47,7 +50,7 @@ export class ParserService {
                 case 'initial':
                     if (trimmedLine === '') {
                         break;
-                    } else if (trimmedLine === '.type ps') {
+                    } else if (trimmedLine === typeKey) {
                         currentParsingState = 'type';
                         break;
                     } else {
@@ -135,7 +138,7 @@ export class ParserService {
                             );
                             this.toastr.warning(
                                 `File contains duplicate transitions`,
-                                `Duplicate transitions are ingnored`
+                                `Duplicate transitions are ignored`
                             );
                         }
                         break;
@@ -151,7 +154,7 @@ export class ParserService {
                 case 'arcs':
                     if (trimmedLine === '' || trimmedLine === arcsAttribute) {
                         break;
-                    } else if (trimmedLine !== '.transitions') {
+                    } else if (trimmedLine !== transitionsAttribute) {
                         let source: string, target: string;
                         const breakpoints: Breakpoint[] = [];
 
@@ -180,7 +183,7 @@ export class ParserService {
                                 );
                                 this.toastr.warning(
                                     `File contains duplicate arcs`,
-                                    `Duplicate arcs are ingnored`
+                                    `Duplicate arcs are ignored`
                                 );
                             } else {
                                 const arc = run.arcs.find(
@@ -229,11 +232,11 @@ export class ParserService {
                             run.warnings.push(`File contains invalid arcs`);
                             this.toastr.warning(
                                 `File contains invalid arcs`,
-                                `Invalid arcs are ingnored`
+                                `Invalid arcs are ignored`
                             );
                         }
                         break;
-                    } else if (trimmedLine === '.transitions') {
+                    } else if (trimmedLine === transitionsAttribute) {
                         currentParsingState = 'transitions';
                         fileContainsTransitions = true;
                         break;
@@ -251,7 +254,7 @@ export class ParserService {
                 );
                 this.toastr.warning(
                     `File contains arcs for non existing transitions`,
-                    `Invalid arcs are ingnored`
+                    `Invalid arcs are ignored`
                 );
             }
 
