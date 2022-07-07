@@ -2,7 +2,9 @@ import { Injectable, OnDestroy } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { Observable, Subject } from 'rxjs';
 
-const allowedExtensions = ['ps'];
+import { getRunTextFromPnml } from './pnml-to-run.fn';
+
+const allowedExtensions = ['ps', 'pnml'];
 
 @Injectable({
     providedIn: 'root',
@@ -65,9 +67,14 @@ export class UploadService implements OnDestroy {
 
         Array.from(files).forEach((file) => {
             const reader = new FileReader();
+            const fileExtension = getExtensionForFileName(file.name);
 
             reader.onload = () => {
-                const content: string = reader.result as string;
+                let content: string = reader.result as string;
+
+                if (fileExtension?.toLowerCase() === 'pnml') {
+                    content = getRunTextFromPnml(content);
+                }
                 this._upload$.next(content);
             };
 
@@ -77,9 +84,13 @@ export class UploadService implements OnDestroy {
 }
 
 function fileExtensionIsValid(fileName: string): boolean {
-    const fileExtension = fileName.split('.').pop();
+    const fileExtension = getExtensionForFileName(fileName);
     if (!fileExtension) {
         return false;
     }
     return allowedExtensions.includes(fileExtension.trim());
+}
+
+function getExtensionForFileName(fileName: string): string | undefined {
+    return fileName.split('.').pop();
 }
