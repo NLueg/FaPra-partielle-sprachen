@@ -2,7 +2,7 @@ import { Injectable, OnDestroy } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { Observable, Subject } from 'rxjs';
 
-import { getRunTextFromPnml } from './pnml-to-run.fn';
+import { getRunTextFromPnml } from './pnml/pnml-to-run.fn';
 
 const allowedExtensions = ['ps', 'pnml'];
 
@@ -20,11 +20,11 @@ export class UploadService implements OnDestroy {
         this._upload$.complete();
     }
 
-    public getUpload$(): Observable<string> {
+    getUpload$(): Observable<string> {
         return this._upload$.asObservable();
     }
 
-    public checkFiles(files: FileList): boolean {
+    checkFiles(files: FileList): boolean {
         let check = true;
 
         Array.from(files).forEach((file) => {
@@ -40,7 +40,7 @@ export class UploadService implements OnDestroy {
         return check;
     }
 
-    public openFileSelector(): void {
+    openFileSelector(): void {
         const fileUpload = document.createElement('input');
         fileUpload.setAttribute('type', 'file');
         fileUpload.setAttribute('multiple', 'multiple');
@@ -60,7 +60,7 @@ export class UploadService implements OnDestroy {
         fileUpload.click();
     }
 
-    public uploadFiles(files: FileList): void {
+    uploadFiles(files: FileList): void {
         if (!this.checkFiles(files)) {
             return;
         }

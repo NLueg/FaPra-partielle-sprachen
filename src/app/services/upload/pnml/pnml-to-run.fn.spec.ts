@@ -1,3 +1,35 @@
+import { getRunTextFromPnml } from './pnml-to-run.fn';
+
+describe('pnml-to-run', () => {
+    it('should parse example correctly', () => {
+        const result = getRunTextFromPnml(exampleContent);
+
+        expect(result).toEqual(
+            '.type ps\n' +
+                '.transitions\n' +
+                'T1\n' +
+                'T2\n' +
+                'T3\n' +
+                'T4\n' +
+                'T5\n' +
+                'T6\n' +
+                'T7\n' +
+                '.arcs\n' +
+                'T1 T2\n' +
+                'T1 T6\n' +
+                'T2 T3\n' +
+                'T6 T3\n' +
+                'T3 T4\n' +
+                'T3 T7\n' +
+                'T4 T5\n' +
+                'T7 T5\n' +
+                'T6 T7\n' +
+                'T2 T4'
+        );
+    });
+});
+
+const exampleContent = `
 <?xml version="1.0" encoding="UTF-8"?>
 <pnml>
      <net id="" type="http://www.pnml.org/version-2009/grammar/ptnet">
@@ -302,3 +334,4 @@
           </page>
      </net>
 </pnml>
+`;
