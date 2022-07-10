@@ -25,6 +25,9 @@ export class CanvasComponent implements OnChanges {
     @Input()
     canvasHeight = 400;
 
+    @Input()
+    persistCoordinates = true;
+
     private _mouseMove: boolean;
     private _childElementInFocus: boolean;
     private _globalChangesProcessed: boolean;
@@ -286,8 +289,10 @@ export class CanvasComponent implements OnChanges {
             currentYMoving,
             currentXMoving
         );
-        this.persistCoords(passedElement);
-        this.persistCoords(movingElement);
+        if (this.persistCoordinates) {
+            this.persistCoords(passedElement);
+            this.persistCoords(movingElement);
+        }
         movingElement.setAttribute('original-y', `${newYMoving}`);
         passedElement.setAttribute('original-y', `${newYPassed}`);
         this._childElementInFocus = false;

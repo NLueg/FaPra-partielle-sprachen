@@ -1,4 +1,4 @@
-import { Component, Input, OnDestroy } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import {
     debounceTime,
@@ -8,7 +8,7 @@ import {
     Subscription,
 } from 'rxjs';
 
-import { resolveWarnings } from '../../classes/diagram/functions/resolve-warnings.fn';
+import { resolveWarnings } from '../../classes/diagram/functions/run-helper.fn';
 import { isRunEmpty, Run } from '../../classes/diagram/run';
 import { DisplayService } from '../../services/display.service';
 import { ParserService } from '../../services/parser/parser.service';
@@ -23,7 +23,7 @@ type Valid = 'error' | 'warn' | 'success';
     templateUrl: './source-file-textarea.component.html',
     styleUrls: ['./source-file-textarea.component.scss'],
 })
-export class SourceFileTextareaComponent implements OnDestroy {
+export class SourceFileTextareaComponent implements OnDestroy, OnInit {
     private eventsSubscription: Subscription | undefined;
     @Input() events: Observable<void> | undefined;
     private _sub: Subscription;
