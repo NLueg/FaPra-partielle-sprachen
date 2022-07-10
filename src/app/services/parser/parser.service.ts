@@ -3,8 +3,12 @@ import { ToastrService } from 'ngx-toastr';
 import { Breakpoint } from 'src/app/classes/diagram/arc';
 
 import { hasCycles } from '../../classes/diagram/functions/cycles.fn';
+import {
+    addArc,
+    addElement,
+    setRefs,
+} from '../../classes/diagram/functions/run-helper.fn';
 import { Run } from '../../classes/diagram/run';
-import { addArc, addElement, setRefs } from './parser-helper.fn';
 import {
     arcsAttribute,
     transitionsAttribute,
