@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
-import clonedeep from 'lodash.clonedeep';
 
 import { Arc, Breakpoint } from '../classes/diagram/arc';
 import { Element } from '../classes/diagram/element';
 import { hasCycles } from '../classes/diagram/functions/cycles.fn';
+import { copyRun } from '../classes/diagram/functions/run-helper.fn';
 import { Run } from '../classes/diagram/run';
 
 type Layer = Element | Breakpoint;
@@ -19,7 +19,7 @@ export class LayoutService {
     private static readonly LAYER_WIDTH = 100;
 
     layout(run: Run, positionOffset = 0): { run: Run; diagrammHeight: number } {
-        const runClone: Run = clonedeep(run);
+        const runClone: Run = copyRun(run, true);
         let diagrammHeight = 0;
 
         //if run hast no cycles use sugiyama layout

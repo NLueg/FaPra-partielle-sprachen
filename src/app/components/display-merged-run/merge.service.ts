@@ -1,10 +1,17 @@
 import { Injectable } from '@angular/core';
-import clonedeep from 'lodash.clonedeep';
 import { map, Observable, shareReplay } from 'rxjs';
 
 import { Arc } from '../../classes/diagram/arc';
 import { Element } from '../../classes/diagram/element';
-import { generateTextForRun } from '../../classes/diagram/functions/resolve-warnings.fn';
+import {
+    addArc,
+    addElement,
+    copyArc,
+    copyElement,
+    copyRun,
+    generateTextForRun,
+    setRefs,
+} from '../../classes/diagram/functions/run-helper.fn';
 import { Run } from '../../classes/diagram/run';
 import { DisplayService } from '../../services/display.service';
 
@@ -34,7 +41,7 @@ export class MergeService {
             return [];
         }
 
-        const baseRun = clonedeep(runs[0]);
+        const baseRun = copyRun(runs[0], false);
         const runsToCheck: Run[] = [];
 
         for (let index = 1; index < runs.length; index++) {
@@ -52,7 +59,7 @@ export class MergeService {
                 runsToCheck.push(runToMerge);
             }
         }
-
+        setRefs(baseRun);
         baseRun.text = generateTextForRun(baseRun);
         return [baseRun, ...this.mergeRuns(runsToCheck)];
     }
@@ -83,15 +90,10 @@ function mergeRuns(
         (element) => element.label === startElementOfRunToMerge.label
     );
     if (!foundElement) {
-        baseRun.elements.push(startElementOfRunToMerge);
-    } else {
-        foundElement.outgoingArcs = mergeArcs(
-            foundElement.outgoingArcs,
-            startElementOfRunToMerge.outgoingArcs
-        );
+        addElement(baseRun, copyElement(startElementOfRunToMerge));
     }
 
-    baseRun.arcs = mergeArcs(baseRun.arcs, runToMerge.arcs);
+    mergeArcs(baseRun, runToMerge.arcs);
 
     for (const outgoingArc of startElementOfRunToMerge.outgoingArcs) {
         const element = runToMerge.elements.find(
@@ -105,16 +107,15 @@ function mergeRuns(
     }
 }
 
-function mergeArcs(baseArcs: Arc[], arcsToMerge: Arc[]): Arc[] {
+function mergeArcs(baseRun: Run, arcsToMerge: Arc[]): void {
     arcsToMerge.forEach((arcToMerge) => {
-        const foundArc = baseArcs.find(
+        const foundArc = baseRun.arcs.find(
             (arc) =>
                 arc.source === arcToMerge.source &&
                 arc.target === arcToMerge.target
         );
         if (!foundArc) {
-            baseArcs.push(arcToMerge);
+            addArc(baseRun, copyArc(arcToMerge));
         }
     });
-    return baseArcs;
 }
