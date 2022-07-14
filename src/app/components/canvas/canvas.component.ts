@@ -9,8 +9,8 @@ import {
     ViewChild,
 } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { ColorService } from 'src/app/services/color.service';
 
+import { ColorService } from '../../services/color.service';
 import { DisplayService } from '../../services/display.service';
 import { LayoutService } from '../../services/layout.service';
 import { SvgService } from '../../services/svg/svg.service';
