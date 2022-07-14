@@ -7,6 +7,7 @@ import { ColorService } from '../color.service';
 import { DisplayService } from '../display.service';
 
 let highlightColor: string;
+let currentRun: Run;
 
 @Injectable({
     providedIn: 'root',
@@ -19,45 +20,112 @@ export class SvgService {
         _colorService.getHighlightColor().subscribe((color) => {
             highlightColor = color;
         });
+        displayService.currentRun$.subscribe((run) => {
+            currentRun = run;
+        });
     }
 
     public createSvgElements(run: Run, merge: boolean): Array<SVGElement> {
         const result: Array<SVGElement> = [];
+        let samePrefix = false;
 
-        run.elements.forEach((el) => {
-            let currentRun = false;
-            this.displayService.currentRun$.subscribe((run) => {
-                run.elements.forEach((element) => {
-                    if (element.label == el.label) {
-                        currentRun = true;
-                        return;
+        if (merge) {
+            const elementWithNoIncomingArc: Array<Element> = [];
+            currentRun.elements.forEach((el) => {
+                if (el.incomingArcs.length == 0) {
+                    elementWithNoIncomingArc.push(el);
+                }
+            });
+
+            run.elements.forEach((el) => {
+                elementWithNoIncomingArc.forEach((e) => {
+                    if (el.incomingArcs.length == 0 && el.label == e.label) {
+                        samePrefix = true;
                     }
                 });
             });
-            result.push(...createSvgForElement(el, currentRun && merge));
-        });
+        }
 
-        run.arcs.forEach((arc) => {
-            const source = run.elements.find((el) => el.label === arc.source);
-            const target = run.elements.find((el) => el.label === arc.target);
-            let currentRun = false;
-            this.displayService.currentRun$.subscribe((run) => {
-                run.arcs.forEach((currentArc) => {
+        if (merge && samePrefix) {
+            run.elements.forEach((el) => {
+                let isCurrentRun = false;
+                currentRun.elements.forEach((element) => {
+                    if (element.label == el.label) {
+                        isCurrentRun = true;
+                        return;
+                    }
+                });
+                result.push(...createSvgForElement(el, isCurrentRun));
+            });
+            run.arcs.forEach((arc) => {
+                const source = run.elements.find(
+                    (el) => el.label === arc.source
+                );
+                const target = run.elements.find(
+                    (el) => el.label === arc.target
+                );
+                let isCurrentRun = false;
+                currentRun.arcs.forEach((currentArc) => {
                     if (
                         currentArc.source == arc.source &&
                         currentArc.target == arc.target
                     ) {
-                        currentRun = true;
+                        isCurrentRun = true;
                         return;
                     }
                 });
+
+                const arrow = createSvgForArc(
+                    arc,
+                    source,
+                    target,
+                    isCurrentRun && merge && samePrefix
+                );
+                if (arrow) {
+                    arrow.forEach((a) => {
+                        result.push(a);
+                    });
+                }
+            });
+        } else {
+            run.elements.forEach((el) => {
+                result.push(...createSvgForElement(el, false));
+            });
+            run.arcs.forEach((arc) => {
+                const source = run.elements.find(
+                    (el) => el.label === arc.source
+                );
+                const target = run.elements.find(
+                    (el) => el.label === arc.target
+                );
+                const arrow = createSvgForArc(arc, source, target, false);
+                if (arrow) {
+                    arrow.forEach((a) => {
+                        result.push(a);
+                    });
+                }
+            });
+        }
+
+        run.arcs.forEach((arc) => {
+            const source = run.elements.find((el) => el.label === arc.source);
+            const target = run.elements.find((el) => el.label === arc.target);
+            let isCurrentRun = false;
+            currentRun.arcs.forEach((currentArc) => {
+                if (
+                    currentArc.source == arc.source &&
+                    currentArc.target == arc.target
+                ) {
+                    isCurrentRun = true;
+                    return;
+                }
             });
 
             const arrow = createSvgForArc(
                 arc,
                 source,
                 target,
-                currentRun && merge
+                isCurrentRun && merge && samePrefix
             );
             if (arrow) {
                 arrow.forEach((a) => {
@@ -184,11 +252,10 @@ function createLine(
     }
 
     line.setAttribute('stroke-width', '1');
-    if (hightlight) {
-        if (showArrow)
-            line.setAttribute('marker-end', 'url(#arrowheadhightlight )');
-    } else {
-        if (showArrow) line.setAttribute('marker-end', 'url(#arrowhead)');
+    if (hightlight && showArrow) {
+        line.setAttribute('marker-end', 'url(#arrowheadhightlight )');
+    } else if (showArrow) {
+        line.setAttribute('marker-end', 'url(#arrowhead)');
     }
     line.setAttribute('x1', `${x1}`);
     line.setAttribute('y1', `${y1}`);

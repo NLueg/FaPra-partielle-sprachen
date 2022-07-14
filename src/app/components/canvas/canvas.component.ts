@@ -3,11 +3,14 @@ import {
     ElementRef,
     Input,
     OnChanges,
+    OnDestroy,
+    OnInit,
     SimpleChanges,
     ViewChild,
 } from '@angular/core';
+import { Subscription } from 'rxjs';
+import { ColorService } from 'src/app/services/color.service';
 
-import { ColorService } from '../../services/color.service';
 import { DisplayService } from '../../services/display.service';
 import { LayoutService } from '../../services/layout.service';
 import { SvgService } from '../../services/svg/svg.service';
@@ -17,7 +20,7 @@ import { SvgService } from '../../services/svg/svg.service';
     templateUrl: './canvas.component.html',
     styleUrls: ['./canvas.component.scss'],
 })
-export class CanvasComponent implements OnChanges {
+export class CanvasComponent implements OnChanges, OnInit, OnDestroy {
     @ViewChild('drawingArea') drawingArea: ElementRef<SVGElement> | undefined;
 
     @Input()
@@ -33,6 +36,7 @@ export class CanvasComponent implements OnChanges {
     private _localChanges: Coordinates = { x: 0, y: 0 };
     private _movedChildElement?: HTMLElement;
     highlightColor: string | undefined;
+    private _sub: Subscription | undefined;
 
     constructor(
         private _layoutService: LayoutService,
@@ -43,9 +47,18 @@ export class CanvasComponent implements OnChanges {
         this._mouseMove = false;
         this._childElementInFocus = false;
         this._globalChangesProcessed = false;
-        _colorService.getHighlightColor().subscribe((color) => {
-            this.highlightColor = color;
-        });
+    }
+
+    ngOnInit(): void {
+        this._sub = this._colorService
+            .getHighlightColor()
+            .subscribe((color) => {
+                this.highlightColor = color;
+            });
+    }
+
+    ngOnDestroy(): void {
+        this._sub?.unsubscribe();
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -485,6 +498,7 @@ export class CanvasComponent implements OnChanges {
                         y: currentY,
                     },
                 });
+                const observable = this._displayService.coordsInfoAdded();
             }
         }
     }
