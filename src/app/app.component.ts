@@ -10,6 +10,7 @@ import { UploadService } from './services/upload/upload.service';
     templateUrl: './app.component.html',
     styleUrls: ['./app.component.scss'],
 })
+export class AppComponent {
     selectedDataToDownload: DownloadableContent = 'separateRuns';
 
     eventSubject: Subject<void> = new Subject<void>();
@@ -18,7 +19,6 @@ import { UploadService } from './services/upload/upload.service';
         private _uploadService: UploadService,
         private _downloadService: DownloadService
     ) {}
-
 
     emitEventToChild(): void {
         this.eventSubject.next();
@@ -33,7 +33,6 @@ import { UploadService } from './services/upload/upload.service';
             this._uploadService.uploadFiles(event.dataTransfer.files);
         }
     }
-
 
     updateTabIndex(index: number): void {
         this.selectedDataToDownload = getContentByIndex(index);
