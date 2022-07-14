@@ -210,7 +210,7 @@ describe('MergeService', () => {
                         outgoingArcs: [],
                     },
                 ],
-                text: '.type ps\r\n.transitions\r\nt1\r\nt2\r\nt4\r\nt7\r\n.arcs\r\nt1 t2\r\nt2 t4\r\nt4 t7\r\nt2 t7\r\n',
+                text: '.type ps\n.transitions\nt1\nt2\nt4\nt7\nt5\nt6\nt3\n.arcs\nt1 t2\nt2 t4\nt4 t7\nt2 t7\nt4 t5\nt5 t6\nt6 t3\nt5 t3\nt4 t3',
                 warnings: [],
             },
             {
@@ -346,7 +346,7 @@ describe('MergeService', () => {
                         outgoingArcs: [],
                     },
                 ],
-                text: '.type ps\r\n.transitions\r\nt6\r\nt21\r\nt22\r\nt3\r\n.arcs\r\nt6 t21\r\nt6 t22\r\nt22 t3\r\nt21 t3',
+                text: '.type ps\n.transitions\nt6\nt21\nt22\nt3\nt10\nt33\n.arcs\nt6 t21\nt6 t22\nt22 t3\nt21 t3\nt6 t33\nt21 t10',
                 warnings: [],
             },
         ]);

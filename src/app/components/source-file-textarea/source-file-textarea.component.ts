@@ -9,7 +9,7 @@ import {
     Subscription,
 } from 'rxjs';
 
-import { resolveWarnings } from '../../classes/diagram/functions/resolve-warnings.fn';
+import { resolveWarnings } from '../../classes/diagram/functions/run-helper.fn';
 import { isRunEmpty, Run } from '../../classes/diagram/run';
 import { DisplayService } from '../../services/display.service';
 import { ParserService } from '../../services/parser/parser.service';
@@ -25,6 +25,8 @@ type Valid = 'error' | 'warn' | 'success';
     styleUrls: ['./source-file-textarea.component.scss'],
 })
 export class SourceFileTextareaComponent implements OnDestroy, OnInit {
+    private eventsSubscription: Subscription | undefined;
+    @Input() events: Observable<void> | undefined;
     private _sub: Subscription;
     private _fileSub: Subscription;
     private _coordsSub: Subscription;
@@ -175,7 +177,7 @@ export class SourceFileTextareaComponent implements OnDestroy, OnInit {
                 '( \\[\\d+,\\d+\\])?\\n';
             const replacePattern = new RegExp(patternString, 'g');
             const newValue = currentValue.replace(replacePattern, coordsString);
-            this.textareaFc.setValue(newValue, { emitEvent: false });
+            this.textareaFc.setValue(newValue, { emitEvent: true });
         }
     }
 

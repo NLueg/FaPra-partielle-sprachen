@@ -29,6 +29,9 @@ export class CanvasComponent implements OnChanges, OnInit, OnDestroy {
     @Input()
     canvasHeight = 400;
 
+    @Input()
+    persistCoordinates = true;
+
     private _mouseMove: boolean;
     private _childElementInFocus: boolean;
     private _globalChangesProcessed: boolean;
@@ -63,14 +66,11 @@ export class CanvasComponent implements OnChanges, OnInit, OnDestroy {
 
     ngOnChanges(changes: SimpleChanges): void {
         if (changes['svgElements'] && this.drawingArea) {
-            console.log(this.svgElements);
-
             this.clearDrawingArea();
 
             for (const element of this.svgElements) {
                 this.drawingArea.nativeElement.appendChild(element);
             }
-            console.log(this.drawingArea.nativeElement.children);
             this.registerCanvasMouseHandler(this.drawingArea.nativeElement);
             this.registerSingleMouseHandler(this.drawingArea.nativeElement);
         }
@@ -308,8 +308,10 @@ export class CanvasComponent implements OnChanges, OnInit, OnDestroy {
             currentYMoving,
             currentXMoving
         );
-        this.persistCoords(passedElement);
-        this.persistCoords(movingElement);
+        if (this.persistCoordinates) {
+            this.persistCoords(passedElement);
+            this.persistCoords(movingElement);
+        }
         movingElement.setAttribute('original-y', `${newYMoving}`);
         passedElement.setAttribute('original-y', `${newYPassed}`);
         this._childElementInFocus = false;
@@ -498,7 +500,6 @@ export class CanvasComponent implements OnChanges, OnInit, OnDestroy {
                         y: currentY,
                     },
                 });
-                const observable = this._displayService.coordsInfoAdded();
             }
         }
     }

@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
-import clonedeep from 'lodash.clonedeep';
 
 import { Arc, Breakpoint } from '../classes/diagram/arc';
 import { Element } from '../classes/diagram/element';
 import { hasCycles } from '../classes/diagram/functions/cycles.fn';
+import { copyRun } from '../classes/diagram/functions/run-helper.fn';
 import { Run } from '../classes/diagram/run';
 
 type Layer = Element | Breakpoint;
@@ -19,7 +19,7 @@ export class LayoutService {
     private static readonly LAYER_WIDTH = 100;
 
     layout(run: Run, positionOffset = 0): { run: Run; diagrammHeight: number } {
-        const runClone: Run = clonedeep(run);
+        const runClone: Run = copyRun(run, true);
         let diagrammHeight = 0;
 
         //if run hast no cycles use sugiyama layout
@@ -116,6 +116,19 @@ export class LayoutService {
                     const target = currentRun.elements.find(
                         (element) => element.label === a.target
                     );
+
+                    const source = currentRun.elements.find(
+                        (element) => element.label === a.source
+                    );
+
+                    //ignore breakpoints for manual positioned transitions
+                    if (
+                        a.breakpoints.length > 0 ||
+                        (target && (target.x || target.y)) ||
+                        (source && (source.x || source.y))
+                    )
+                        return;
+
                     //find layer of target
                     const targetLayerIndex = layers.findIndex(
                         (l) => l.findIndex((e) => e === target) >= 0
@@ -425,11 +438,13 @@ export class LayoutService {
             const offsetX = LayoutService.LAYER_WIDTH * (index + 1);
 
             layer.forEach((el, idx) => {
-                el.x = offsetX;
-                el.y =
-                    offsetY * (idx + 1) +
-                    idx * LayoutService.ELEMENT_HEIGHT +
-                    verticalOffset;
+                //ignore new coordinates if manual coordinates are available
+                if (!el.x) el.x = offsetX;
+                if (!el.y)
+                    el.y =
+                        offsetY * (idx + 1) +
+                        idx * LayoutService.ELEMENT_HEIGHT +
+                        verticalOffset;
             });
         });
 

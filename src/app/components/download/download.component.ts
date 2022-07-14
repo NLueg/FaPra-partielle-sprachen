@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 import { DownloadService } from '../../services/download/download.service';
+import { DownloadableContent } from './download.const';
 
 @Component({
     selector: 'app-download',
@@ -8,22 +9,29 @@ import { DownloadService } from '../../services/download/download.service';
     styleUrls: ['./download.component.scss'],
 })
 export class DownloadComponent {
-    _downloadName = '';
-    _currentDownloadSelection = 'all';
-    _hideDownload = true;
+    @Input()
+    contentToDownload: DownloadableContent = 'separateRuns';
+
+    downloadName = '';
+    hideDownload = true;
+    currentDownloadSelection = 'all';
+
     constructor(private _downloadService: DownloadService) {}
 
-    changeHideDownload(): void {
-        this._hideDownload = !this._hideDownload;
-        this._downloadName = '';
-        this._currentDownloadSelection = 'all';
+    toggleHideDownload(): void {
+        this.hideDownload = !this.hideDownload;
+        this.downloadName = '';
+        this.currentDownloadSelection = 'all';
     }
 
-    public download(): void {
-        if (this._currentDownloadSelection === 'all') {
-            this._downloadService.downloadRuns(this._downloadName);
-        } else if (this._currentDownloadSelection === 'current') {
-            this._downloadService.downloadCurrentRun(this._downloadName);
+    download(): void {
+        if (this.currentDownloadSelection === 'all') {
+            this._downloadService.downloadRuns(
+                this.downloadName,
+                this.contentToDownload
+            );
+        } else if (this.currentDownloadSelection === 'current') {
+            this._downloadService.downloadCurrentRun(this.downloadName);
         }
         this.changeHideDownload();
     }

@@ -1,19 +1,34 @@
 import { Injectable } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
+import { Breakpoint } from 'src/app/classes/diagram/arc';
 
 import { hasCycles } from '../../classes/diagram/functions/cycles.fn';
+import {
+    addArc,
+    addElement,
+    setRefs,
+} from '../../classes/diagram/functions/run-helper.fn';
 import { Run } from '../../classes/diagram/run';
-import { addArc, addElement, setRefs } from './parser-helper.fn';
+import {
+    arcsAttribute,
+    transitionsAttribute,
+    typeKey,
+} from './parsing-constants';
 
 type ParsingStates = 'initial' | 'type' | 'transitions' | 'arcs';
-const transitionsAttribute = '.transitions';
-const arcsAttribute = '.arcs';
 
 @Injectable({
     providedIn: 'root',
 })
 export class ParserService {
     constructor(private toastr: ToastrService) {}
+    static transitionRegex = new RegExp(
+        '^([^\\[ ]+)(\\s?\\[\\d+,\\s?\\d+\\])?$'
+    );
+    static arcRegex = new RegExp(
+        '^([^\\[ ]+)\\s([^\\[ ]+)(\\s?\\[\\d+,\\s?\\d+\\])*$'
+    );
+    static breakpointRegex = new RegExp('\\[\\d+,\\s?\\d+\\]');
 
     parse(content: string, errors: Set<string>): Run | null {
         const contentLines = content.split('\n');
@@ -39,7 +54,7 @@ export class ParserService {
                 case 'initial':
                     if (trimmedLine === '') {
                         break;
-                    } else if (trimmedLine === '.type ps') {
+                    } else if (trimmedLine === typeKey) {
                         currentParsingState = 'type';
                         break;
                     } else {
@@ -76,18 +91,46 @@ export class ParserService {
                     ) {
                         break;
                     } else if (trimmedLine !== arcsAttribute) {
-                        if (trimmedLine.split(' ').length !== 1) {
-                            run.warnings.push(
-                                `Transition names are not allow to contain blank`
-                            );
+                        let label: string;
+                        let posX: number | undefined;
+                        let posY: number | undefined;
+                        if (!ParserService.transitionRegex.test(trimmedLine)) {
+                            label = trimmedLine.split(' ')[0];
+                            run.warnings.push(`Invalid transition definition`);
                             this.toastr.warning(
-                                `Transition names are not allow to contain blank`,
+                                `Invalid transition definition`,
                                 `Only first word is used`
                             );
+                        } else {
+                            const match =
+                                ParserService.transitionRegex.exec(trimmedLine);
+                            if (match) {
+                                label = match[1];
+                                if (match[2]) {
+                                    //extract coordinates
+                                    posX = parseInt(
+                                        match[2].substring(
+                                            match[2].indexOf('[') + 1,
+                                            match[2].indexOf(',')
+                                        )
+                                    );
+                                    posY = parseInt(
+                                        match[2].substring(
+                                            match[2].indexOf(',') + 1,
+                                            match[2].indexOf(']')
+                                        )
+                                    );
+                                }
+                            } else {
+                                label = trimmedLine.split(' ')[0];
+                            }
                         }
+
                         if (
                             !addElement(run, {
-                                label: trimmedLine.split(' ')[0],
+                                label: label,
+                                x: posX,
+                                y: posY,
                                 incomingArcs: [],
                                 outgoingArcs: [],
                             })
@@ -99,7 +142,7 @@ export class ParserService {
                             );
                             this.toastr.warning(
                                 `File contains duplicate transitions`,
-                                `Duplicate transitions are ingnored`
+                                `Duplicate transitions are ignored`
                             );
                         }
                         break;
@@ -115,33 +158,89 @@ export class ParserService {
                 case 'arcs':
                     if (trimmedLine === '' || trimmedLine === arcsAttribute) {
                         break;
-                    } else if (trimmedLine !== '.transitions') {
-                        if (trimmedLine.split(' ').length === 2) {
-                            const splitLine = trimmedLine.split(' ');
+                    } else if (trimmedLine !== transitionsAttribute) {
+                        let source: string, target: string;
+                        const breakpoints: Breakpoint[] = [];
+
+                        if (ParserService.arcRegex.test(trimmedLine)) {
+                            const match =
+                                ParserService.arcRegex.exec(trimmedLine);
+
+                            if (match) {
+                                source = match[1];
+                                target = match[2];
+                            } else {
+                                const splitLine = trimmedLine.split(' ');
+                                source = splitLine[0];
+                                target = splitLine[1];
+                            }
+
                             if (
                                 !addArc(run, {
-                                    source: splitLine[0],
-                                    target: splitLine[1],
-                                    breakpoints: [],
+                                    source: source,
+                                    target: target,
+                                    breakpoints: breakpoints,
                                 })
                             ) {
                                 run.warnings.push(
-                                    `File contains duplicate arc (${splitLine[0]} ${splitLine[1]})`
+                                    `File contains duplicate arc (${source} ${target})`
                                 );
                                 this.toastr.warning(
                                     `File contains duplicate arcs`,
-                                    `Duplicate arcs are ingnored`
+                                    `Duplicate arcs are ignored`
                                 );
+                            } else {
+                                const arc = run.arcs.find(
+                                    (a) =>
+                                        a.source === source &&
+                                        a.target === target
+                                );
+                                if (arc) {
+                                    let trimmedLineTmp = trimmedLine;
+                                    while (
+                                        ParserService.breakpointRegex.test(
+                                            trimmedLineTmp
+                                        )
+                                    ) {
+                                        const posX =
+                                            parseInt(
+                                                trimmedLineTmp.substring(
+                                                    trimmedLineTmp.indexOf(
+                                                        '['
+                                                    ) + 1,
+                                                    trimmedLineTmp.indexOf(',')
+                                                )
+                                            ) - 25; // center breakpoints
+                                        const posY =
+                                            parseInt(
+                                                trimmedLineTmp.substring(
+                                                    trimmedLineTmp.indexOf(
+                                                        ','
+                                                    ) + 1,
+                                                    trimmedLineTmp.indexOf(']')
+                                                )
+                                            ) - 25; // center breakpoints
+                                        breakpoints.push({
+                                            x: posX,
+                                            y: posY,
+                                            arc: arc,
+                                        });
+                                        trimmedLineTmp =
+                                            trimmedLineTmp.substring(
+                                                trimmedLineTmp.indexOf(']') + 1
+                                            );
+                                    }
+                                }
                             }
                         } else {
                             run.warnings.push(`File contains invalid arcs`);
                             this.toastr.warning(
                                 `File contains invalid arcs`,
-                                `Invalid arcs are ingnored`
+                                `Invalid arcs are ignored`
                             );
                         }
                         break;
-                    } else if (trimmedLine === '.transitions') {
+                    } else if (trimmedLine === transitionsAttribute) {
                         currentParsingState = 'transitions';
                         fileContainsTransitions = true;
                         break;
@@ -159,7 +258,7 @@ export class ParserService {
                 );
                 this.toastr.warning(
                     `File contains arcs for non existing transitions`,
-                    `Invalid arcs are ingnored`
+                    `Invalid arcs are ignored`
                 );
             }
 
