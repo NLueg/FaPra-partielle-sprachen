@@ -25,7 +25,7 @@ export function generateTextForRun(run: Run): string {
     const lines = [typeKey];
     lines.push(transitionsAttribute);
     run.elements.forEach((e) => {
-        if (e.x && e.y) lines.push(`${e.label} [${e.x}, ${e.y}]`);
+        if (e.layerPos) lines.push(`${e.label} [${e.layerPos}]`);
         else lines.push(e.label);
     });
 
@@ -53,7 +53,7 @@ function getBreakpointInfo(arc: Arc): string {
     if (arc.breakpoints.length > 0) {
         text = '';
         arc.breakpoints.forEach((breakpoint) => {
-            text += `[${breakpoint.x + 25}, ${breakpoint.y + 25}]`;
+            text += `[${breakpoint.layerPos}]`;
         });
     }
 

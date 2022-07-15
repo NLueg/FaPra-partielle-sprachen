@@ -22,13 +22,9 @@ type ParsingStates = 'initial' | 'type' | 'transitions' | 'arcs';
 })
 export class ParserService {
     constructor(private toastr: ToastrService) {}
-    static transitionRegex = new RegExp(
-        '^([^\\[ ]+)(\\s?\\[\\d+,\\s?\\d+\\])?$'
-    );
-    static arcRegex = new RegExp(
-        '^([^\\[ ]+)\\s([^\\[ ]+)(\\s?\\[\\d+,\\s?\\d+\\])*$'
-    );
-    static breakpointRegex = new RegExp('\\[\\d+,\\s?\\d+\\]');
+    static transitionRegex = new RegExp('^([^\\[ ]+)(\\s?\\[\\d+\\])?$');
+    static arcRegex = new RegExp('^([^\\[ ]+)\\s([^\\[ ]+)(\\s?\\[\\d+\\])*$');
+    static breakpointRegex = new RegExp('\\[\\d+\\]');
 
     parse(content: string, errors: Set<string>): Run | null {
         const contentLines = content.split('\n');
@@ -92,8 +88,7 @@ export class ParserService {
                         break;
                     } else if (trimmedLine !== arcsAttribute) {
                         let label: string;
-                        let posX: number | undefined;
-                        let posY: number | undefined;
+                        let layerPos: number | undefined;
                         if (!ParserService.transitionRegex.test(trimmedLine)) {
                             label = trimmedLine.split(' ')[0];
                             run.warnings.push(`Invalid transition definition`);
@@ -108,15 +103,9 @@ export class ParserService {
                                 label = match[1];
                                 if (match[2]) {
                                     //extract coordinates
-                                    posX = parseInt(
+                                    layerPos = parseInt(
                                         match[2].substring(
                                             match[2].indexOf('[') + 1,
-                                            match[2].indexOf(',')
-                                        )
-                                    );
-                                    posY = parseInt(
-                                        match[2].substring(
-                                            match[2].indexOf(',') + 1,
                                             match[2].indexOf(']')
                                         )
                                     );
@@ -129,8 +118,7 @@ export class ParserService {
                         if (
                             !addElement(run, {
                                 label: label,
-                                x: posX,
-                                y: posY,
+                                layerPos: layerPos,
                                 incomingArcs: [],
                                 outgoingArcs: [],
                             })
@@ -202,27 +190,16 @@ export class ParserService {
                                             trimmedLineTmp
                                         )
                                     ) {
-                                        const posX =
-                                            parseInt(
-                                                trimmedLineTmp.substring(
-                                                    trimmedLineTmp.indexOf(
-                                                        '['
-                                                    ) + 1,
-                                                    trimmedLineTmp.indexOf(',')
-                                                )
-                                            ) - 25; // center breakpoints
-                                        const posY =
-                                            parseInt(
-                                                trimmedLineTmp.substring(
-                                                    trimmedLineTmp.indexOf(
-                                                        ','
-                                                    ) + 1,
-                                                    trimmedLineTmp.indexOf(']')
-                                                )
-                                            ) - 25; // center breakpoints
+                                        const layerPos = parseInt(
+                                            trimmedLineTmp.substring(
+                                                trimmedLineTmp.indexOf('[') + 1,
+                                                trimmedLineTmp.indexOf(']')
+                                            )
+                                        );
                                         breakpoints.push({
-                                            x: posX,
-                                            y: posY,
+                                            x: 0,
+                                            y: 0,
+                                            layerPos: layerPos,
                                             arc: arc,
                                         });
                                         trimmedLineTmp =
