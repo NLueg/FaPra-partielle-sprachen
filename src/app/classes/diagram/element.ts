@@ -6,4 +6,5 @@ export interface Element {
     label: string;
     incomingArcs: Arc[];
     outgoingArcs: Arc[];
+    layerPos?: number;
 }

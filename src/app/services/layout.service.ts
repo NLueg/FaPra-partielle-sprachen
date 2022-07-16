@@ -26,7 +26,9 @@ export class LayoutService {
         if (!hasCycles(runClone)) {
             const layers: Array<Layer[]> = this.assignLayers(runClone);
             this.addBreakpoints(runClone, layers);
+            this.setFixedLayerPos(layers);
             this.minimizeCrossing(runClone, layers);
+            this.updateLayerPos(layers);
             diagrammHeight = this.calculatePosition(layers, positionOffset);
         } else {
             runClone.elements.forEach((el) => {
@@ -117,32 +119,29 @@ export class LayoutService {
                         (element) => element.label === a.target
                     );
 
-                    const source = currentRun.elements.find(
-                        (element) => element.label === a.source
-                    );
-
-                    //ignore breakpoints for manual positioned transitions
-                    if (
-                        a.breakpoints.length > 0 ||
-                        (target && (target.x || target.y)) ||
-                        (source && (source.x || source.y))
-                    )
-                        return;
-
                     //find layer of target
                     const targetLayerIndex = layers.findIndex(
                         (l) => l.findIndex((e) => e === target) >= 0
                     );
 
                     for (let y = i + 1; y < targetLayerIndex; y++) {
-                        const b: Breakpoint = {
-                            x: 0,
-                            y: 0,
-                            arc: a,
-                        };
-                        a.breakpoints.push(b);
+                        let b: Breakpoint;
+                        //Breakpoint already exists?
+                        if (a.breakpoints.length < y - i) {
+                            b = {
+                                x: 0,
+                                y: 0,
+                                arc: a,
+                            };
+                            a.breakpoints.push(b);
+                        } else {
+                            b = a.breakpoints[y - (i + 1)];
+                        }
                         layers[y].push(b);
                     }
+
+                    //remove unnecessary breakpoints
+                    a.breakpoints.splice(targetLayerIndex - (i + 1));
                 });
         }
     }
@@ -160,6 +159,36 @@ export class LayoutService {
             this.reorderLayer(currentRun, layers, layer, index, 0, layerTmp);
             layer.splice(0, layer.length);
             layer.push(...layerTmp);
+        });
+    }
+
+    /**
+     * Move elements/breakpoints with fixed positions in a layer
+     * @param layers layers with elements and breakpoints
+     */
+    private setFixedLayerPos(layers: Array<Layer[]>): void {
+        layers.forEach((layer) => {
+            for (let i = 0; i < layer.length; i++) {
+                let layerPos = layer[i].layerPos;
+                if (layerPos && i != layerPos - 1) {
+                    layerPos = Math.min(layerPos - 1, layer.length - 1);
+                    const tmp = layer[i];
+                    layer[i] = layer[layerPos];
+                    layer[layerPos] = tmp;
+                }
+            }
+        });
+    }
+
+    /**
+     * Save the position in a layer for each element and breakpoint
+     * @param layers layers with elements and breakpoints
+     */
+    private updateLayerPos(layers: Array<Layer[]>): void {
+        layers.forEach((layer) => {
+            for (let i = 0; i < layer.length; i++) {
+                layer[i].layerPos = i;
+            }
         });
     }
 
@@ -184,6 +213,8 @@ export class LayoutService {
         let min = this.countCrossings(currentRun, layers, layerIndex);
         let minLayer = layer;
 
+        const tmp = layer[currentLayerPositon];
+
         if (currentLayerPositon == layer.length - 1) {
             const crossings = this.countCrossings(
                 currentRun,
@@ -197,10 +228,11 @@ export class LayoutService {
         } else {
             //Loop through all remaining elements and set each element once to the current position
             for (let i = currentLayerPositon + 1; i < layer.length; i++) {
-                const tmp = layer[currentLayerPositon];
-                layer[currentLayerPositon] = layer[i];
-                layer[i] = tmp;
-
+                //ignore elements/breakpoints with fixed positions
+                if (!layer[i].layerPos && !tmp.layerPos) {
+                    layer[currentLayerPositon] = layer[i];
+                    layer[i] = tmp;
+                }
                 const layerTmp = new Array<Layer>();
                 const crossings = this.reorderLayer(
                     currentRun,
@@ -214,9 +246,10 @@ export class LayoutService {
                     min = crossings;
                     minLayer = layerTmp;
                 }
-
-                layer[i] = layer[currentLayerPositon];
-                layer[currentLayerPositon] = tmp;
+                if (!layer[i].layerPos && !tmp.layerPos) {
+                    layer[i] = layer[currentLayerPositon];
+                    layer[currentLayerPositon] = tmp;
+                }
             }
         }
 
@@ -438,13 +471,11 @@ export class LayoutService {
             const offsetX = LayoutService.LAYER_WIDTH * (index + 1);
 
             layer.forEach((el, idx) => {
-                //ignore new coordinates if manual coordinates are available
-                if (!el.x) el.x = offsetX;
-                if (!el.y)
-                    el.y =
-                        offsetY * (idx + 1) +
-                        idx * LayoutService.ELEMENT_HEIGHT +
-                        verticalOffset;
+                el.x = offsetX;
+                el.y =
+                    offsetY * (idx + 1) +
+                    idx * LayoutService.ELEMENT_HEIGHT +
+                    verticalOffset;
             });
         });
 

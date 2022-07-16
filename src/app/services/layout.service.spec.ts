@@ -59,6 +59,7 @@ describe('LayoutService', () => {
                 {
                     incomingArcs: [],
                     label: 't1',
+                    layerPos: 0,
                     outgoingArcs: [
                         {
                             breakpoints: [],
@@ -78,6 +79,7 @@ describe('LayoutService', () => {
                         },
                     ],
                     label: 't2',
+                    layerPos: 0,
                     outgoingArcs: [
                         {
                             breakpoints: [],
@@ -107,6 +109,7 @@ describe('LayoutService', () => {
                         },
                     ],
                     label: 't3',
+                    layerPos: 0,
                     outgoingArcs: [],
                     x: 600,
                     y: 160,
@@ -120,6 +123,7 @@ describe('LayoutService', () => {
                         },
                     ],
                     label: 't4',
+                    layerPos: 0,
                     outgoingArcs: [
                         {
                             breakpoints: [
@@ -127,9 +131,11 @@ describe('LayoutService', () => {
                                     arc: expect.anything(),
                                     x: 400,
                                     y: 80,
+                                    layerPos: 0,
                                 },
                                 {
                                     arc: expect.anything(),
+                                    layerPos: 0,
                                     x: 500,
                                     y: 40,
                                 },
@@ -155,11 +161,13 @@ describe('LayoutService', () => {
                         },
                     ],
                     label: 't5',
+                    layerPos: 1,
                     outgoingArcs: [
                         {
                             breakpoints: [
                                 {
                                     arc: expect.anything(),
+                                    layerPos: 2,
                                     x: 500,
                                     y: 280,
                                 },
@@ -185,6 +193,7 @@ describe('LayoutService', () => {
                         },
                     ],
                     label: 't6',
+                    layerPos: 1,
                     outgoingArcs: [
                         {
                             breakpoints: [],
