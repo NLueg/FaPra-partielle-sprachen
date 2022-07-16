@@ -21,30 +21,32 @@ export class DisplayService implements OnDestroy {
 
     private readonly _runs$: BehaviorSubject<Run[]>;
 
-    private coordinatesInfo: BehaviorSubject<CoordinatesInfo>;
+    private coordinatesInfo: BehaviorSubject<Array<CoordinatesInfo>>;
 
     constructor() {
         const emptyRun = getEmptyRun();
         this._runs$ = new BehaviorSubject<Run[]>([emptyRun]);
         this._currentRun$ = new BehaviorSubject<Run>(emptyRun);
-        this.coordinatesInfo = new BehaviorSubject<CoordinatesInfo>({
-            transitionName: '',
-            coordinates: {
-                x: 0,
-                y: 0,
+        this.coordinatesInfo = new BehaviorSubject<Array<CoordinatesInfo>>([
+            {
+                transitionName: '',
+                coordinates: {
+                    x: 0,
+                    y: 0,
+                },
             },
-        });
+        ]);
     }
 
     ngOnDestroy(): void {
         this._currentRun$.complete();
     }
 
-    public setCoordsInfo(coordsInfo: CoordinatesInfo): void {
-        this.coordinatesInfo.next(coordsInfo);
+    public setCoordsInfo(coordsInfos: Array<CoordinatesInfo>): void {
+        this.coordinatesInfo.next(coordsInfos);
     }
 
-    public coordsInfoAdded(): Observable<CoordinatesInfo> {
+    public coordsInfoAdded(): Observable<CoordinatesInfo[]> {
         return this.coordinatesInfo.asObservable();
     }
 

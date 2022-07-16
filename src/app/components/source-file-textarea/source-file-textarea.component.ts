@@ -155,25 +155,30 @@ export class SourceFileTextareaComponent implements OnDestroy, OnInit {
         this.textareaFc.setValue(newSource);
     }
 
-    private addCoordinatesInfo(coordinatesInfo: CoordinatesInfo): void {
-        if (coordinatesInfo.transitionName !== '') {
-            const currentValue = this.textareaFc.value;
-            const coordsString =
-                '\n' +
-                coordinatesInfo.transitionName +
-                ' [' +
-                coordinatesInfo.coordinates.x +
-                ',' +
-                +coordinatesInfo.coordinates.y +
-                ']\n';
-            const patternString =
-                '\\n' +
-                coordinatesInfo.transitionName +
-                '( \\[\\d+,\\d+\\])?\\n';
-            const replacePattern = new RegExp(patternString, 'g');
-            const newValue = currentValue.replace(replacePattern, coordsString);
-            this.textareaFc.setValue(newValue, { emitEvent: true });
-        }
+    private addCoordinatesInfo(coordinatesInfo: Array<CoordinatesInfo>): void {
+        coordinatesInfo.forEach((infoElement) => {
+            if (infoElement.transitionName !== '') {
+                const currentValue = this.textareaFc.value;
+                const coordsString =
+                    '\n' +
+                    infoElement.transitionName +
+                    ' [' +
+                    infoElement.coordinates.x +
+                    ',' +
+                    +infoElement.coordinates.y +
+                    ']\n';
+                const patternString =
+                    '\\n' +
+                    infoElement.transitionName +
+                    '( \\[\\-?\\d+,\\-?\\d+\\])?\\n';
+                const replacePattern = new RegExp(patternString, 'g');
+                const newValue = currentValue.replace(
+                    replacePattern,
+                    coordsString
+                );
+                this.textareaFc.setValue(newValue, { emitEvent: false });
+            }
+        });
     }
 
     public removeCoordinates(): void {

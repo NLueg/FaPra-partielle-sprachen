@@ -4,6 +4,7 @@ import { Arc, Breakpoint } from '../../classes/diagram/arc';
 import { Element } from '../../classes/diagram/element';
 import { Run } from '../../classes/diagram/run';
 import { registerSvg } from './register-svg.fn';
+import { circleSize, transitionSize } from './svg-constants';
 
 @Injectable({
     providedIn: 'root',
@@ -37,16 +38,16 @@ function createSvgForElement(element: Element): SVGElement[] {
 
     svg.setAttribute('x', `${element.x ?? 0}`);
     svg.setAttribute('y', `${element.y ?? 0}`);
-    svg.setAttribute('width', '50');
-    svg.setAttribute('height', '50');
+    svg.setAttribute('width', `${transitionSize}`);
+    svg.setAttribute('height', `${transitionSize}`);
     svg.setAttribute('stroke', 'black');
     svg.setAttribute('stroke-width', '2');
     svg.setAttribute('fill-opacity', '0');
 
     const text = createSvgElement('text');
     text.textContent = element.label;
-    text.setAttribute('x', `${(element.x ?? 0) + 25}`);
-    text.setAttribute('y', `${(element.y ?? 0) + 75}`);
+    text.setAttribute('x', `${(element.x ?? 0) + transitionSize / 2}`);
+    text.setAttribute('y', `${(element.y ?? 0) + transitionSize * 1.5}`);
 
     registerSvg(svg);
 
@@ -71,10 +72,10 @@ function createSvgForArc(
     if (arc.breakpoints.length == 0) {
         elements.push(
             createLine(
-                (source.x ?? 0) + 50,
-                (source.y ?? 0) + 25,
+                (source.x ?? 0) + transitionSize,
+                (source.y ?? 0) + transitionSize / 2,
                 target.x ?? 0,
-                (target.y ?? 0) + 25,
+                (target.y ?? 0) + transitionSize / 2,
                 true
             )
         );
@@ -82,10 +83,10 @@ function createSvgForArc(
         //source -> first breakpoint
         elements.push(
             createLine(
-                (source.x ?? 0) + 50,
-                (source.y ?? 0) + 25,
-                arc.breakpoints[0].x + 25,
-                arc.breakpoints[0].y + 25,
+                (source.x ?? 0) + transitionSize,
+                (source.y ?? 0) + transitionSize / 2,
+                arc.breakpoints[0].x + transitionSize / 2,
+                arc.breakpoints[0].y + transitionSize / 2,
                 false
             )
         );
@@ -93,10 +94,10 @@ function createSvgForArc(
         for (let i = 0; i < arc.breakpoints.length - 1; i++) {
             elements.push(
                 createLine(
-                    arc.breakpoints[i].x + 25,
-                    arc.breakpoints[i].y + 25,
-                    arc.breakpoints[i + 1].x + 25,
-                    arc.breakpoints[i + 1].y + 25,
+                    arc.breakpoints[i].x + transitionSize / 2,
+                    arc.breakpoints[i].y + transitionSize / 2,
+                    arc.breakpoints[i + 1].x + transitionSize / 2,
+                    arc.breakpoints[i + 1].y + transitionSize / 2,
                     false
                 )
             );
@@ -104,8 +105,10 @@ function createSvgForArc(
         //last breakpoint -> target
         elements.push(
             createLine(
-                arc.breakpoints[arc.breakpoints.length - 1].x + 25,
-                arc.breakpoints[arc.breakpoints.length - 1].y + 25,
+                arc.breakpoints[arc.breakpoints.length - 1].x +
+                    transitionSize / 2,
+                arc.breakpoints[arc.breakpoints.length - 1].y +
+                    transitionSize / 2,
                 target.x ?? 0,
                 (target.y ?? 0) + 25,
                 true
@@ -140,10 +143,10 @@ function createLine(
 }
 
 function createCircle(breakpoint: Breakpoint): SVGElement {
-    const x = breakpoint.x + 25;
-    const y = breakpoint.y + 25;
+    const x = breakpoint.x + transitionSize / 2;
+    const y = breakpoint.y + transitionSize / 2;
     const circle = createSvgElement('circle');
-    circle.setAttribute('r', `10`);
+    circle.setAttribute('r', `${circleSize}`);
     circle.setAttribute('cx', `${x}`);
     circle.setAttribute('cy', `${y}`);
     circle.setAttribute('class', `move-helper`);
