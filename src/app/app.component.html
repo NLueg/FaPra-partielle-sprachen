@@ -14,6 +14,7 @@
             </button>
         </mat-tab>
         <mat-tab id="merged" label="Merged Runs">
+            <app-color></app-color>
             <app-display-merged-run
                 class="padding full-size"
             ></app-display-merged-run>
@@ -29,7 +30,7 @@
         ></app-template-button>
 
         <app-source-file-textarea
-            [events]="eventsSubject.asObservable()"
+            [resetEvent]="eventSubject.asObservable()"
         ></app-source-file-textarea>
 
         <app-download

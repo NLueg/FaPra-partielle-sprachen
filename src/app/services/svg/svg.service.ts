@@ -3,25 +3,131 @@ import { Injectable } from '@angular/core';
 import { Arc, Breakpoint } from '../../classes/diagram/arc';
 import { Element } from '../../classes/diagram/element';
 import { Run } from '../../classes/diagram/run';
-import { registerSvg } from './register-svg.fn';
+import { ColorService } from '../color.service';
+import { DisplayService } from '../display.service';
 import { circleSize, transitionSize } from './svg-constants';
+
+let highlightColor: string;
+let currentRun: Run;
 
 @Injectable({
     providedIn: 'root',
 })
 export class SvgService {
-    public createSvgElements(run: Run): Array<SVGElement> {
-        const result: Array<SVGElement> = [];
-
-        run.elements.forEach((el) => {
-            result.push(...createSvgForElement(el));
+    constructor(
+        public displayService: DisplayService,
+        private _colorService: ColorService
+    ) {
+        _colorService.getHighlightColor().subscribe((color) => {
+            highlightColor = color;
         });
+        displayService.currentRun$.subscribe((run) => {
+            currentRun = run;
+        });
+    }
+
+    public createSvgElements(run: Run, merge: boolean): Array<SVGElement> {
+        const result: Array<SVGElement> = [];
+        let samePrefix = false;
+
+        if (merge) {
+            const elementWithNoIncomingArc: Array<Element> = [];
+            currentRun.elements.forEach((el) => {
+                if (el.incomingArcs.length == 0) {
+                    elementWithNoIncomingArc.push(el);
+                }
+            });
+
+            run.elements.forEach((el) => {
+                elementWithNoIncomingArc.forEach((e) => {
+                    if (el.incomingArcs.length == 0 && el.label == e.label) {
+                        samePrefix = true;
+                    }
+                });
+            });
+        }
+
+        if (merge && samePrefix) {
+            run.elements.forEach((el) => {
+                let isCurrentRun = false;
+                currentRun.elements.forEach((element) => {
+                    if (element.label == el.label) {
+                        isCurrentRun = true;
+                        return;
+                    }
+                });
+                result.push(...createSvgForElement(el, isCurrentRun));
+            });
+            run.arcs.forEach((arc) => {
+                const source = run.elements.find(
+                    (el) => el.label === arc.source
+                );
+                const target = run.elements.find(
+                    (el) => el.label === arc.target
+                );
+                let isCurrentRun = false;
+                currentRun.arcs.forEach((currentArc) => {
+                    if (
+                        currentArc.source == arc.source &&
+                        currentArc.target == arc.target
+                    ) {
+                        isCurrentRun = true;
+                        return;
+                    }
+                });
+
+                const arrow = createSvgForArc(
+                    arc,
+                    source,
+                    target,
+                    isCurrentRun && merge && samePrefix
+                );
+                if (arrow) {
+                    arrow.forEach((a) => {
+                        result.push(a);
+                    });
+                }
+            });
+        } else {
+            run.elements.forEach((el) => {
+                result.push(...createSvgForElement(el, false));
+            });
+            run.arcs.forEach((arc) => {
+                const source = run.elements.find(
+                    (el) => el.label === arc.source
+                );
+                const target = run.elements.find(
+                    (el) => el.label === arc.target
+                );
+                const arrow = createSvgForArc(arc, source, target, false);
+                if (arrow) {
+                    arrow.forEach((a) => {
+                        result.push(a);
+                    });
+                }
+            });
+        }
 
         run.arcs.forEach((arc) => {
             const source = run.elements.find((el) => el.label === arc.source);
             const target = run.elements.find((el) => el.label === arc.target);
+            let isCurrentRun = false;
+            currentRun.arcs.forEach((currentArc) => {
+                if (
+                    currentArc.source == arc.source &&
+                    currentArc.target == arc.target
+                ) {
+                    isCurrentRun = true;
+                    return;
+                }
+            });
 
-            const arrow = createSvgForArc(arc, source, target);
+            const arrow = createSvgForArc(
+                arc,
+                source,
+                target,
+                isCurrentRun && merge && samePrefix
+            );
             if (arrow) {
                 arrow.forEach((a) => {
                     result.push(a);
@@ -33,7 +139,10 @@ export class SvgService {
     }
 }
 
-function createSvgForElement(element: Element): SVGElement[] {
+function createSvgForElement(
+    element: Element,
+    hightlight: boolean
+): SVGElement[] {
     const svg = createSvgElement('rect');
 
     svg.setAttribute('x', `${element.x ?? 0}`);
@@ -49,7 +158,10 @@ function createSvgForElement(element: Element): SVGElement[] {
     text.setAttribute('x', `${(element.x ?? 0) + transitionSize / 2}`);
     text.setAttribute('y', `${(element.y ?? 0) + transitionSize * 1.5}`);
 
-    registerSvg(svg);
+    if (hightlight) {
+        svg.setAttribute('stroke', highlightColor);
+        text.setAttribute('fill', highlightColor);
+    }
 
     return [svg, text];
 }
@@ -61,7 +173,8 @@ function createSvgElement(name: string): SVGElement {
 function createSvgForArc(
     arc: Arc,
     source: Element | undefined,
-    target: Element | undefined
+    target: Element | undefined,
+    hightlight: boolean
 ): SVGElement[] {
     const elements: SVGElement[] = [];
 
@@ -76,7 +189,8 @@ function createSvgForArc(
                 (source.y ?? 0) + transitionSize / 2,
                 target.x ?? 0,
                 (target.y ?? 0) + transitionSize / 2,
-                true
+                true,
+                hightlight
             )
         );
     } else {
@@ -87,7 +201,8 @@ function createSvgForArc(
                 (source.y ?? 0) + transitionSize / 2,
                 arc.breakpoints[0].x + transitionSize / 2,
                 arc.breakpoints[0].y + transitionSize / 2,
-                false
+                false,
+                hightlight
             )
         );
         //breakpoint -> next breakpoint
@@ -98,7 +213,8 @@ function createSvgForArc(
                     arc.breakpoints[i].y + transitionSize / 2,
                     arc.breakpoints[i + 1].x + transitionSize / 2,
                     arc.breakpoints[i + 1].y + transitionSize / 2,
-                    false
+                    false,
+                    hightlight
                 )
             );
         }
@@ -111,7 +227,8 @@ function createSvgForArc(
                     transitionSize / 2,
                 target.x ?? 0,
                 (target.y ?? 0) + 25,
-                true
+                true,
+                hightlight
             )
         );
         elements.push(createCircle(arc.breakpoints[0]));
@@ -128,12 +245,22 @@ function createLine(
     y1: number,
     x2: number,
     y2: number,
-    showArrow: boolean
+    showArrow: boolean,
+    hightlight: boolean
 ): SVGElement {
     const line = createSvgElement('line');
-    line.setAttribute('stroke', 'black');
+    if (hightlight) {
+        line.setAttribute('stroke', highlightColor);
+    } else {
+        line.setAttribute('stroke', 'black');
+    }
+
     line.setAttribute('stroke-width', '1');
-    if (showArrow) line.setAttribute('marker-end', 'url(#arrowhead)');
+    if (hightlight && showArrow) {
+        line.setAttribute('marker-end', 'url(#arrowheadhightlight )');
+    } else if (showArrow) {
+        line.setAttribute('marker-end', 'url(#arrowhead)');
+    }
     line.setAttribute('x1', `${x1}`);
     line.setAttribute('y1', `${y1}`);
     line.setAttribute('x2', `${x2}`);

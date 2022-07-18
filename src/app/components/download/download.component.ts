@@ -33,5 +33,6 @@ export class DownloadComponent {
         } else if (this.currentDownloadSelection === 'current') {
             this._downloadService.downloadCurrentRun(this.downloadName);
         }
+        this.toggleHideDownload();
     }
 }

@@ -13,7 +13,7 @@ import { UploadService } from './services/upload/upload.service';
 export class AppComponent {
     selectedDataToDownload: DownloadableContent = 'separateRuns';
 
-    eventsSubject: Subject<void> = new Subject<void>();
+    eventSubject: Subject<void> = new Subject<void>();
 
     constructor(
         private _uploadService: UploadService,
@@ -21,7 +21,7 @@ export class AppComponent {
     ) {}
 
     emitEventToChild(): void {
-        this.eventsSubject.next();
+        this.eventSubject.next();
     }
 
     public openFileSelector(): void {

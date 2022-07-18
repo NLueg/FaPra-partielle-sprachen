@@ -5,6 +5,7 @@ import {
     distinctUntilChanged,
     first,
     Observable,
+    of,
     Subscription,
 } from 'rxjs';
 
@@ -29,6 +30,7 @@ export class SourceFileTextareaComponent implements OnDestroy, OnInit {
     private _sub: Subscription;
     private _fileSub: Subscription;
     private _coordsSub: Subscription;
+    private _resetEventSubscription!: Subscription;
 
     textareaFc: FormControl;
 
@@ -37,6 +39,9 @@ export class SourceFileTextareaComponent implements OnDestroy, OnInit {
     isCurrentRunEmpty$: Observable<boolean>;
     getCurrentRunIndex$: Observable<number>;
     getRunCount$: Observable<number>;
+
+    @Input()
+    resetEvent: Observable<void> = of(undefined);
 
     runValidationStatus: Valid | null = null;
     runHint = '';
@@ -85,13 +90,13 @@ export class SourceFileTextareaComponent implements OnDestroy, OnInit {
     }
 
     ngOnInit(): void {
-        this.eventsSubscription = this.events?.subscribe(() =>
+        this._resetEventSubscription = this.resetEvent.subscribe(() =>
             this.removeCoordinates()
         );
     }
 
     ngOnDestroy(): void {
-        this.eventsSubscription?.unsubscribe();
+        this._resetEventSubscription.unsubscribe();
         this._sub.unsubscribe();
         this._fileSub.unsubscribe();
     }
@@ -197,7 +202,7 @@ export class SourceFileTextareaComponent implements OnDestroy, OnInit {
         this.processSourceChange(newText);
     }
 
-    private updateShownRun(run: Run, emitEvent = false): void {
+    private updateShownRun(run: Run, emitEvent = true): void {
         this.textareaFc.setValue(run.text, { emitEvent: emitEvent });
         this.updateValidation(run);
     }

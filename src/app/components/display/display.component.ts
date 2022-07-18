@@ -21,7 +21,7 @@ export class DisplayComponent {
         this.svgElements$ = this._displayService.currentRun$.pipe(
             map((currentRun) => this._layoutService.layout(currentRun).run),
             map((modifiedRun) =>
-                this._svgService.createSvgElements(modifiedRun)
+                this._svgService.createSvgElements(modifiedRun, false)
             )
         );
     }
