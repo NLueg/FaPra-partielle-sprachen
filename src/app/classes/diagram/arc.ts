@@ -8,4 +8,5 @@ export type Breakpoint = {
     x: number;
     y: number;
     arc: Arc;
+    layerPos?: number;
 };
