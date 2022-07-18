@@ -21,13 +21,13 @@ export class DisplayService implements OnDestroy {
 
     private readonly _runs$: BehaviorSubject<Run[]>;
 
-    private coordinatesInfo: BehaviorSubject<Array<CoordinatesInfo>>;
+    private coordinatesInfo$: BehaviorSubject<Array<CoordinatesInfo>>;
 
     constructor() {
         const emptyRun = getEmptyRun();
         this._runs$ = new BehaviorSubject<Run[]>([emptyRun]);
         this._currentRun$ = new BehaviorSubject<Run>(emptyRun);
-        this.coordinatesInfo = new BehaviorSubject<Array<CoordinatesInfo>>([
+        this.coordinatesInfo$ = new BehaviorSubject<Array<CoordinatesInfo>>([
             {
                 transitionName: '',
                 coordinates: {
@@ -43,11 +43,11 @@ export class DisplayService implements OnDestroy {
     }
 
     public setCoordsInfo(coordsInfos: Array<CoordinatesInfo>): void {
-        this.coordinatesInfo.next(coordsInfos);
+        this.coordinatesInfo$.next(coordsInfos);
     }
 
     public coordsInfoAdded(): Observable<CoordinatesInfo[]> {
-        return this.coordinatesInfo.asObservable();
+        return this.coordinatesInfo$.asObservable();
     }
 
     public get runs$(): Observable<Run[]> {
