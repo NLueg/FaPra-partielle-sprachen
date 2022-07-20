@@ -1,4 +1,10 @@
-<h1 mat-dialog-title>Download run</h1>
+<h1 mat-dialog-title>
+    Download
+    <ng-container *ngIf="data.contentToDownload === 'mergeRuns'"
+        >merged</ng-container
+    >
+    run
+</h1>
 
 <div class="content" mat-dialog-content>
     <mat-form-field appearance="outline" class="textarea">
@@ -10,12 +16,23 @@
     </mat-form-field>
 
     <mat-radio-group
+        *ngIf="data.contentToDownload === 'separateRuns'"
         color="primary"
         aria-label="Select an option"
         [(ngModel)]="currentDownloadSelection"
     >
         <mat-radio-button value="all" checked>All runs</mat-radio-button>
         <mat-radio-button value="current"> Only current run </mat-radio-button>
+    </mat-radio-group>
+
+    <mat-label id="format-radio-group-label">File format</mat-label>
+    <mat-radio-group
+        color="primary"
+        [(ngModel)]="fileFormat"
+        aria-labelledby="format-radio-group-label"
+    >
+        <mat-radio-button value="run">PS</mat-radio-button>
+        <mat-radio-button value="pnml">PNML</mat-radio-button>
     </mat-radio-group>
 
     <div class="buttons"></div>

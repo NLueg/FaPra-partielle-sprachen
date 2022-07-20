@@ -2,7 +2,7 @@ import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 import { DownloadService } from '../../../services/download/download.service';
-import { DownloadableContent } from '../download.const';
+import { DownloadableContent, DownloadFormat } from '../download.const';
 
 @Component({
     selector: 'app-download-popover',
@@ -10,8 +10,9 @@ import { DownloadableContent } from '../download.const';
     styleUrls: ['./download-popover.component.scss'],
 })
 export class DownloadPopoverComponent {
+    fileFormat: DownloadFormat = 'run';
     downloadName = '';
-    currentDownloadSelection = 'all';
+    currentDownloadSelection: 'all' | 'current' = 'all';
 
     constructor(
         private dialogRef: MatDialogRef<DownloadPopoverComponent>,
@@ -24,10 +25,14 @@ export class DownloadPopoverComponent {
         if (this.currentDownloadSelection === 'all') {
             this._downloadService.downloadRuns(
                 this.downloadName,
-                this.data.contentToDownload
+                this.data.contentToDownload,
+                this.fileFormat
             );
         } else if (this.currentDownloadSelection === 'current') {
-            this._downloadService.downloadCurrentRun(this.downloadName);
+            this._downloadService.downloadCurrentRun(
+                this.downloadName,
+                this.fileFormat
+            );
         }
         this.closePopover();
     }

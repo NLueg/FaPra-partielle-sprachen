@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { MatDialog } from '@angular/material/dialog';
 
 import { DownloadComponent } from './download.component';
 
@@ -9,6 +10,7 @@ describe('DownloadComponent', () => {
     beforeEach(async () => {
         await TestBed.configureTestingModule({
             declarations: [DownloadComponent],
+            providers: [{ provide: MatDialog, useValue: { open: jest.fn() } }],
         }).compileComponents();
     });
 
