@@ -1,0 +1,27 @@
+<h1 mat-dialog-title>Download run</h1>
+
+<div class="content" mat-dialog-content>
+    <mat-form-field appearance="outline" class="textarea">
+        <mat-label class="input-label">
+            <span>Name</span>
+        </mat-label>
+
+        <input matInput [(ngModel)]="downloadName" />
+    </mat-form-field>
+
+    <mat-radio-group
+        color="primary"
+        aria-label="Select an option"
+        [(ngModel)]="currentDownloadSelection"
+    >
+        <mat-radio-button value="all" checked>All runs</mat-radio-button>
+        <mat-radio-button value="current"> Only current run </mat-radio-button>
+    </mat-radio-group>
+
+    <div class="buttons"></div>
+</div>
+
+<div mat-dialog-actions>
+    <button mat-button (click)="closePopover()">Cancel</button>
+    <button mat-button (click)="download()">Save</button>
+</div>
