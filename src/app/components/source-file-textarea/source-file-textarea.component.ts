@@ -5,7 +5,6 @@ import {
     distinctUntilChanged,
     first,
     Observable,
-    of,
     Subscription,
 } from 'rxjs';
 
@@ -25,12 +24,11 @@ type Valid = 'error' | 'warn' | 'success';
     styleUrls: ['./source-file-textarea.component.scss'],
 })
 export class SourceFileTextareaComponent implements OnDestroy, OnInit {
-    private eventsSubscription: Subscription | undefined;
     @Input() events: Observable<void> | undefined;
     private _sub: Subscription;
     private _fileSub: Subscription;
     private _coordsSub: Subscription;
-    private _resetEventSubscription!: Subscription;
+    private _resetEventSubscription?: Subscription;
 
     textareaFc: FormControl;
 
@@ -41,7 +39,7 @@ export class SourceFileTextareaComponent implements OnDestroy, OnInit {
     getRunCount$: Observable<number>;
 
     @Input()
-    resetEvent: Observable<void> = of(undefined);
+    resetEvent?: Observable<void>;
 
     runValidationStatus: Valid | null = null;
     runHint = '';
@@ -90,13 +88,13 @@ export class SourceFileTextareaComponent implements OnDestroy, OnInit {
     }
 
     ngOnInit(): void {
-        this._resetEventSubscription = this.resetEvent.subscribe(() =>
+        this._resetEventSubscription = this.resetEvent?.subscribe(() =>
             this.removeCoordinates()
         );
     }
 
     ngOnDestroy(): void {
-        this._resetEventSubscription.unsubscribe();
+        this._resetEventSubscription?.unsubscribe();
         this._sub.unsubscribe();
         this._fileSub.unsubscribe();
     }
@@ -164,18 +162,8 @@ export class SourceFileTextareaComponent implements OnDestroy, OnInit {
         coordinatesInfo.forEach((infoElement) => {
             if (infoElement.transitionName !== '') {
                 const currentValue = this.textareaFc.value;
-                const coordsString =
-                    '\n' +
-                    infoElement.transitionName +
-                    ' [' +
-                    infoElement.coordinates.x +
-                    ',' +
-                    +infoElement.coordinates.y +
-                    ']\n';
-                const patternString =
-                    '\\n' +
-                    infoElement.transitionName +
-                    '( \\[\\-?\\d+,\\-?\\d+\\])?\\n';
+                const coordsString = `\n${infoElement.transitionName} [${infoElement.coordinates.x},${infoElement.coordinates.y}]\n`;
+                const patternString = `\\n${infoElement.transitionName}( \\[\\-?\\d+,\\-?\\d+\\])?\\s*\\n`;
                 const replacePattern = new RegExp(patternString, 'g');
                 const newValue = currentValue.replace(
                     replacePattern,
@@ -195,7 +183,7 @@ export class SourceFileTextareaComponent implements OnDestroy, OnInit {
                 newText = newText + line.split('[')[0];
                 first = false;
             } else {
-                newText = newText + '\n' + line.split('[')[0];
+                newText = `${newText}\n${line.split('[')[0].trim()}`;
             }
         }
         this.textareaFc.setValue(newText);

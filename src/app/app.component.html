@@ -9,7 +9,7 @@
     <mat-tab-group (selectedIndexChange)="updateTabIndex($event)">
         <mat-tab id="separate" label="Separate Runs">
             <app-display class="padding full-size"></app-display>
-            <button (click)="emitEventToChild()" class="reset-button">
+            <button (click)="resetSvgPositioning()" class="reset-button">
                 Reset
             </button>
         </mat-tab>
@@ -30,7 +30,7 @@
         ></app-template-button>
 
         <app-source-file-textarea
-            [resetEvent]="eventSubject.asObservable()"
+            [resetEvent]="resetPositioningSubject.asObservable()"
         ></app-source-file-textarea>
 
         <app-download
