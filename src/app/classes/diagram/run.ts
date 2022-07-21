@@ -1,3 +1,4 @@
+import { Coordinates } from '../../components/canvas/canvas.component';
 import { Arc } from './arc';
 import { Element } from './element';
 
@@ -6,6 +7,7 @@ export interface Run {
     arcs: Arc[];
     elements: Element[];
     warnings: string[];
+    offset?: Coordinates;
 }
 
 export function isRunEmpty(run: Run): boolean {

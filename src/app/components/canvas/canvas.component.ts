@@ -6,11 +6,31 @@ import {
     SimpleChanges,
     ViewChild,
 } from '@angular/core';
+import { Subscription } from 'rxjs';
 
 import { DisplayService } from '../../services/display.service';
+import { DraggingService } from '../../services/dragging/dragging.service';
+import {
+    asInt,
+    createCoordsFromElement,
+    findElementsInYAxis,
+    findIncomingArcs,
+    findInfoElementForTransition,
+    findOutgoingArcs,
+    getElementFromCanvas,
+    getMoveDirection,
+    getXAttribute,
+    getYAttribute,
+    moveElement,
+} from '../../services/dragging/dragging-helper.fn';
 import { SvgService } from '../../services/svg/svg.service';
 import {
+    breakpointPositionAttribute,
+    breakpointTrail,
+    fromTransitionAttribute,
+    layerPosYAttibute,
     originalYAttribute,
+    toTransitionAttribute,
     transitionSize,
 } from '../../services/svg/svg-constants';
 
@@ -36,16 +56,30 @@ export class CanvasComponent implements OnChanges {
     private _runMoved: boolean;
     private _globalChanges: Coordinates = { x: 0, y: 0 };
     private _localChanges: Coordinates = { x: 0, y: 0 };
+    private _localChangesRun: Coordinates = { x: 0, y: 0 };
+    private _globalChangesRun: Coordinates = { x: 0, y: 0 };
     private _movedChildElement?: Draggable;
     private _activeNeighbourElement?: Draggable;
+    private _offsetSub: Subscription;
+    private _updateOffsetSub: Subscription;
 
     constructor(
         private _svgService: SvgService,
-        private _displayService: DisplayService
+        private _displayService: DisplayService,
+        private _draggingService: DraggingService
     ) {
         this._mouseMove = false;
         this._childElementInFocus = false;
         this._runMoved = false;
+        this._offsetSub = this._displayService
+            .offsetInfoAdded()
+            .pipe()
+            .subscribe((val) => this.resetOffset(val));
+        this._updateOffsetSub = this._displayService
+            .offsetInfoUpdated()
+            .pipe()
+            .subscribe((val) => this.resetOffset(val));
+        this._draggingService.setDrawingArea(this.drawingArea);
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -58,6 +92,11 @@ export class CanvasComponent implements OnChanges {
             this.registerCanvasMouseHandler(this.drawingArea.nativeElement);
             this.registerSingleMouseHandler(this.drawingArea.nativeElement);
         }
+    }
+
+    private resetOffset(newCoordinates: Coordinates): void {
+        this._globalChangesRun.x = newCoordinates.x;
+        this._globalChangesRun.y = newCoordinates.y;
     }
 
     private clearDrawingArea() {
@@ -76,26 +115,33 @@ export class CanvasComponent implements OnChanges {
     private registerCanvasMouseHandler(drawingArea: SVGElement) {
         drawingArea.onmousedown = (e) => {
             this._mouseMove = true;
+            this._localChangesRun = {
+                x: 0,
+                y: 0,
+            };
             this._globalChanges = {
                 x: e.offsetX,
                 y: e.offsetY,
             };
         };
         drawingArea.onmousemove = (e) => {
-            this.updateChangeState(e);
             if (this._movedChildElement && !this._childElementInFocus) {
                 this.moveDraggable(this._movedChildElement);
+                this.updateChangeStateDraggable(e);
             }
             if (
                 this._mouseMove &&
                 !this._childElementInFocus &&
                 !this._movedChildElement
             ) {
+                this.updateChangeStateRun(e);
                 this.moveRun(drawingArea);
             }
         };
         drawingArea.onmouseup = () => {
-            this.persistAllCoordinates();
+            if (this.persistCoordinates) {
+                this.persistOffset();
+            }
             this.resetCanvasHandlers();
         };
         drawingArea.onmouseleave = () => {
@@ -118,46 +164,42 @@ export class CanvasComponent implements OnChanges {
         this._runMoved = false;
     }
 
-    private persistAllCoordinates() {
+    private persistOffset() {
         if (this._runMoved) {
-            const transitions =
-                this.drawingArea?.nativeElement.querySelectorAll('rect') ?? [];
-            const transitionElements = [];
-            for (let i = 0; i < transitions.length; i++) {
-                const transition = transitions[i] as unknown as HTMLElement;
-                transitionElements.push(transition);
-            }
-            this.persistCoords(transitionElements);
+            this._displayService.setOffsetInfo({
+                x: this._globalChangesRun.x,
+                y: this._globalChangesRun.y,
+            });
         }
     }
 
     private moveRun(drawingArea: SVGElement) {
         Array.from(drawingArea.children).forEach((e) => {
-            const x = this._localChanges.x;
-            const y = this._localChanges.y;
+            const x = this._localChangesRun.x;
+            const y = this._localChangesRun.y;
             if (x !== 0 || y !== 0) {
                 this._runMoved = true;
             }
             if (e.nodeName === 'rect' || e.nodeName === 'text') {
-                const currentX = +this.asInt(e, 'x') + +x;
-                const currentY = +this.asInt(e, 'y') + +y;
+                const currentX = +asInt(e, 'x') + +x;
+                const currentY = +asInt(e, 'y') + +y;
                 e.setAttribute('x', `${currentX}`);
                 e.setAttribute('y', `${currentY}`);
                 e.removeAttribute(originalYAttribute);
             }
             if (e.nodeName === 'line') {
-                const currentX1 = +this.asInt(e, 'x1') + +x;
-                const currentY1 = +this.asInt(e, 'y1') + +y;
-                const currentX2 = +this.asInt(e, 'x2') + +x;
-                const currentY2 = +this.asInt(e, 'y2') + +y;
+                const currentX1 = +asInt(e, 'x1') + +x;
+                const currentY1 = +asInt(e, 'y1') + +y;
+                const currentX2 = +asInt(e, 'x2') + +x;
+                const currentY2 = +asInt(e, 'y2') + +y;
                 e.setAttribute('x1', `${currentX1}`);
                 e.setAttribute('y1', `${currentY1}`);
                 e.setAttribute('x2', `${currentX2}`);
                 e.setAttribute('y2', `${currentY2}`);
             }
             if (e.nodeName === 'circle') {
-                const newX = +this.asInt(e, 'cx') + +x;
-                const newY = +this.asInt(e, 'cy') + +y;
+                const newX = +asInt(e, 'cx') + +x;
+                const newY = +asInt(e, 'cy') + +y;
                 e.setAttribute('cx', `${newX}`);
                 e.setAttribute('cy', `${newY}`);
                 e.removeAttribute(originalYAttribute);
@@ -180,28 +222,30 @@ export class CanvasComponent implements OnChanges {
         if (element === null) {
             return;
         }
+        element.transition.onmouseenter = () => {
+            this._mouseMove = false;
+        };
         element.transition.onmousedown = (e) => {
             this.initMouseDownForDraggable(e);
         };
         element.transition.onmousemove = (e) => {
             if (this._childElementInFocus) {
-                this.updateChangeState(e);
                 if (this._movedChildElement === undefined) {
                     this._movedChildElement = element;
                 }
+                this.updateChangeStateDraggable(e);
                 this.moveDraggable(this._movedChildElement);
             }
         };
         element.transition.onmouseleave = () => {
             this._childElementInFocus = false;
-            this._activeNeighbourElement = undefined;
         };
         element.transition.onmouseup = (e) => {
             if (this._movedChildElement !== undefined) {
                 this.resetDraggable(this._movedChildElement);
             }
             this.resetGlobalHandlers();
-            this.updateChangeState(e);
+            this.updateChangeStateDraggable(e);
         };
     }
 
@@ -211,37 +255,17 @@ export class CanvasComponent implements OnChanges {
         }
         const transition = draggable.transition;
         const y = this._localChanges.y;
-        const currentCoords = this.createCoordsFromElement(transition);
+        const currentCoords = createCoordsFromElement(transition);
         const currentY = currentCoords.y;
         const newY = currentY + y;
-        const originalY = this.asInt(transition, originalYAttribute);
+        const originalY = asInt(transition, originalYAttribute);
         if (originalY === 0) {
             transition.setAttribute(originalYAttribute, `${currentY}`);
         }
         if (this.checkForPassedElement(transition)) {
             this.handlePassedElement(draggable);
         } else {
-            this.moveElement(draggable, newY);
-        }
-    }
-
-    private moveElement(draggable: Draggable, newY: number) {
-        const transition = draggable.transition;
-        const attributePraefix = this.getAttributePraefix(transition);
-        transition.setAttribute(attributePraefix + 'y', `${newY}`);
-        const newYInfo = newY + transitionSize * 1.5;
-        draggable.infoElement?.setAttribute('y', `${newYInfo}`);
-        let offsetIncoming = 0;
-        if (transition.nodeName === 'rect') {
-            offsetIncoming = transitionSize / 2;
-        }
-        const newYForLines = newY + offsetIncoming;
-
-        for (let i = 0; i < draggable.incomingArcs.length; i++) {
-            draggable.incomingArcs[i].setAttribute('y2', `${newYForLines}`);
-        }
-        for (let j = 0; j < draggable.outgoingArcs.length; j++) {
-            draggable.outgoingArcs[j].setAttribute('y1', `${newYForLines}`);
+            moveElement(draggable, newY);
         }
     }
 
@@ -258,68 +282,63 @@ export class CanvasComponent implements OnChanges {
         let newYPassed;
         if (nodeTypeOfMovingElement === 'rect') {
             if (nodeTypeOfPassedElement === 'circle') {
-                newYMoving =
-                    this.asInt(passedElement, 'cy') - transitionSize / 2;
+                newYMoving = asInt(passedElement, 'cy') - transitionSize / 2;
                 newYPassed =
-                    this.asInt(movingElement, originalYAttribute) +
+                    asInt(movingElement, originalYAttribute) +
                     transitionSize / 2;
             } else {
-                newYMoving = this.asInt(passedElement, 'y');
-                newYPassed = this.asInt(movingElement, originalYAttribute);
+                newYMoving = asInt(passedElement, 'y');
+                newYPassed = asInt(movingElement, originalYAttribute);
             }
         } else {
             if (nodeTypeOfPassedElement === 'circle') {
-                newYPassed = this.asInt(movingElement, originalYAttribute);
-                newYMoving = this.asInt(passedElement, 'cy');
+                newYPassed = asInt(movingElement, originalYAttribute);
+                newYMoving = asInt(passedElement, 'cy');
             } else {
                 newYPassed =
-                    this.asInt(movingElement, originalYAttribute) -
+                    asInt(movingElement, originalYAttribute) -
                     transitionSize / 2;
-                newYMoving =
-                    this.asInt(passedElement, 'y') + transitionSize / 2;
+                newYMoving = asInt(passedElement, 'y') + transitionSize / 2;
             }
         }
-        this.moveElement(
+        moveElement(
             this.createDraggableFromElement(passedElement) as Draggable,
             newYPassed
         );
-        this.moveElement(draggable, newYMoving);
+        moveElement(draggable, newYMoving);
+
         if (this.persistCoordinates) {
-            this.persistCoords([passedElement, movingElement]);
+            const movedLayerPos = asInt(movingElement, layerPosYAttibute);
+            const passedLayerPos = asInt(passedElement, layerPosYAttibute);
+            movingElement.setAttribute(layerPosYAttibute, `${passedLayerPos}`);
+            passedElement.setAttribute(layerPosYAttibute, `${movedLayerPos}`);
+            this.persistLayerPosition([passedElement, movingElement]);
         }
         movingElement.removeAttribute(originalYAttribute);
         passedElement.removeAttribute(originalYAttribute);
-        this.resetCanvasHandlers();
-    }
 
-    private getAttributePraefix(e: HTMLElement): string {
-        if (e.nodeName === 'circle') {
-            return 'c';
-        }
-        return '';
+        this.resetCanvasHandlers();
     }
 
     private checkForPassedElement(movingElement: HTMLElement): boolean {
         if (this._activeNeighbourElement === undefined) {
             return false;
         }
-        const yMoving = this.asInt(
-            movingElement,
-            this.getYAttribute(movingElement)
-        );
-        const yPassed = this.asInt(
+        const yMoving = asInt(movingElement, getYAttribute(movingElement));
+        const yOriginal = asInt(movingElement, originalYAttribute);
+        const yPassed = asInt(
             this._activeNeighbourElement.transition,
-            this.getYAttribute(this._activeNeighbourElement.transition)
+            getYAttribute(this._activeNeighbourElement.transition)
         );
-        const direction = this.getMoveDirection(movingElement);
+        const direction = getMoveDirection(movingElement);
         if (!direction) {
             return false;
         }
         const offset = this.calculateOffset(movingElement, direction);
         if (direction === 'up') {
-            return yMoving < yPassed + offset + transitionSize / 2;
+            return yMoving < yPassed + offset && yOriginal > yPassed;
         }
-        return yMoving > yPassed + offset - transitionSize / 2;
+        return yMoving > yPassed + offset && yOriginal < yPassed;
     }
 
     private calculateOffset(
@@ -355,15 +374,15 @@ export class CanvasComponent implements OnChanges {
 
     private resetDraggable(e: Draggable) {
         const transition = e.transition;
-        const newY = this.asInt(transition, originalYAttribute);
+        const newY = asInt(transition, originalYAttribute);
         if (newY > 0) {
-            this.moveElement(e, newY);
+            moveElement(e, newY);
         }
     }
 
-    private findInfoElement(transition: HTMLElement): HTMLElement {
-        const x = this.asInt(transition, this.getXAttribute(transition));
-        const y = this.asInt(transition, this.getYAttribute(transition));
+    private findInfoElementForTransition(transition: HTMLElement): HTMLElement {
+        const x = asInt(transition, getXAttribute(transition));
+        const y = asInt(transition, getYAttribute(transition));
         const currentXForInfolement = +x + +transitionSize / 2;
         const currentYInfoElement = +y + transitionSize * 1.5;
         const selector =
@@ -372,87 +391,47 @@ export class CanvasComponent implements OnChanges {
             '"][x="' +
             currentXForInfolement +
             '"]';
-        return this.drawingArea?.nativeElement.querySelector(
-            selector
-        ) as HTMLElement;
+        return getElementFromCanvas(selector, this.drawingArea);
     }
 
-    private findIncomingArcs(transition: HTMLElement): Array<HTMLElement> {
-        const coords = this.createCoordsFromElement(transition);
-        let offsetIncoming = 0;
-        if (transition.nodeName === 'rect') {
-            offsetIncoming = transitionSize / 2;
-        }
-        const currentXForIncomingLines = coords.x;
-        const currentYForLines = coords.y + offsetIncoming;
-        const selectorForIncomingLines =
-            'line[y2="' +
-            currentYForLines +
-            '"][x2="' +
-            currentXForIncomingLines +
-            '"]';
-        const matchingNodes =
-            this.drawingArea?.nativeElement.querySelectorAll(
-                selectorForIncomingLines
-            ) ?? [];
-        const incomingLines = [];
-        for (let i = 0; i < matchingNodes.length; i++) {
-            incomingLines.push(matchingNodes[i] as HTMLElement);
-        }
-        return incomingLines;
-    }
-
-    private findOutgoingArcs(transition: HTMLElement): Array<HTMLElement> {
-        const coords = this.createCoordsFromElement(transition);
-        let offsetXOutgoing = 0;
-        let offsetYOutgoing = 0;
-        if (transition.nodeName === 'rect') {
-            offsetXOutgoing = transitionSize;
-            offsetYOutgoing = transitionSize / 2;
-        }
-        const currentXForOutgoingLines = coords.x + offsetXOutgoing;
-        const currentYForLines = coords.y + offsetYOutgoing;
-        const selectorForOutgoingLines =
-            'line[y1="' +
-            currentYForLines +
-            '"][x1="' +
-            currentXForOutgoingLines +
-            '"]';
-        this.drawingArea?.nativeElement.append(
-            '<p>' + selectorForOutgoingLines + '</p>'
-        );
-        const matchingNodes =
-            this.drawingArea?.nativeElement.querySelectorAll(
-                selectorForOutgoingLines
-            ) ?? [];
-        const outgoingLines = [];
-        for (let i = 0; i < matchingNodes.length; i++) {
-            outgoingLines.push(matchingNodes[i] as HTMLElement);
-        }
-        return outgoingLines;
-    }
-
-    persistCoords(elements: Array<HTMLElement>): void {
+    persistLayerPosition(elements: Array<HTMLElement>): void {
         const coordinates = [] as CoordinatesInfo[];
         elements.forEach((element) => {
-            if (element.nodeName === 'rect') {
-                const currentY = this.asInt(element, 'y');
-                const originalY = this.asInt(element, originalYAttribute);
-                const x = this.asInt(element, 'x');
-                if (currentY !== originalY) {
-                    const infoText =
-                        this.findInfoElement(element).textContent ?? '';
-                    coordinates.push({
-                        transitionName: infoText,
-                        coordinates: {
-                            x: x,
-                            y: currentY,
-                        },
-                    });
+            const y = asInt(element, layerPosYAttibute);
+            let x = -1;
+            let infoText =
+                this.findInfoElementForTransition(element)?.textContent ?? '';
+            if (element.nodeName === 'circle') {
+                x = asInt(element, breakpointPositionAttribute);
+                infoText =
+                    element.getAttribute(fromTransitionAttribute) +
+                    ' ' +
+                    element.getAttribute(toTransitionAttribute);
+                const breakPoints =
+                    element.getAttribute(breakpointTrail)?.split(',') ?? [];
+                for (let i = 0; i < breakPoints.length; i++) {
+                    const breakPoint = breakPoints[i].split(':');
+                    if (i === x) {
+                        infoText += '[' + (y + 1) + ']';
+                    } else {
+                        infoText += '[' + (parseInt(breakPoint[1]) + 1) + ']';
+                    }
                 }
             }
+            coordinates.push({
+                transitionName: infoText.trim(),
+                transitionType: element.nodeName,
+                coordinates: {
+                    x: x + 1,
+                    y: y + 1,
+                },
+                globalOffset: {
+                    x: x + 1,
+                    y: y + 1,
+                },
+            });
         });
-        this._displayService.setCoordsInfo(coordinates);
+        this._displayService.setLayerPositions(coordinates);
     }
 
     private initMouseDownForDraggable(event: MouseEvent) {
@@ -460,10 +439,28 @@ export class CanvasComponent implements OnChanges {
             x: event.offsetX,
             y: event.offsetY,
         };
+        this._mouseMove = false;
         this._childElementInFocus = true;
     }
 
-    private updateChangeState(event: MouseEvent) {
+    private updateChangeStateRun(event: MouseEvent) {
+        this._localChangesRun = {
+            x: event.offsetX - this._globalChanges.x,
+            y: event.offsetY - this._globalChanges.y,
+        };
+        this._globalChangesRun.x += this._localChangesRun.x;
+        this._globalChangesRun.y += this._localChangesRun.y;
+        this._localChanges = {
+            x: event.offsetX - this._globalChanges.x,
+            y: event.offsetY - this._globalChanges.y,
+        };
+        this._globalChanges = {
+            x: event.offsetX,
+            y: event.offsetY,
+        };
+    }
+
+    private updateChangeStateDraggable(event: MouseEvent) {
         this._localChanges = {
             x: event.offsetX - this._globalChanges.x,
             y: event.offsetY - this._globalChanges.y,
@@ -479,28 +476,28 @@ export class CanvasComponent implements OnChanges {
             return;
         }
         const transition = movedElement.transition;
-        const yAttribute = this.getYAttribute(transition);
-        const direction = this.getMoveDirection(transition);
+        const yAttribute = getYAttribute(transition);
+        const direction = getMoveDirection(transition);
         if (!direction) {
             return;
         }
-        const potentialNeighbours = this.findElementsInYAxis(transition);
-        potentialNeighbours?.forEach((e) => {
+        const potentialNeighbours = findElementsInYAxis(
+            transition,
+            this.drawingArea
+        );
+        potentialNeighbours.forEach((e) => {
             const eLocal = e as HTMLElement;
             if (
-                this.asInt(eLocal, originalYAttribute) > 0 &&
+                asInt(eLocal, originalYAttribute) > 0 &&
                 eLocal.getAttribute(originalYAttribute) ===
                     transition.getAttribute(originalYAttribute)
             ) {
                 return;
             }
-            const localYAttribute = this.getYAttribute(eLocal);
+            const localYAttribute = getYAttribute(eLocal);
             const draggable = this.createDraggableFromElement(eLocal);
             if (direction === 'up') {
-                if (
-                    this.asInt(e, localYAttribute) <
-                    this.asInt(transition, yAttribute)
-                ) {
+                if (asInt(e, localYAttribute) < asInt(transition, yAttribute)) {
                     if (draggable !== null) {
                         this.setActiveNeighbourElement(draggable, direction);
                     }
@@ -508,8 +505,8 @@ export class CanvasComponent implements OnChanges {
             }
             if (direction === 'down') {
                 if (
-                    this.asInt(eLocal, localYAttribute) >
-                    this.asInt(transition, yAttribute)
+                    asInt(eLocal, localYAttribute) >
+                    asInt(transition, yAttribute)
                 ) {
                     if (draggable !== null) {
                         this.setActiveNeighbourElement(draggable, direction);
@@ -526,9 +523,9 @@ export class CanvasComponent implements OnChanges {
         if (this._activeNeighbourElement === undefined) {
             this._activeNeighbourElement = draggable;
         }
-        const movingCoords = this.createCoordsFromElement(draggable.transition);
+        const movingCoords = createCoordsFromElement(draggable.transition);
         if (this._activeNeighbourElement) {
-            const neighbourCoords = this.createCoordsFromElement(
+            const neighbourCoords = createCoordsFromElement(
                 this._activeNeighbourElement.transition
             );
             if (direction === 'up' && movingCoords.y > neighbourCoords.y) {
@@ -540,46 +537,6 @@ export class CanvasComponent implements OnChanges {
         }
     }
 
-    private getMoveDirection(movedElement: HTMLElement): string {
-        const originalY = this.asInt(movedElement, originalYAttribute);
-        const yAttribute = this.getYAttribute(movedElement);
-        const currentY = this.asInt(movedElement, yAttribute);
-        if (originalY === 0 || originalY === currentY) {
-            return '';
-        }
-        return originalY > currentY ? 'up' : 'down';
-    }
-
-    private getYAttribute(element: HTMLElement): string {
-        return element.nodeName === 'rect' ? 'y' : 'cy';
-    }
-
-    private getXAttribute(element: HTMLElement): string {
-        return element.nodeName === 'rect' ? 'x' : 'cx';
-    }
-
-    private findElementsInYAxis(
-        element: HTMLElement
-    ): NodeListOf<Element> | null {
-        let relevantXCircle = 0;
-        let relevantXRect = 0;
-        if (element.nodeName === 'circle') {
-            relevantXCircle = this.asInt(element, 'cx');
-            relevantXRect = +relevantXCircle - transitionSize / 2;
-        }
-        if (element.nodeName === 'rect') {
-            relevantXRect = this.asInt(element, 'x');
-            relevantXCircle = relevantXRect + transitionSize / 2;
-        }
-        const rectSelector = 'rect[x="' + relevantXRect + '"]';
-        const circleSelector = 'circle[cx="' + relevantXCircle + '"]';
-        return (
-            this.drawingArea?.nativeElement.querySelectorAll(
-                circleSelector + ',' + rectSelector
-            ) ?? null
-        );
-    }
-
     private createDraggableFromElement(element: HTMLElement): Draggable | null {
         if (element.nodeName !== 'rect' && element.nodeName !== 'circle') {
             return null;
@@ -587,27 +544,21 @@ export class CanvasComponent implements OnChanges {
         const draggable = {
             transition: element,
         } as Draggable;
-        draggable.infoElement = this.findInfoElement(element);
-        draggable.incomingArcs = this.findIncomingArcs(element);
-        draggable.outgoingArcs = this.findOutgoingArcs(element);
+        draggable.infoElement = findInfoElementForTransition(
+            element,
+            this.drawingArea
+        );
+        draggable.incomingArcs = findIncomingArcs(element, this.drawingArea);
+        draggable.outgoingArcs = findOutgoingArcs(element, this.drawingArea);
         return draggable;
-    }
-
-    private asInt(elem: Element, attribute: string): number {
-        return parseInt(elem.getAttribute(attribute) ?? '0');
-    }
-
-    private createCoordsFromElement(element: HTMLElement): Coordinates {
-        return {
-            x: this.asInt(element, this.getXAttribute(element)),
-            y: this.asInt(element, this.getYAttribute(element)),
-        };
     }
 }
 
 export type CoordinatesInfo = {
     transitionName: string;
+    transitionType: string;
     coordinates: Coordinates;
+    globalOffset: Coordinates;
 };
 
 export type Coordinates = {

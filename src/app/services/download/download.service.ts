@@ -58,7 +58,8 @@ export class DownloadService implements OnDestroy {
 function downloadFile(name: string, content: string): void {
     const downloadLink: HTMLAnchorElement = document.createElement('a');
     downloadLink.download = name;
-    downloadLink.href = 'data:text/plain;charset=utf-16,' + content;
+    downloadLink.href =
+        'data:application/text/html,' + encodeURIComponent(content);
     downloadLink.click();
     downloadLink.remove();
 }

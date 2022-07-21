@@ -21,7 +21,6 @@ export class LayoutService {
     layout(run: Run, positionOffset = 0): { run: Run; diagrammHeight: number } {
         const runClone: Run = copyRun(run, true);
         let diagrammHeight = 0;
-
         //if run hast no cycles use sugiyama layout
         if (!hasCycles(runClone)) {
             const layers: Array<Layer[]> = this.assignLayers(runClone);

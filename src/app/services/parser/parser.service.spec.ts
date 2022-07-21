@@ -33,6 +33,7 @@ describe('ParserService', () => {
                 { source: 't5', target: 't6', breakpoints: [] },
                 { source: 't6', target: 't3', breakpoints: [] },
             ],
+            offset: { x: 0, y: 0 },
             elements: [
                 {
                     label: 't1',
