@@ -3,11 +3,14 @@ import {
     ElementRef,
     Input,
     OnChanges,
+    OnDestroy,
+    OnInit,
     SimpleChanges,
     ViewChild,
 } from '@angular/core';
 import { Subscription } from 'rxjs';
 
+import { ColorService } from '../../services/color.service';
 import { DisplayService } from '../../services/display.service';
 import { DraggingService } from '../../services/dragging/dragging.service';
 import {
@@ -39,7 +42,7 @@ import {
     templateUrl: './canvas.component.html',
     styleUrls: ['./canvas.component.scss'],
 })
-export class CanvasComponent implements OnChanges {
+export class CanvasComponent implements OnChanges, OnInit, OnDestroy {
     @ViewChild('drawingArea') drawingArea: ElementRef<SVGElement> | undefined;
 
     @Input()
@@ -60,6 +63,8 @@ export class CanvasComponent implements OnChanges {
     private _globalChangesRun: Coordinates = { x: 0, y: 0 };
     private _movedChildElement?: Draggable;
     private _activeNeighbourElement?: Draggable;
+    highlightColor: string | undefined;
+    private _sub: Subscription | undefined;
     private _offsetSub: Subscription;
     private _updateOffsetSub: Subscription;
 
@@ -67,6 +72,7 @@ export class CanvasComponent implements OnChanges {
         private _svgService: SvgService,
         private _displayService: DisplayService,
         private _draggingService: DraggingService
+        private _colorService: ColorService
     ) {
         this._mouseMove = false;
         this._childElementInFocus = false;
@@ -80,6 +86,24 @@ export class CanvasComponent implements OnChanges {
             .pipe()
             .subscribe((val) => this.resetOffset(val));
         this._draggingService.setDrawingArea(this.drawingArea);
+    }
+
+    ngOnInit(): void {
+        this._sub = this._colorService
+            .getHighlightColor()
+            .subscribe((color) => {
+                this.highlightColor = color;
+            });
+    }
+
+    ngOnDestroy(): void {
+        this.
+        
+        
+        
+        
+        
+        ?.unsubscribe();
     }
 
     ngOnChanges(changes: SimpleChanges): void {

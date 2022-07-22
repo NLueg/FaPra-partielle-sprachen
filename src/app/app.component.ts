@@ -12,16 +12,15 @@ import { UploadService } from './services/upload/upload.service';
 })
 export class AppComponent {
     selectedDataToDownload: DownloadableContent = 'separateRuns';
-
-    eventsSubject: Subject<void> = new Subject<void>();
+    resetPositioningSubject: Subject<void> = new Subject<void>();
 
     constructor(
         private _uploadService: UploadService,
         private _downloadService: DownloadService
     ) {}
 
-    emitEventToChild(): void {
-        this.eventsSubject.next();
+    resetSvgPositioning(): void {
+        this.resetPositioningSubject.next();
     }
 
     public openFileSelector(): void {

@@ -24,20 +24,21 @@ export class DisplayService implements OnDestroy {
 
     private readonly _runs$: BehaviorSubject<Run[]>;
 
-    private coordinatesInfo: BehaviorSubject<Array<CoordinatesInfo>>;
+    private coordinatesInfo$: BehaviorSubject<Array<CoordinatesInfo>>;
 
-    private offsetInfo: BehaviorSubject<Coordinates>;
+    private offsetInfo$: BehaviorSubject<Coordinates>;
 
-    private updatedOffsetInfo: BehaviorSubject<Coordinates>;
+    private updatedOffsetInfo$: BehaviorSubject<Coordinates>;
 
-    private reset: BehaviorSubject<Coordinates>;
+    private reset$: BehaviorSubject<Coordinates>;
 
     constructor() {
         const emptyRun = getEmptyRun();
         this._runs$ = new BehaviorSubject<Run[]>([emptyRun]);
         this._currentRun$ = new BehaviorSubject<Run>(emptyRun);
-        this.reset = new BehaviorSubject<Coordinates>({ x: 0, y: 0 });
-        this.coordinatesInfo = new BehaviorSubject<Array<CoordinatesInfo>>([
+
+        this.reset$ = new BehaviorSubject<Coordinates>({ x: 0, y: 0 });
+        this.coordinatesInfo$ = new BehaviorSubject<Array<CoordinatesInfo>>([
             {
                 transitionName: '',
                 transitionType: '',
@@ -51,11 +52,11 @@ export class DisplayService implements OnDestroy {
                 },
             },
         ]);
-        this.offsetInfo = new BehaviorSubject<Coordinates>({
+        this.offsetInfo$ = new BehaviorSubject<Coordinates>({
             x: 0,
             y: 0,
         });
-        this.updatedOffsetInfo = new BehaviorSubject<Coordinates>({
+        this.updatedOffsetInfo$ = new BehaviorSubject<Coordinates>({
             x: 0,
             y: 0,
         });
@@ -65,36 +66,38 @@ export class DisplayService implements OnDestroy {
         this._currentRun$.complete();
     }
 
-    public setLayerPositions(coordsInfos: Array<CoordinatesInfo>): void {
-        this.coordinatesInfo.next(coordsInfos);
+
+    public setCoordsInfo(coordsInfos: Array<CoordinatesInfo>): void {
+        this.coordinatesInfo$.next(coordsInfos);
     }
 
-    public layerPosInfoAdded(): Observable<CoordinatesInfo[]> {
-        return this.coordinatesInfo.asObservable();
+    public coordsInfoAdded(): Observable<CoordinatesInfo[]> {
+        return this.coordinatesInfo$.asObservable();
+
     }
 
     public resetOffset(reset: Coordinates): void {
-        this.reset.next(reset);
+        this.reset$.next(reset);
     }
 
     public offsetReset(): Observable<Coordinates> {
-        return this.reset.asObservable();
+        return this.reset$.asObservable();
     }
 
     public setOffsetInfo(offsetInfo: Coordinates): void {
-        this.offsetInfo.next(offsetInfo);
+        this.offsetInfo$.next(offsetInfo);
     }
 
     public offsetInfoAdded(): Observable<Coordinates> {
-        return this.offsetInfo.asObservable();
+        return this.offsetInfo$.asObservable();
     }
 
     public updateOffsetInfo(offsetInfo: Coordinates): void {
-        this.updatedOffsetInfo.next(offsetInfo);
+        this.updatedOffsetInfo$.next(offsetInfo);
     }
 
     public offsetInfoUpdated(): Observable<Coordinates> {
-        return this.updatedOffsetInfo.asObservable();
+        return this.updatedOffsetInfo$.asObservable();
     }
 
     public get runs$(): Observable<Run[]> {

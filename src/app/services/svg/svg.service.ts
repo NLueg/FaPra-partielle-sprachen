@@ -14,23 +14,134 @@ import {
     toTransitionAttribute,
     transitionSize,
 } from './svg-constants';
+import { ColorService } from '../color.service';
+import { DisplayService } from '../display.service';
+
+let highlightColor: string;
+let currentRun: Run;
 
 @Injectable({
     providedIn: 'root',
 })
 export class SvgService {
-    public createSvgElements(run: Run): Array<SVGElement> {
+    constructor(
+        public displayService: DisplayService,
+        private _colorService: ColorService
+    ) {
+        _colorService.getHighlightColor().subscribe((color) => {
+            highlightColor = color;
+        });
+        displayService.currentRun$.subscribe((run) => {
+            currentRun = run;
+        });
+    }
+
+    public createSvgElements(run: Run, merge: boolean): Array<SVGElement> {
         const result: Array<SVGElement> = [];
         const offset = run.offset ?? { x: 0, y: 0 };
-        run.elements.forEach((el) => {
-            result.push(...createSvgForElement(el, offset));
-        });
+        let samePrefix = false;
+
+        if (merge) {
+            const elementWithNoIncomingArc: Array<Element> = [];
+            currentRun.elements.forEach((el) => {
+                if (el.incomingArcs.length == 0) {
+                    elementWithNoIncomingArc.push(el);
+                }
+            });
+
+            run.elements.forEach((el) => {
+                elementWithNoIncomingArc.forEach((e) => {
+                    if (el.incomingArcs.length == 0 && el.label == e.label) {
+                        samePrefix = true;
+                    }
+                });
+            });
+        }
+
+        if (merge && samePrefix) {
+            run.elements.forEach((el) => {
+                let isCurrentRun = false;
+                currentRun.elements.forEach((element) => {
+                    if (element.label == el.label) {
+                        isCurrentRun = true;
+                        return;
+                    }
+                });
+                result.push(...createSvgForElement(el, isCurrentRun, offset));
+            });
+            run.arcs.forEach((arc) => {
+                const source = run.elements.find(
+                    (el) => el.label === arc.source
+                );
+                const target = run.elements.find(
+                    (el) => el.label === arc.target
+                );
+                let isCurrentRun = false;
+                currentRun.arcs.forEach((currentArc) => {
+                    if (
+                        currentArc.source == arc.source &&
+                        currentArc.target == arc.target
+                    ) {
+                        isCurrentRun = true;
+                        return;
+                    }
+                });
+
+                const arrow = createSvgForArc(
+                    arc,
+                    source,
+                    target,
+                    isCurrentRun && merge && samePrefix,
+                    offset
+                );
+                if (arrow) {
+                    arrow.forEach((a) => {
+                        result.push(a);
+                    });
+                }
+            });
+        } else {
+            run.elements.forEach((el) => {
+                result.push(...
+                (el, false));
+            });
+            run.arcs.forEach((arc) => {
+                const source = run.elements.find(
+                    (el) => el.label === arc.source
+                );
+                const target = run.elements.find(
+                    (el) => el.label === arc.target
+                );
+                const arrow = createSvgForArc(arc, source, target, false, offset);
+                if (arrow) {
+                    arrow.forEach((a) => {
+                        result.push(a);
+                    });
+                }
+            });
+        }
 
         run.arcs.forEach((arc) => {
             const source = run.elements.find((el) => el.label === arc.source);
             const target = run.elements.find((el) => el.label === arc.target);
+            let isCurrentRun = false;
+            currentRun.arcs.forEach((currentArc) => {
+                if (
+                    currentArc.source == arc.source &&
+                    currentArc.target == arc.target
+                ) {
+                    isCurrentRun = true;
+                    return;
+                }
+            });
 
-            const arrow = createSvgForArc(arc, source, target, offset);
+            const arrow = createSvgForArc(
+                arc,
+                source,
+                target,
+                isCurrentRun && merge && samePrefix,
+                offset
+            );
             if (arrow) {
                 arrow.forEach((a) => {
                     result.push(a);
@@ -44,6 +155,7 @@ export class SvgService {
 
 function createSvgForElement(
     element: Element,
+    hightlight: boolean,
     offset: Coordinates
 ): SVGElement[] {
     const svg = createSvgElement('rect');
@@ -63,7 +175,10 @@ function createSvgForElement(
     text.setAttribute('x', `${x + transitionSize / 2}`);
     text.setAttribute('y', `${y + transitionSize * 1.5}`);
 
-    registerSvg(svg);
+    if (hightlight) {
+        svg.setAttribute('stroke', highlightColor);
+        text.setAttribute('fill', highlightColor);
+    }
 
     return [svg, text];
 }
@@ -76,6 +191,7 @@ function createSvgForArc(
     arc: Arc,
     source: Element | undefined,
     target: Element | undefined,
+    hightlight: boolean,
     offset: Coordinates
 ): SVGElement[] {
     const elements: SVGElement[] = [];
@@ -91,7 +207,8 @@ function createSvgForArc(
                 (source.y ?? 0) + transitionSize / 2 + offset.y,
                 (target.x ?? 0) + offset.x,
                 (target.y ?? 0) + transitionSize / 2 + offset.y,
-                true
+                true,
+                hightlight
             )
         );
     } else {
@@ -102,7 +219,8 @@ function createSvgForArc(
                 (source.y ?? 0) + transitionSize / 2 + offset.y,
                 arc.breakpoints[0].x + transitionSize / 2 + offset.x,
                 arc.breakpoints[0].y + transitionSize / 2 + offset.y,
-                false
+                false,
+                hightlight
             )
         );
         //breakpoint -> next breakpoint
@@ -113,7 +231,8 @@ function createSvgForArc(
                     arc.breakpoints[i].y + transitionSize / 2 + offset.y,
                     arc.breakpoints[i + 1].x + transitionSize / 2 + offset.x,
                     arc.breakpoints[i + 1].y + transitionSize / 2 + offset.y,
-                    false
+                    false,
+                    hightlight
                 )
             );
         }
@@ -128,7 +247,8 @@ function createSvgForArc(
                     offset.y,
                 (target.x ?? 0) + offset.x,
                 (target.y ?? 0) + 25 + offset.y,
-                true
+                true,
+                hightlight
             )
         );
         elements.push(
@@ -155,12 +275,22 @@ function createLine(
     y1: number,
     x2: number,
     y2: number,
-    showArrow: boolean
+    showArrow: boolean,
+    hightlight: boolean
 ): SVGElement {
     const line = createSvgElement('line');
-    line.setAttribute('stroke', 'black');
+    if (hightlight) {
+        line.setAttribute('stroke', highlightColor);
+    } else {
+        line.setAttribute('stroke', 'black');
+    }
+
     line.setAttribute('stroke-width', '1');
-    if (showArrow) line.setAttribute('marker-end', 'url(#arrowhead)');
+    if (hightlight && showArrow) {
+        line.setAttribute('marker-end', 'url(#arrowheadhightlight )');
+    } else if (showArrow) {
+        line.setAttribute('marker-end', 'url(#arrowhead)');
+    }
     line.setAttribute('x1', `${x1}`);
     line.setAttribute('y1', `${y1}`);
     line.setAttribute('x2', `${x2}`);
