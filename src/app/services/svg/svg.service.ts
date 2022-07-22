@@ -4,7 +4,8 @@ import { Arc, Breakpoint } from '../../classes/diagram/arc';
 import { Element } from '../../classes/diagram/element';
 import { Run } from '../../classes/diagram/run';
 import { Coordinates } from '../../components/canvas/canvas.component';
-import { registerSvg } from './register-svg.fn';
+import { ColorService } from '../color.service';
+import { DisplayService } from '../display.service';
 import {
     breakpointPositionAttribute,
     breakpointTrail,
@@ -14,8 +15,6 @@ import {
     toTransitionAttribute,
     transitionSize,
 } from './svg-constants';
-import { ColorService } from '../color.service';
-import { DisplayService } from '../display.service';
 
 let highlightColor: string;
 let currentRun: Run;
@@ -102,8 +101,7 @@ export class SvgService {
             });
         } else {
             run.elements.forEach((el) => {
-                result.push(...
-                (el, false));
+                result.push(...createSvgForElement(el, false, offset));
             });
             run.arcs.forEach((arc) => {
                 const source = run.elements.find(
@@ -112,7 +110,13 @@ export class SvgService {
                 const target = run.elements.find(
                     (el) => el.label === arc.target
                 );
-                const arrow = createSvgForArc(arc, source, target, false, offset);
+                const arrow = createSvgForArc(
+                    arc,
+                    source,
+                    target,
+                    false,
+                    offset
+                );
                 if (arrow) {
                     arrow.forEach((a) => {
                         result.push(a);

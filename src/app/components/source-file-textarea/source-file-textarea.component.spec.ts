@@ -21,7 +21,7 @@ describe('SourceFileTextareaComponent', () => {
         isCurrentRunEmpty$: () => of(undefined),
         getCurrentRunIndex$: () => of(undefined),
         getRunCount$: () => of(undefined),
-        layerPosInfoAdded: () => of(undefined),
+        coordsInfoAdded: () => of(undefined),
         offsetInfoAdded: () => of(undefined),
     };
 

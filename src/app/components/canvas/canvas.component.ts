@@ -71,7 +71,7 @@ export class CanvasComponent implements OnChanges, OnInit, OnDestroy {
     constructor(
         private _svgService: SvgService,
         private _displayService: DisplayService,
-        private _draggingService: DraggingService
+        private _draggingService: DraggingService,
         private _colorService: ColorService
     ) {
         this._mouseMove = false;
@@ -97,13 +97,7 @@ export class CanvasComponent implements OnChanges, OnInit, OnDestroy {
     }
 
     ngOnDestroy(): void {
-        this.
-        
-        
-        
-        
-        
-        ?.unsubscribe();
+        this._sub?.unsubscribe();
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -455,7 +449,7 @@ export class CanvasComponent implements OnChanges, OnInit, OnDestroy {
                 },
             });
         });
-        this._displayService.setLayerPositions(coordinates);
+        this._displayService.setCoordsInfo(coordinates);
     }
 
     private initMouseDownForDraggable(event: MouseEvent) {

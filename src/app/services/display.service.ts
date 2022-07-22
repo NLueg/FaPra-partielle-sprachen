@@ -66,14 +66,12 @@ export class DisplayService implements OnDestroy {
         this._currentRun$.complete();
     }
 
-
     public setCoordsInfo(coordsInfos: Array<CoordinatesInfo>): void {
         this.coordinatesInfo$.next(coordsInfos);
     }
 
     public coordsInfoAdded(): Observable<CoordinatesInfo[]> {
         return this.coordinatesInfo$.asObservable();
-
     }
 
     public resetOffset(reset: Coordinates): void {

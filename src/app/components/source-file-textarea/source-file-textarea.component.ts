@@ -79,7 +79,7 @@ export class SourceFileTextareaComponent implements OnDestroy, OnInit {
             .subscribe((val) => this.processSourceChange(val));
 
         this._coordsSub = this._displayService
-            .layerPosInfoAdded()
+            .coordsInfoAdded()
             .pipe()
             .subscribe((val) => this.addLayerPosInfo(val));
 
@@ -247,7 +247,6 @@ export class SourceFileTextareaComponent implements OnDestroy, OnInit {
     }
 
     private updateShownRun(run: Run, emitEvent = true): void {
-
         this.textareaFc.setValue(run.text, { emitEvent: emitEvent });
         this.updateValidation(run);
     }
