@@ -178,8 +178,15 @@ export class SourceFileTextareaComponent implements OnDestroy, OnInit {
                 infoElement.transitionType === 'circle'
             ) {
                 const currentValue = this.textareaFc.value;
-                const coordsString = `\n${infoElement.transitionName} [${infoElement.coordinates.x},${infoElement.coordinates.y}]\n`;
-                const patternString = `\\n${infoElement.transitionName}( \\[\\-?\\d+,\\-?\\d+\\])?\\s*\\n`;
+                let patternString = `\\n${infoElement.transitionName.replace(
+                    new RegExp('\\[\\d+\\]', 'g'),
+                    ''
+                )}(\\[\\d+\\])*?\\n`;
+                let coordsString = `\n${infoElement.transitionName}\n`;
+                if (infoElement.transitionType === 'rect') {
+                    coordsString = `\n${infoElement.transitionName} [${infoElement.coordinates.y}]\n`;
+                    patternString = `\\n${infoElement.transitionName}( \\[\\-?\\d+])?\\s*\\n`;
+                }
                 const replacePattern = new RegExp(patternString, 'g');
                 const newValue = currentValue.replace(
                     replacePattern,
