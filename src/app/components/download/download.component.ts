@@ -1,7 +1,8 @@
 import { Component, Input } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 
-import { DownloadService } from '../../services/download/download.service';
 import { DownloadableContent } from './download.const';
+import { DownloadPopoverComponent } from './download-popover/download-popover.component';
 
 @Component({
     selector: 'app-download',
@@ -12,27 +13,11 @@ export class DownloadComponent {
     @Input()
     contentToDownload: DownloadableContent = 'separateRuns';
 
-    downloadName = '';
-    hideDownload = true;
-    currentDownloadSelection = 'all';
+    constructor(public dialog: MatDialog) {}
 
-    constructor(private _downloadService: DownloadService) {}
-
-    toggleHideDownload(): void {
-        this.hideDownload = !this.hideDownload;
-        this.downloadName = '';
-        this.currentDownloadSelection = 'all';
-    }
-
-    download(): void {
-        if (this.currentDownloadSelection === 'all') {
-            this._downloadService.downloadRuns(
-                this.downloadName,
-                this.contentToDownload
-            );
-        } else if (this.currentDownloadSelection === 'current') {
-            this._downloadService.downloadCurrentRun(this.downloadName);
-        }
-        this.toggleHideDownload();
+    openDialog(): void {
+        this.dialog.open(DownloadPopoverComponent, {
+            data: { contentToDownload: this.contentToDownload },
+        });
     }
 }
