@@ -7,40 +7,6 @@
                 : ' merged run(s)')
         "
         buttonIcon="download"
-        (buttonAction)="toggleHideDownload()"
+        (buttonAction)="openDialog()"
     ></app-template-button>
-    <form [hidden]="hideDownload" class="download-field">
-        <div class="input-field">
-            <label>Name:</label>
-            <input
-                type="text"
-                name="text"
-                id="text"
-                value="_downloadName"
-                placeholder="Enter Name"
-                [(ngModel)]="downloadName"
-            />
-        </div>
-        <div class="radio-button" *ngIf="contentToDownload !== 'mergeRuns'">
-            <span>Download:</span>
-            <input
-                type="radio"
-                name="selection"
-                value="all"
-                [(ngModel)]="currentDownloadSelection"
-            />
-            <label>All</label>
-            <input
-                type="radio"
-                name="selection"
-                value="current"
-                [(ngModel)]="currentDownloadSelection"
-            />
-            <label>Current Run</label>
-        </div>
-        <div class="buttons">
-            <button class="btn" (click)="toggleHideDownload()">Cancel</button>
-            <button class="btn" (click)="download()">Save</button>
-        </div>
-    </form>
 </div>

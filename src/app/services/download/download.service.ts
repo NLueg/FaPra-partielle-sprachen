@@ -1,9 +1,14 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { first, Subject } from 'rxjs';
 
+import { Run } from '../../classes/diagram/run';
 import { MergeService } from '../../components/display-merged-run/merge.service';
-import { DownloadableContent } from '../../components/download/download.const';
+import {
+    DownloadableContent,
+    DownloadFormat,
+} from '../../components/download/download.const';
 import { DisplayService } from '../display.service';
+import { RunToPnmlService } from './run-to-pnml/run-to-pnml.service';
 
 @Injectable({
     providedIn: 'root',
@@ -13,7 +18,8 @@ export class DownloadService implements OnDestroy {
 
     constructor(
         private _displayService: DisplayService,
-        private _mergeService: MergeService
+        private _mergeService: MergeService,
+        private _runToPnmlService: RunToPnmlService
     ) {
         this._download$ = new Subject<string>();
     }
@@ -22,7 +28,11 @@ export class DownloadService implements OnDestroy {
         this._download$.complete();
     }
 
-    downloadRuns(name: string, contentToDownload: DownloadableContent): void {
+    downloadRuns(
+        name: string,
+        contentToDownload: DownloadableContent,
+        formatToDownload: DownloadFormat
+    ): void {
         const runsToDownload =
             contentToDownload === 'mergeRuns'
                 ? this._mergeService.getMergedRuns$()
@@ -30,28 +40,44 @@ export class DownloadService implements OnDestroy {
 
         runsToDownload.pipe(first()).subscribe((runs) => {
             const timestamp = Date.now();
+            const fileEnding = getFileEndingForFormat(formatToDownload);
+
             runs.forEach((run, index) => {
-                let fileName = '';
-                if (!name) {
-                    fileName = `${timestamp}_run_${index + 1}.ps`;
-                } else {
-                    fileName = `${name}_run_${index + 1}.ps`;
-                }
-                downloadFile(fileName, run.text.trim());
+                const fileName = name
+                    ? `${name}_${index + 1}.${fileEnding}`
+                    : `${timestamp}_run_${index + 1}.${fileEnding}`;
+
+                this.downloadRun(fileName, formatToDownload, run);
             });
         });
     }
 
-    downloadCurrentRun(name: string): void {
+    downloadCurrentRun(name: string, formatToDownload: DownloadFormat): void {
         this._displayService.currentRun$.pipe(first()).subscribe((run) => {
-            let fileName = '';
-            if (!name) {
-                fileName = Date.now() + '_run.ps';
-            } else {
-                fileName = name + '_run.ps';
-            }
-            downloadFile(fileName, run.text.trim());
+            const fileEnding = getFileEndingForFormat(formatToDownload);
+            const fileName = name
+                ? `${name}.${fileEnding}`
+                : `${Date.now()}_run.${fileEnding}`;
+
+            this.downloadRun(fileName, formatToDownload, run);
         });
+    }
+
+    private downloadRun(
+        name: string,
+        formatToDownload: DownloadFormat,
+        run: Run
+    ): void {
+        const fileContent =
+            formatToDownload === 'run'
+                ? run.text.trim()
+                : this._runToPnmlService.parseRunToPnml(name, run);
+
+        const downloadLink: HTMLAnchorElement = document.createElement('a');
+        downloadLink.download = name;
+        downloadLink.href = 'data:text/plain;charset=utf-16,' + fileContent;
+        downloadLink.click();
+        downloadLink.remove();
     }
 }
 
@@ -62,4 +88,12 @@ function downloadFile(name: string, content: string): void {
         'data:application/text/html,' + encodeURIComponent(content);
     downloadLink.click();
     downloadLink.remove();
+
+function getFileEndingForFormat(format: DownloadFormat): string {
+    switch (format) {
+        case 'run':
+            return 'ps';
+        case 'pnml':
+            return 'pnml';
+    }
 }
