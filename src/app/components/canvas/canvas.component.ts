@@ -10,6 +10,10 @@ import {
 } from '@angular/core';
 import { Subscription } from 'rxjs';
 
+import {
+    Coordinates,
+    CoordinatesInfo,
+} from '../../classes/diagram/coordinates';
 import { ColorService } from '../../services/color.service';
 import { DisplayService } from '../../services/display.service';
 import { DraggingService } from '../../services/dragging/dragging.service';
@@ -79,11 +83,9 @@ export class CanvasComponent implements OnChanges, OnInit, OnDestroy {
         this._runMoved = false;
         this._offsetSub = this._displayService
             .offsetInfoAdded()
-            .pipe()
             .subscribe((val) => this.resetOffset(val));
         this._updateOffsetSub = this._displayService
             .offsetInfoUpdated()
-            .pipe()
             .subscribe((val) => this.resetOffset(val));
         this._draggingService.setDrawingArea(this.drawingArea);
     }
@@ -571,18 +573,6 @@ export class CanvasComponent implements OnChanges, OnInit, OnDestroy {
         return draggable;
     }
 }
-
-export type CoordinatesInfo = {
-    transitionName: string;
-    transitionType: string;
-    coordinates: Coordinates;
-    globalOffset: Coordinates;
-};
-
-export type Coordinates = {
-    x: number;
-    y: number;
-};
 
 export type Draggable = {
     transition: HTMLElement;

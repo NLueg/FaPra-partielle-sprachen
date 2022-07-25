@@ -1,11 +1,8 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { BehaviorSubject, map, Observable, switchMap } from 'rxjs';
 
+import { Coordinates, CoordinatesInfo } from '../classes/diagram/coordinates';
 import { isRunEmpty, Run } from '../classes/diagram/run';
-import {
-    Coordinates,
-    CoordinatesInfo,
-} from '../components/canvas/canvas.component';
 
 function getEmptyRun(): Run {
     return {

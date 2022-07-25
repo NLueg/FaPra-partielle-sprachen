@@ -1,5 +1,5 @@
-import { Coordinates } from '../../components/canvas/canvas.component';
 import { Arc } from './arc';
+import { Coordinates } from './coordinates';
 import { Element } from './element';
 
 export interface Run {

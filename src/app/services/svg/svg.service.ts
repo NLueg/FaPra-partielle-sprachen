@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 
 import { Arc, Breakpoint } from '../../classes/diagram/arc';
+import { Coordinates } from '../../classes/diagram/coordinates';
 import { Element } from '../../classes/diagram/element';
 import { Run } from '../../classes/diagram/run';
-import { Coordinates } from '../../components/canvas/canvas.component';
 import { ColorService } from '../color.service';
 import { DisplayService } from '../display.service';
 import {

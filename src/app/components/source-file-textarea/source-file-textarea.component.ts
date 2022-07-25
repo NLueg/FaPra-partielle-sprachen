@@ -8,6 +8,10 @@ import {
     Subscription,
 } from 'rxjs';
 
+import {
+    Coordinates,
+    CoordinatesInfo,
+} from '../../classes/diagram/coordinates';
 import { resolveWarnings } from '../../classes/diagram/functions/run-helper.fn';
 import { isRunEmpty, Run } from '../../classes/diagram/run';
 import { DisplayService } from '../../services/display.service';
@@ -15,7 +19,6 @@ import { ParserService } from '../../services/parser/parser.service';
 import { offsetAttribute } from '../../services/parser/parsing-constants';
 import { exampleContent } from '../../services/upload/example-file';
 import { UploadService } from '../../services/upload/upload.service';
-import { Coordinates, CoordinatesInfo } from '../canvas/canvas.component';
 
 type Valid = 'error' | 'warn' | 'success';
 
@@ -80,12 +83,10 @@ export class SourceFileTextareaComponent implements OnDestroy, OnInit {
 
         this._coordsSub = this._displayService
             .coordsInfoAdded()
-            .pipe()
             .subscribe((val) => this.addLayerPosInfo(val));
 
         this._offsetSub = this._displayService
             .offsetInfoAdded()
-            .pipe()
             .subscribe((val) => this.addOffsetInfo(val));
 
         this._fileSub = this._uploadService

@@ -1,9 +1,7 @@
 import { ElementRef } from '@angular/core';
 
-import {
-    Coordinates,
-    Draggable,
-} from '../../components/canvas/canvas.component';
+import { Coordinates } from '../../classes/diagram/coordinates';
+import { Draggable } from '../../components/canvas/canvas.component';
 import { originalYAttribute, transitionSize } from '../svg/svg-constants';
 
 export function asInt(elem: Element, attribute: string): number {
