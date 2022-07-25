@@ -167,15 +167,16 @@ export class LayoutService {
      */
     private setFixedLayerPos(layers: Array<Layer[]>): void {
         layers.forEach((layer) => {
-            for (let i = 0; i < layer.length; i++) {
-                let layerPos = layer[i].layerPos;
+            const layerTmp = [...layer]; //Copy original layer for traversing all elements (ignores position changes in the original layer)
+            layerTmp.forEach((elm) => {
+                const i = layer.indexOf(elm);
+                let layerPos = elm.layerPos;
                 if (layerPos && i != layerPos - 1) {
                     layerPos = Math.min(layerPos - 1, layer.length - 1);
-                    const tmp = layer[i];
                     layer[i] = layer[layerPos];
-                    layer[layerPos] = tmp;
+                    layer[layerPos] = elm;
                 }
-            }
+            });
         });
     }
 
