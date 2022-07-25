@@ -11,11 +11,12 @@ import {
 import { Run } from '../../classes/diagram/run';
 import {
     arcsAttribute,
+    offsetAttribute,
     transitionsAttribute,
     typeKey,
 } from './parsing-constants';
 
-type ParsingStates = 'initial' | 'type' | 'transitions' | 'arcs';
+type ParsingStates = 'initial' | 'type' | 'transitions' | 'arcs' | 'offset';
 
 @Injectable({
     providedIn: 'root',
@@ -25,6 +26,7 @@ export class ParserService {
     static transitionRegex = new RegExp('^([^\\[ ]+)(\\s?\\[\\d+\\])?$');
     static arcRegex = new RegExp('^([^\\[ ]+)\\s([^\\[ ]+)(\\s?\\[\\d+\\])*$');
     static breakpointRegex = new RegExp('\\[\\d+\\]');
+    static offsetRegex = new RegExp('-?\\d+ -?\\d+');
 
     parse(content: string, errors: Set<string>): Run | null {
         const contentLines = content.split('\n');
@@ -33,11 +35,13 @@ export class ParserService {
             arcs: [],
             elements: [],
             warnings: [],
+            offset: { x: 0, y: 0 },
         };
 
         let currentParsingState: ParsingStates = 'initial';
         let fileContainsTransitions = false;
         let fileContainsArcs = false;
+        let fileHasOffset = false;
 
         this.toastr.toasts.forEach((t) => {
             this.toastr.remove(t.toastId);
@@ -86,7 +90,10 @@ export class ParserService {
                         trimmedLine === transitionsAttribute
                     ) {
                         break;
-                    } else if (trimmedLine !== arcsAttribute) {
+                    } else if (
+                        trimmedLine !== arcsAttribute &&
+                        trimmedLine !== offsetAttribute
+                    ) {
                         let label: string;
                         let layerPos: number | undefined;
                         if (!ParserService.transitionRegex.test(trimmedLine)) {
@@ -138,6 +145,9 @@ export class ParserService {
                         currentParsingState = 'arcs';
                         fileContainsArcs = true;
                         break;
+                    } else if (trimmedLine === offsetAttribute) {
+                        currentParsingState = 'offset';
+                        break;
                     } else {
                         errors.add(`Unable to parse file`);
                         this.toastr.error(`Error`, `Unable to parse file`);
@@ -145,6 +155,9 @@ export class ParserService {
                     }
                 case 'arcs':
                     if (trimmedLine === '' || trimmedLine === arcsAttribute) {
+                        break;
+                    } else if (trimmedLine === offsetAttribute) {
+                        currentParsingState = 'offset';
                         break;
                     } else if (trimmedLine !== transitionsAttribute) {
                         let source: string, target: string;
@@ -202,6 +215,7 @@ export class ParserService {
                                             layerPos: layerPos,
                                             arc: arc,
                                         });
+                                        arc.breakpoints = breakpoints;
                                         trimmedLineTmp =
                                             trimmedLineTmp.substring(
                                                 trimmedLineTmp.indexOf(']') + 1
@@ -225,6 +239,25 @@ export class ParserService {
                         errors.add(`Unable to parse file`);
                         this.toastr.error(`Error`, `Unable to parse file`);
                         return null;
+                    }
+                case 'offset':
+                    if (
+                        trimmedLine === '' ||
+                        trimmedLine === offsetAttribute ||
+                        fileHasOffset
+                    ) {
+                        break;
+                    } else if (ParserService.offsetRegex.test(trimmedLine)) {
+                        const matches =
+                            ParserService.offsetRegex.exec(trimmedLine);
+                        if (matches) {
+                            fileHasOffset = true;
+                            const coordinates = matches[0].split(' ');
+                            run.offset = {
+                                x: parseInt(coordinates[0]),
+                                y: parseInt(coordinates[1]),
+                            };
+                        }
                     }
             }
         }

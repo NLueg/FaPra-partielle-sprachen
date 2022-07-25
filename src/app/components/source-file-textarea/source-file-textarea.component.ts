@@ -8,13 +8,17 @@ import {
     Subscription,
 } from 'rxjs';
 
+import {
+    Coordinates,
+    CoordinatesInfo,
+} from '../../classes/diagram/coordinates';
 import { resolveWarnings } from '../../classes/diagram/functions/run-helper.fn';
 import { isRunEmpty, Run } from '../../classes/diagram/run';
 import { DisplayService } from '../../services/display.service';
 import { ParserService } from '../../services/parser/parser.service';
+import { offsetAttribute } from '../../services/parser/parsing-constants';
 import { exampleContent } from '../../services/upload/example-file';
 import { UploadService } from '../../services/upload/upload.service';
-import { CoordinatesInfo } from '../canvas/canvas.component';
 
 type Valid = 'error' | 'warn' | 'success';
 
@@ -28,6 +32,8 @@ export class SourceFileTextareaComponent implements OnDestroy, OnInit {
     private _sub: Subscription;
     private _fileSub: Subscription;
     private _coordsSub: Subscription;
+    private _offsetSub: Subscription;
+
     private _resetEventSubscription?: Subscription;
 
     textareaFc: FormControl;
@@ -77,8 +83,11 @@ export class SourceFileTextareaComponent implements OnDestroy, OnInit {
 
         this._coordsSub = this._displayService
             .coordsInfoAdded()
-            .pipe(debounceTime(400))
-            .subscribe((val) => this.addCoordinatesInfo(val));
+            .subscribe((val) => this.addLayerPosInfo(val));
+
+        this._offsetSub = this._displayService
+            .offsetInfoAdded()
+            .subscribe((val) => this.addOffsetInfo(val));
 
         this._fileSub = this._uploadService
             .getUpload$()
@@ -91,6 +100,9 @@ export class SourceFileTextareaComponent implements OnDestroy, OnInit {
         this._resetEventSubscription = this.resetEvent?.subscribe(() =>
             this.removeCoordinates()
         );
+        this._resetEventSubscription = this.resetEvent?.subscribe(() =>
+            this.removeOffset()
+        );
     }
 
     ngOnDestroy(): void {
@@ -98,6 +110,7 @@ export class SourceFileTextareaComponent implements OnDestroy, OnInit {
         this._sub.unsubscribe();
         this._fileSub.unsubscribe();
     }
+
     nextRun(): void {
         const run = this._displayService.setNextRun();
         this.updateShownRun(run);
@@ -143,7 +156,9 @@ export class SourceFileTextareaComponent implements OnDestroy, OnInit {
         this.updateValidation(result, errors);
 
         if (!result) return;
-
+        if (result.offset) {
+            this._displayService.updateOffsetInfo(result.offset);
+        }
         this._displayService.updateCurrentRun(result);
     }
 
@@ -153,25 +168,50 @@ export class SourceFileTextareaComponent implements OnDestroy, OnInit {
         this.updateValidation(result, errors);
 
         if (!result) return;
-
         this._displayService.registerRun(result);
         this.textareaFc.setValue(newSource);
     }
 
-    private addCoordinatesInfo(coordinatesInfo: Array<CoordinatesInfo>): void {
+    private addLayerPosInfo(coordinatesInfo: Array<CoordinatesInfo>): void {
         coordinatesInfo.forEach((infoElement) => {
-            if (infoElement.transitionName !== '') {
+            if (
+                infoElement.transitionType === 'rect' ||
+                infoElement.transitionType === 'circle'
+            ) {
                 const currentValue = this.textareaFc.value;
-                const coordsString = `\n${infoElement.transitionName} [${infoElement.coordinates.x},${infoElement.coordinates.y}]\n`;
-                const patternString = `\\n${infoElement.transitionName}( \\[\\-?\\d+,\\-?\\d+\\])?\\s*\\n`;
+                let patternString = `\\n${infoElement.transitionName.replace(
+                    new RegExp('\\[\\d+\\]', 'g'),
+                    ''
+                )}(\\[\\d+\\])*?\\n`;
+                let coordsString = `\n${infoElement.transitionName}\n`;
+                if (infoElement.transitionType === 'rect') {
+                    coordsString = `\n${infoElement.transitionName} [${infoElement.coordinates.y}]\n`;
+                    patternString = `\\n${infoElement.transitionName}( \\[\\-?\\d+])?\\s*\\n`;
+                }
                 const replacePattern = new RegExp(patternString, 'g');
                 const newValue = currentValue.replace(
                     replacePattern,
                     coordsString
                 );
                 this.textareaFc.setValue(newValue, { emitEvent: false });
+                this.processSourceChange(newValue);
             }
         });
+    }
+
+    private addOffsetInfo(offset: Coordinates): void {
+        const currentValue = this.textareaFc.value;
+        if (currentValue) {
+            const offsetString =
+                offsetAttribute + '\n' + offset.x + ' ' + offset.y;
+            const patternString = '\\.offset\\n-?\\d+ -?\\d+';
+            const replacePattern = new RegExp(patternString, 'g');
+            let newValue = currentValue + offsetString;
+            if (replacePattern.test(currentValue)) {
+                newValue = currentValue.replace(replacePattern, offsetString);
+            }
+            this.textareaFc.setValue(newValue, { emitEvent: true });
+        }
     }
 
     public removeCoordinates(): void {
@@ -188,6 +228,30 @@ export class SourceFileTextareaComponent implements OnDestroy, OnInit {
         }
         this.textareaFc.setValue(newText);
         this.processSourceChange(newText);
+    }
+
+    public removeOffset(): void {
+        const contentLines = this.textareaFc.value.split('\n');
+        let isOffsetLine = false;
+        let first = true;
+        let newText = '';
+        for (const line of contentLines) {
+            if (line === offsetAttribute) {
+                isOffsetLine = true;
+            }
+            if (!isOffsetLine) {
+                if (first) {
+                    newText = newText + line;
+                    first = false;
+                } else {
+                    newText = newText + '\n' + line;
+                }
+            }
+        }
+        newText += '\n';
+        this.textareaFc.setValue(newText);
+        this.processSourceChange(newText);
+        this._displayService.setOffsetInfo({ x: 0, y: 0 });
     }
 
     private updateShownRun(run: Run, emitEvent = true): void {

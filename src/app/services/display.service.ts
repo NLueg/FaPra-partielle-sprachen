@@ -1,8 +1,8 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { BehaviorSubject, map, Observable, switchMap } from 'rxjs';
 
+import { Coordinates, CoordinatesInfo } from '../classes/diagram/coordinates';
 import { isRunEmpty, Run } from '../classes/diagram/run';
-import { CoordinatesInfo } from '../components/canvas/canvas.component';
 
 function getEmptyRun(): Run {
     return {
@@ -23,19 +23,40 @@ export class DisplayService implements OnDestroy {
 
     private coordinatesInfo$: BehaviorSubject<Array<CoordinatesInfo>>;
 
+    private offsetInfo$: BehaviorSubject<Coordinates>;
+
+    private updatedOffsetInfo$: BehaviorSubject<Coordinates>;
+
+    private reset$: BehaviorSubject<Coordinates>;
+
     constructor() {
         const emptyRun = getEmptyRun();
         this._runs$ = new BehaviorSubject<Run[]>([emptyRun]);
         this._currentRun$ = new BehaviorSubject<Run>(emptyRun);
+
+        this.reset$ = new BehaviorSubject<Coordinates>({ x: 0, y: 0 });
         this.coordinatesInfo$ = new BehaviorSubject<Array<CoordinatesInfo>>([
             {
                 transitionName: '',
+                transitionType: '',
                 coordinates: {
+                    x: 0,
+                    y: 0,
+                },
+                globalOffset: {
                     x: 0,
                     y: 0,
                 },
             },
         ]);
+        this.offsetInfo$ = new BehaviorSubject<Coordinates>({
+            x: 0,
+            y: 0,
+        });
+        this.updatedOffsetInfo$ = new BehaviorSubject<Coordinates>({
+            x: 0,
+            y: 0,
+        });
     }
 
     ngOnDestroy(): void {
@@ -48,6 +69,30 @@ export class DisplayService implements OnDestroy {
 
     public coordsInfoAdded(): Observable<CoordinatesInfo[]> {
         return this.coordinatesInfo$.asObservable();
+    }
+
+    public resetOffset(reset: Coordinates): void {
+        this.reset$.next(reset);
+    }
+
+    public offsetReset(): Observable<Coordinates> {
+        return this.reset$.asObservable();
+    }
+
+    public setOffsetInfo(offsetInfo: Coordinates): void {
+        this.offsetInfo$.next(offsetInfo);
+    }
+
+    public offsetInfoAdded(): Observable<Coordinates> {
+        return this.offsetInfo$.asObservable();
+    }
+
+    public updateOffsetInfo(offsetInfo: Coordinates): void {
+        this.updatedOffsetInfo$.next(offsetInfo);
+    }
+
+    public offsetInfoUpdated(): Observable<Coordinates> {
+        return this.updatedOffsetInfo$.asObservable();
     }
 
     public get runs$(): Observable<Run[]> {
@@ -86,7 +131,6 @@ export class DisplayService implements OnDestroy {
 
     public updateCurrentRun(run: Run): void {
         const index = this.getCurrentRunIndex();
-
         const runs = this._runs$.getValue();
         runs[index] = run;
         this._runs$.next(runs);
