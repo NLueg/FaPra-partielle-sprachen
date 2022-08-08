@@ -137,9 +137,15 @@ export function copyRun(run: Run, copyCoordinates: boolean): Run {
             warnings: [],
         };
 
-        run.elements.forEach((e) => {
-            targetRun.elements.push(copyElement(e));
-        });
+        run.elements
+            .filter(
+                (element) =>
+                    element.incomingArcs.length > 0 ||
+                    element.outgoingArcs.length > 0
+            )
+            .forEach((e) => {
+                targetRun.elements.push(copyElement(e));
+            });
 
         run.arcs.forEach((a) => {
             targetRun.arcs.push(copyArc(a));
