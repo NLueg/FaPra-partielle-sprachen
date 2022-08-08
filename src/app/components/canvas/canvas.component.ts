@@ -9,36 +9,20 @@ import {
     ViewChild,
 } from '@angular/core';
 import { Subscription } from 'rxjs';
+import { Draggable } from 'src/app/classes/diagram/draggable';
 
-import {
-    Coordinates,
-    CoordinatesInfo,
-} from '../../classes/diagram/coordinates';
 import { ColorService } from '../../services/color.service';
 import { DisplayService } from '../../services/display.service';
-import { DraggingService } from '../../services/dragging/dragging.service';
-import {
-    asInt,
-    createCoordsFromElement,
-    findElementsInYAxis,
-    findIncomingArcs,
-    findInfoElementForTransition,
-    findOutgoingArcs,
-    getElementFromCanvas,
-    getMoveDirection,
-    getXAttribute,
-    getYAttribute,
-    moveElement,
-} from '../../services/dragging/dragging-helper.fn';
+import { DraggingService } from '../../services/moving/dragging.service';
+import { asInt, getYAttribute } from '../../services/moving/dragging-helper.fn';
+import { DraggingCreationService } from '../../services/moving/factory/draggable-creation.service';
+import { FindElementsService } from '../../services/moving/find/find-elements.service';
+import { MoveElementsService } from '../../services/moving/move/move-elements.service';
+import { StatehandlerService } from '../../services/moving/statehandler/statehandler.service';
 import { SvgService } from '../../services/svg/svg.service';
 import {
-    breakpointPositionAttribute,
-    breakpointTrail,
-    fromTransitionAttribute,
     layerPosYAttibute,
     originalYAttribute,
-    toTransitionAttribute,
-    transitionSize,
 } from '../../services/svg/svg-constants';
 
 @Component({
@@ -58,15 +42,6 @@ export class CanvasComponent implements OnChanges, OnInit, OnDestroy {
     @Input()
     persistCoordinates = true;
 
-    private _mouseMove: boolean;
-    private _childElementInFocus: boolean;
-    private _runMoved: boolean;
-    private _globalChanges: Coordinates = { x: 0, y: 0 };
-    private _localChanges: Coordinates = { x: 0, y: 0 };
-    private _localChangesRun: Coordinates = { x: 0, y: 0 };
-    private _globalChangesRun: Coordinates = { x: 0, y: 0 };
-    private _movedChildElement?: Draggable;
-    private _activeNeighbourElement?: Draggable;
     highlightColor: string | undefined;
     private _sub: Subscription | undefined;
     private _offsetSub: Subscription;
@@ -76,18 +51,15 @@ export class CanvasComponent implements OnChanges, OnInit, OnDestroy {
         private _svgService: SvgService,
         private _displayService: DisplayService,
         private _draggingService: DraggingService,
-        private _colorService: ColorService
+        private _colorService: ColorService,
+        private _stateHandler: StatehandlerService
     ) {
-        this._mouseMove = false;
-        this._childElementInFocus = false;
-        this._runMoved = false;
         this._offsetSub = this._displayService
             .offsetInfoAdded()
-            .subscribe((val) => this.resetOffset(val));
+            .subscribe((val) => this._stateHandler.resetOffset(val));
         this._updateOffsetSub = this._displayService
             .offsetInfoUpdated()
-            .subscribe((val) => this.resetOffset(val));
-        this._draggingService.setDrawingArea(this.drawingArea);
+            .subscribe((val) => this._stateHandler.resetOffset(val));
     }
 
     ngOnInit(): void {
@@ -103,6 +75,7 @@ export class CanvasComponent implements OnChanges, OnInit, OnDestroy {
     }
 
     ngOnChanges(changes: SimpleChanges): void {
+        this._draggingService.setDrawingArea(this.drawingArea);
         if (changes['svgElements'] && this.drawingArea) {
             this.clearDrawingArea();
 
@@ -112,11 +85,6 @@ export class CanvasComponent implements OnChanges, OnInit, OnDestroy {
             this.registerCanvasMouseHandler(this.drawingArea.nativeElement);
             this.registerSingleMouseHandler(this.drawingArea.nativeElement);
         }
-    }
-
-    private resetOffset(newCoordinates: Coordinates): void {
-        this._globalChangesRun.x = newCoordinates.x;
-        this._globalChangesRun.y = newCoordinates.y;
     }
 
     private clearDrawingArea() {
@@ -134,97 +102,41 @@ export class CanvasComponent implements OnChanges, OnInit, OnDestroy {
 
     private registerCanvasMouseHandler(drawingArea: SVGElement) {
         drawingArea.onmousedown = (e) => {
-            this._mouseMove = true;
-            this._localChangesRun = {
-                x: 0,
-                y: 0,
-            };
-            this._globalChanges = {
-                x: e.offsetX,
-                y: e.offsetY,
-            };
+            this._stateHandler.initMouseDownForRun(e);
         };
         drawingArea.onmousemove = (e) => {
-            if (this._movedChildElement && !this._childElementInFocus) {
-                this.moveDraggable(this._movedChildElement);
-                this.updateChangeStateDraggable(e);
+            if (this._stateHandler.childIsBeingDragged()) {
+                this.moveChildElementIfExisting();
+                this._stateHandler.updateChangeStateDraggable(e);
             }
-            if (
-                this._mouseMove &&
-                !this._childElementInFocus &&
-                !this._movedChildElement
-            ) {
-                this.updateChangeStateRun(e);
-                this.moveRun(drawingArea);
+            if (this._stateHandler.runIsMoving()) {
+                this._stateHandler.updateChangeStateRun(e);
+                MoveElementsService.moveRun(
+                    drawingArea,
+                    this._stateHandler.getLocalChangesForRun()
+                );
             }
         };
         drawingArea.onmouseup = () => {
             if (this.persistCoordinates) {
                 this.persistOffset();
             }
-            this.resetCanvasHandlers();
+            this._stateHandler.resetCanvasHandlers();
+        };
+        drawingArea.onmouseenter = () => {
+            this._stateHandler.resetCanvasHandlers();
         };
         drawingArea.onmouseleave = () => {
-            this.resetCanvasHandlers();
+            this._stateHandler.resetCanvasHandlers();
         };
-    }
-
-    private resetCanvasHandlers() {
-        if (this._movedChildElement !== undefined) {
-            this.resetDraggable(this._movedChildElement);
-        }
-        this.resetGlobalHandlers();
-    }
-
-    private resetGlobalHandlers() {
-        this._childElementInFocus = false;
-        this._mouseMove = false;
-        this._movedChildElement = undefined;
-        this._activeNeighbourElement = undefined;
-        this._runMoved = false;
     }
 
     private persistOffset() {
-        if (this._runMoved) {
-            this._displayService.setOffsetInfo({
-                x: this._globalChangesRun.x,
-                y: this._globalChangesRun.y,
-            });
+        if (this._stateHandler.runIsMoved()) {
+            this._displayService.setOffsetInfo(
+                this._stateHandler.getGlobalChangesForRun()
+            );
         }
-    }
-
-    private moveRun(drawingArea: SVGElement) {
-        Array.from(drawingArea.children).forEach((e) => {
-            const x = this._localChangesRun.x;
-            const y = this._localChangesRun.y;
-            if (x !== 0 || y !== 0) {
-                this._runMoved = true;
-            }
-            if (e.nodeName === 'rect' || e.nodeName === 'text') {
-                const currentX = +asInt(e, 'x') + +x;
-                const currentY = +asInt(e, 'y') + +y;
-                e.setAttribute('x', `${currentX}`);
-                e.setAttribute('y', `${currentY}`);
-                e.removeAttribute(originalYAttribute);
-            }
-            if (e.nodeName === 'line') {
-                const currentX1 = +asInt(e, 'x1') + +x;
-                const currentY1 = +asInt(e, 'y1') + +y;
-                const currentX2 = +asInt(e, 'x2') + +x;
-                const currentY2 = +asInt(e, 'y2') + +y;
-                e.setAttribute('x1', `${currentX1}`);
-                e.setAttribute('y1', `${currentY1}`);
-                e.setAttribute('x2', `${currentX2}`);
-                e.setAttribute('y2', `${currentY2}`);
-            }
-            if (e.nodeName === 'circle') {
-                const newX = +asInt(e, 'cx') + +x;
-                const newY = +asInt(e, 'cy') + +y;
-                e.setAttribute('cx', `${newX}`);
-                e.setAttribute('cy', `${newY}`);
-                e.removeAttribute(originalYAttribute);
-            }
-        });
     }
 
     private registerSingleMouseHandler(drawingArea: SVGElement) {
@@ -232,7 +144,7 @@ export class CanvasComponent implements OnChanges, OnInit, OnDestroy {
             const e = drawingArea.children[i] as HTMLElement;
             if (e.nodeName === 'rect' || e.nodeName === 'circle') {
                 this.registerMouseHandlerForDraggable(
-                    this.createDraggableFromElement(e)
+                    this._draggingService.createDraggable(e)
                 );
             }
         }
@@ -243,39 +155,48 @@ export class CanvasComponent implements OnChanges, OnInit, OnDestroy {
             return;
         }
         element.transition.onmouseenter = () => {
-            this._mouseMove = false;
+            this._stateHandler.disableMouseMoveForRun();
         };
+
         element.transition.onmousedown = (e) => {
-            this.initMouseDownForDraggable(e);
+            this._stateHandler.initMouseDownForDraggable(e);
         };
+
         element.transition.onmousemove = (e) => {
-            if (this._childElementInFocus) {
-                if (this._movedChildElement === undefined) {
-                    this._movedChildElement = element;
-                }
-                this.updateChangeStateDraggable(e);
-                this.moveDraggable(this._movedChildElement);
+            if (this._stateHandler.draggableCanBeMoved(element, e)) {
+                this.moveDraggable(element);
             }
         };
         element.transition.onmouseleave = () => {
-            this._childElementInFocus = false;
+            this._stateHandler.disableFocusForChildElement();
         };
         element.transition.onmouseup = (e) => {
-            if (this._movedChildElement !== undefined) {
-                this.resetDraggable(this._movedChildElement);
-            }
-            this.resetGlobalHandlers();
-            this.updateChangeStateDraggable(e);
+            this.resetChildElementIfExisting();
+            this._stateHandler.resetGlobalHandlers();
+            this._stateHandler.updateChangeStateDraggable(e);
         };
     }
 
-    private moveDraggable(draggable: Draggable) {
-        if (this._activeNeighbourElement === undefined) {
-            this.findActiveNeighbourElement(draggable);
+    private resetChildElementIfExisting(): void {
+        const movedChildElement = this._stateHandler.getMovedDraggable();
+        if (movedChildElement !== undefined) {
+            MoveElementsService.resetPositionForDraggable(movedChildElement);
         }
+    }
+
+    private moveChildElementIfExisting(): void {
+        const movedChildElement = this._stateHandler.getMovedDraggable();
+        if (movedChildElement !== undefined) {
+            this.moveDraggable(movedChildElement);
+        }
+    }
+
+    private moveDraggable(draggable: Draggable) {
+        this.determineActiveNeighbourElement(draggable);
+        const y = this._stateHandler.getVerticalChanges();
         const transition = draggable.transition;
-        const y = this._localChanges.y;
-        const currentCoords = createCoordsFromElement(transition);
+        const currentCoords =
+            FindElementsService.createCoordsFromElement(transition);
         const currentY = currentCoords.y;
         const newY = currentY + y;
         const originalY = asInt(transition, originalYAttribute);
@@ -285,48 +206,21 @@ export class CanvasComponent implements OnChanges, OnInit, OnDestroy {
         if (this.checkForPassedElement(transition)) {
             this.handlePassedElement(draggable);
         } else {
-            moveElement(draggable, newY);
+            MoveElementsService.moveElement(draggable, newY);
         }
     }
 
     private handlePassedElement(draggable: Draggable) {
-        const passedElement = this._activeNeighbourElement
+        const passedElement = this._stateHandler.getActiveNeighbourElement()
             ?.transition as HTMLElement;
         const movingElement = draggable.transition;
         if (passedElement === undefined) {
             return;
         }
-        const nodeTypeOfMovingElement = movingElement.nodeName;
-        const nodeTypeOfPassedElement = passedElement.nodeName;
-        let newYMoving;
-        let newYPassed;
-        if (nodeTypeOfMovingElement === 'rect') {
-            if (nodeTypeOfPassedElement === 'circle') {
-                newYMoving = asInt(passedElement, 'cy') - transitionSize / 2;
-                newYPassed =
-                    asInt(movingElement, originalYAttribute) +
-                    transitionSize / 2;
-            } else {
-                newYMoving = asInt(passedElement, 'y');
-                newYPassed = asInt(movingElement, originalYAttribute);
-            }
-        } else {
-            if (nodeTypeOfPassedElement === 'circle') {
-                newYPassed = asInt(movingElement, originalYAttribute);
-                newYMoving = asInt(passedElement, 'cy');
-            } else {
-                newYPassed =
-                    asInt(movingElement, originalYAttribute) -
-                    transitionSize / 2;
-                newYMoving = asInt(passedElement, 'y') + transitionSize / 2;
-            }
-        }
-        moveElement(
-            this.createDraggableFromElement(passedElement) as Draggable,
-            newYPassed
+        MoveElementsService.switchElements(
+            draggable,
+            this._draggingService.createDraggable(passedElement) as Draggable
         );
-        moveElement(draggable, newYMoving);
-
         if (this.persistCoordinates) {
             const movedLayerPos = asInt(movingElement, layerPosYAttibute);
             const passedLayerPos = asInt(passedElement, layerPosYAttibute);
@@ -337,171 +231,47 @@ export class CanvasComponent implements OnChanges, OnInit, OnDestroy {
         movingElement.removeAttribute(originalYAttribute);
         passedElement.removeAttribute(originalYAttribute);
 
-        this.resetCanvasHandlers();
+        this._stateHandler.resetCanvasHandlers();
     }
 
     private checkForPassedElement(movingElement: HTMLElement): boolean {
-        if (this._activeNeighbourElement === undefined) {
+        const activeNeighbour = this._stateHandler.getActiveNeighbourElement();
+        if (activeNeighbour === undefined) {
             return false;
         }
+
         const yMoving = asInt(movingElement, getYAttribute(movingElement));
         const yOriginal = asInt(movingElement, originalYAttribute);
         const yPassed = asInt(
-            this._activeNeighbourElement.transition,
-            getYAttribute(this._activeNeighbourElement.transition)
+            activeNeighbour.transition,
+            getYAttribute(activeNeighbour.transition)
         );
-        const direction = getMoveDirection(movingElement);
+        const direction = MoveElementsService.getMoveDirection(movingElement);
         if (!direction) {
             return false;
         }
-        const offset = this.calculateOffset(movingElement, direction);
+        const offset = MoveElementsService.calculateOffset(
+            movingElement,
+            activeNeighbour,
+            direction
+        );
         if (direction === 'up') {
             return yMoving < yPassed + offset && yOriginal > yPassed;
         }
         return yMoving > yPassed + offset && yOriginal < yPassed;
     }
 
-    private calculateOffset(
-        movingElement: HTMLElement,
-        direction: string
-    ): number {
-        const movingNode = movingElement.nodeName;
-        const passedNode = this._activeNeighbourElement?.transition.nodeName;
-        if (passedNode === 'circle') {
-            if (movingNode === 'circle') {
-                return 0;
-            }
-            if (movingNode === 'rect') {
-                if (direction === 'up') {
-                    return transitionSize / 2;
-                }
-                return -transitionSize / 2;
-            }
-        }
-        if (passedNode === 'rect') {
-            if (movingNode === 'circle') {
-                if (direction === 'up') {
-                    return transitionSize / 2;
-                }
-                return -transitionSize / 2;
-            }
-            if (movingNode === 'rect') {
-                return 0;
-            }
-        }
-        return 0;
-    }
-
-    private resetDraggable(e: Draggable) {
-        const transition = e.transition;
-        const newY = asInt(transition, originalYAttribute);
-        if (newY > 0) {
-            moveElement(e, newY);
-        }
-    }
-
-    private findInfoElementForTransition(transition: HTMLElement): HTMLElement {
-        const x = asInt(transition, getXAttribute(transition));
-        const y = asInt(transition, getYAttribute(transition));
-        const currentXForInfolement = +x + +transitionSize / 2;
-        const currentYInfoElement = +y + transitionSize * 1.5;
-        const selector =
-            'text[y="' +
-            currentYInfoElement +
-            '"][x="' +
-            currentXForInfolement +
-            '"]';
-        return getElementFromCanvas(selector, this.drawingArea);
-    }
-
-    persistLayerPosition(elements: Array<HTMLElement>): void {
-        const coordinates = [] as CoordinatesInfo[];
-        elements.forEach((element) => {
-            const y = asInt(element, layerPosYAttibute);
-            let x = -1;
-            let infoText =
-                this.findInfoElementForTransition(element)?.textContent ?? '';
-            if (element.nodeName === 'circle') {
-                x = asInt(element, breakpointPositionAttribute);
-                infoText =
-                    element.getAttribute(fromTransitionAttribute) +
-                    ' ' +
-                    element.getAttribute(toTransitionAttribute);
-                const breakPoints =
-                    element.getAttribute(breakpointTrail)?.split(',') ?? [];
-                for (let i = 0; i < breakPoints.length; i++) {
-                    const breakPoint = breakPoints[i].split(':');
-                    if (i === x) {
-                        infoText += '[' + (y + 1) + ']';
-                    } else {
-                        infoText += '[' + (parseInt(breakPoint[1]) + 1) + ']';
-                    }
-                }
-            }
-            coordinates.push({
-                transitionName: infoText.trim(),
-                transitionType: element.nodeName,
-                coordinates: {
-                    x: x + 1,
-                    y: y + 1,
-                },
-                globalOffset: {
-                    x: x + 1,
-                    y: y + 1,
-                },
-            });
-        });
-        this._displayService.setCoordsInfo(coordinates);
-    }
-
-    private initMouseDownForDraggable(event: MouseEvent) {
-        this._globalChanges = {
-            x: event.offsetX,
-            y: event.offsetY,
-        };
-        this._mouseMove = false;
-        this._childElementInFocus = true;
-    }
-
-    private updateChangeStateRun(event: MouseEvent) {
-        this._localChangesRun = {
-            x: event.offsetX - this._globalChanges.x,
-            y: event.offsetY - this._globalChanges.y,
-        };
-        this._globalChangesRun.x += this._localChangesRun.x;
-        this._globalChangesRun.y += this._localChangesRun.y;
-        this._localChanges = {
-            x: event.offsetX - this._globalChanges.x,
-            y: event.offsetY - this._globalChanges.y,
-        };
-        this._globalChanges = {
-            x: event.offsetX,
-            y: event.offsetY,
-        };
-    }
-
-    private updateChangeStateDraggable(event: MouseEvent) {
-        this._localChanges = {
-            x: event.offsetX - this._globalChanges.x,
-            y: event.offsetY - this._globalChanges.y,
-        };
-        this._globalChanges = {
-            x: event.offsetX,
-            y: event.offsetY,
-        };
-    }
-
-    private findActiveNeighbourElement(movedElement: Draggable): void {
-        if (!movedElement) {
-            return;
+    private determineActiveNeighbourElement(movedElement: Draggable): void {
+        if (!movedElement || !this.drawingArea) {
+            null;
         }
         const transition = movedElement.transition;
         const yAttribute = getYAttribute(transition);
-        const direction = getMoveDirection(transition);
+        const direction = MoveElementsService.getMoveDirection(transition);
         if (!direction) {
             return;
         }
-        const potentialNeighbours = findElementsInYAxis(
+        const potentialNeighbours = FindElementsService.findElementsInYAxis(
             transition,
             this.drawingArea
         );
@@ -515,11 +285,18 @@ export class CanvasComponent implements OnChanges, OnInit, OnDestroy {
                 return;
             }
             const localYAttribute = getYAttribute(eLocal);
-            const draggable = this.createDraggableFromElement(eLocal);
+            const draggable =
+                DraggingCreationService.createDraggableFromElement(
+                    eLocal,
+                    this.drawingArea
+                );
             if (direction === 'up') {
                 if (asInt(e, localYAttribute) < asInt(transition, yAttribute)) {
                     if (draggable !== null) {
-                        this.setActiveNeighbourElement(draggable, direction);
+                        this._stateHandler.setActiveNeighbourElement(
+                            draggable,
+                            direction
+                        );
                     }
                 }
             }
@@ -529,54 +306,20 @@ export class CanvasComponent implements OnChanges, OnInit, OnDestroy {
                     asInt(transition, yAttribute)
                 ) {
                     if (draggable !== null) {
-                        this.setActiveNeighbourElement(draggable, direction);
+                        this._stateHandler.setActiveNeighbourElement(
+                            draggable,
+                            direction
+                        );
                     }
                 }
             }
         });
     }
 
-    private setActiveNeighbourElement(
-        draggable: Draggable,
-        direction: string
-    ): void {
-        if (this._activeNeighbourElement === undefined) {
-            this._activeNeighbourElement = draggable;
-        }
-        const movingCoords = createCoordsFromElement(draggable.transition);
-        if (this._activeNeighbourElement) {
-            const neighbourCoords = createCoordsFromElement(
-                this._activeNeighbourElement.transition
-            );
-            if (direction === 'up' && movingCoords.y > neighbourCoords.y) {
-                this._activeNeighbourElement = draggable;
-            }
-            if (direction === 'down' && movingCoords.y < neighbourCoords.y) {
-                this._activeNeighbourElement = draggable;
-            }
-        }
-    }
-
-    private createDraggableFromElement(element: HTMLElement): Draggable | null {
-        if (element.nodeName !== 'rect' && element.nodeName !== 'circle') {
-            return null;
-        }
-        const draggable = {
-            transition: element,
-        } as Draggable;
-        draggable.infoElement = findInfoElementForTransition(
-            element,
-            this.drawingArea
+    persistLayerPosition(elements: Array<HTMLElement>): void {
+        this._draggingService.setDrawingArea(this.drawingArea);
+        this._displayService.setCoordsInfo(
+            this._draggingService.getCoordinates(elements)
         );
-        draggable.incomingArcs = findIncomingArcs(element, this.drawingArea);
-        draggable.outgoingArcs = findOutgoingArcs(element, this.drawingArea);
-        return draggable;
     }
 }
-
-export type Draggable = {
-    transition: HTMLElement;
-    infoElement?: HTMLElement;
-    incomingArcs: Array<HTMLElement>;
-    outgoingArcs: Array<HTMLElement>;
-};
