@@ -3,7 +3,7 @@ import { ToastrService } from 'ngx-toastr';
 
 import { UploadService } from './upload.service';
 
-describe('ParserService', () => {
+describe('UploadService', () => {
     let service: UploadService;
 
     beforeEach(() => {

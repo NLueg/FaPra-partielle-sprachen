@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 
 import { DraggingCreationService } from './draggable-creation.service';
 
-describe('ParserService', () => {
+describe('DraggingCreationService', () => {
     let service: DraggingCreationService;
 
     beforeEach(() => {

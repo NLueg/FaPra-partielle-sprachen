@@ -4,7 +4,7 @@ import { MergeService } from '../../components/display-merged-run/merge.service'
 import { DisplayService } from '../display.service';
 import { DownloadService } from './download.service';
 
-describe('ParserService', () => {
+describe('DownloadService', () => {
     let service: DownloadService;
 
     beforeEach(() => {

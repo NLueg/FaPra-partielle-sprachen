@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 
 import { StatehandlerService } from './statehandler.service';
 
-describe('ParserService', () => {
+describe('StatehandlerService', () => {
     let service: StatehandlerService;
 
     beforeEach(() => {

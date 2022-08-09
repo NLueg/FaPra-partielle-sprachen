@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 
 import { MoveElementsService } from './move-elements.service';
 
-describe('ParserService', () => {
+describe('MoveElementsService', () => {
     let service: MoveElementsService;
 
     beforeEach(() => {

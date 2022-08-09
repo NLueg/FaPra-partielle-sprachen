@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 
 import { FindElementsService } from './find-elements.service';
 
-describe('ParserService', () => {
+describe('FindElementsService', () => {
     let service: FindElementsService;
 
     beforeEach(() => {
