@@ -238,6 +238,7 @@ export class SourceFileTextareaComponent implements OnDestroy, OnInit {
         for (const line of contentLines) {
             if (line === offsetAttribute) {
                 isOffsetLine = true;
+                newText += '\n';
             }
             if (!isOffsetLine) {
                 if (first) {
@@ -248,7 +249,6 @@ export class SourceFileTextareaComponent implements OnDestroy, OnInit {
                 }
             }
         }
-        newText += '\n';
         this.textareaFc.setValue(newText);
         this.processSourceChange(newText);
         this._displayService.setOffsetInfo({ x: 0, y: 0 });

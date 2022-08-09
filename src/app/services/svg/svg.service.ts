@@ -124,35 +124,6 @@ export class SvgService {
                 }
             });
         }
-
-        run.arcs.forEach((arc) => {
-            const source = run.elements.find((el) => el.label === arc.source);
-            const target = run.elements.find((el) => el.label === arc.target);
-            let isCurrentRun = false;
-            currentRun.arcs.forEach((currentArc) => {
-                if (
-                    currentArc.source == arc.source &&
-                    currentArc.target == arc.target
-                ) {
-                    isCurrentRun = true;
-                    return;
-                }
-            });
-
-            const arrow = createSvgForArc(
-                arc,
-                source,
-                target,
-                isCurrentRun && merge && samePrefix,
-                offset
-            );
-            if (arrow) {
-                arrow.forEach((a) => {
-                    result.push(a);
-                });
-            }
-        });
-
         return result;
     }
 }
