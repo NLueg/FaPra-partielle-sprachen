@@ -2,11 +2,7 @@ import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 import { DownloadService } from '../../../services/download/download.service';
-import {
-    Compression,
-    DownloadableContent,
-    DownloadFormat,
-} from '../download.const';
+import { DownloadableContent, DownloadFormat } from '../download.const';
 
 @Component({
     selector: 'app-download-popover',
@@ -17,7 +13,7 @@ export class DownloadPopoverComponent {
     fileFormat: DownloadFormat = 'run';
     downloadName = '';
     currentDownloadSelection: 'all' | 'current' = 'all';
-    compression: Compression = 'no';
+    compression = false;
 
     constructor(
         private dialogRef: MatDialogRef<DownloadPopoverComponent>,

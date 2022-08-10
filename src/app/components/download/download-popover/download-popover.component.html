@@ -40,15 +40,14 @@
         id="format-radio-group-label"
         >Compression</mat-label
     >
-    <mat-radio-group
+    <mat-checkbox
         *ngIf="currentDownloadSelection === 'all'"
         color="primary"
         [(ngModel)]="compression"
         aria-labelledby="format-radio-group-label"
     >
-        <mat-radio-button value="no">No compression</mat-radio-button>
-        <mat-radio-button value="zip">Download as ZIP</mat-radio-button>
-    </mat-radio-group>
+        Download as ZIP</mat-checkbox
+    >
 
     <div class="buttons"></div>
 </div>
