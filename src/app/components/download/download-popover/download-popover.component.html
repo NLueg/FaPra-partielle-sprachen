@@ -35,6 +35,20 @@
         <mat-radio-button value="pnml">PNML</mat-radio-button>
     </mat-radio-group>
 
+    <mat-label
+        *ngIf="currentDownloadSelection === 'all'"
+        id="format-radio-group-label"
+        >Compression</mat-label
+    >
+    <mat-checkbox
+        *ngIf="currentDownloadSelection === 'all'"
+        color="primary"
+        [(ngModel)]="compression"
+        aria-labelledby="format-radio-group-label"
+    >
+        Download as ZIP</mat-checkbox
+    >
+
     <div class="buttons"></div>
 </div>
 

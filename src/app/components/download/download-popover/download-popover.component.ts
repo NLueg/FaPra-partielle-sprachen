@@ -13,6 +13,7 @@ export class DownloadPopoverComponent {
     fileFormat: DownloadFormat = 'run';
     downloadName = '';
     currentDownloadSelection: 'all' | 'current' = 'all';
+    compression = false;
 
     constructor(
         private dialogRef: MatDialogRef<DownloadPopoverComponent>,
@@ -26,7 +27,8 @@ export class DownloadPopoverComponent {
             this._downloadService.downloadRuns(
                 this.downloadName,
                 this.data.contentToDownload,
-                this.fileFormat
+                this.fileFormat,
+                this.compression
             );
         } else if (this.currentDownloadSelection === 'current') {
             this._downloadService.downloadCurrentRun(

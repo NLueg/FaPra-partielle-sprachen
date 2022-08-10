@@ -1,4 +1,6 @@
 import { Injectable, OnDestroy } from '@angular/core';
+import { saveAs } from 'file-saver';
+import JSZip from 'jszip';
 import { first, Subject } from 'rxjs';
 
 import { Run } from '../../classes/diagram/run';
@@ -31,7 +33,8 @@ export class DownloadService implements OnDestroy {
     downloadRuns(
         name: string,
         contentToDownload: DownloadableContent,
-        formatToDownload: DownloadFormat
+        formatToDownload: DownloadFormat,
+        compression: boolean
     ): void {
         const runsToDownload =
             contentToDownload === 'mergeRuns'
@@ -42,13 +45,33 @@ export class DownloadService implements OnDestroy {
             const timestamp = Date.now();
             const fileEnding = getFileEndingForFormat(formatToDownload);
 
-            runs.forEach((run, index) => {
-                const fileName = name
-                    ? `${name}_${index + 1}.${fileEnding}`
-                    : `${timestamp}_run_${index + 1}.${fileEnding}`;
+            if (!compression) {
+                runs.forEach((run, index) => {
+                    const fileName = name
+                        ? `${name}_${index + 1}.${fileEnding}`
+                        : `${timestamp}_run_${index + 1}.${fileEnding}`;
 
-                this.downloadRun(fileName, formatToDownload, run);
-            });
+                    this.downloadRun(fileName, formatToDownload, run);
+                });
+            } else if (compression) {
+                const zip = new JSZip();
+                runs.forEach((run, index) => {
+                    const fileName = name
+                        ? `${name}_${index + 1}.${fileEnding}`
+                        : `${timestamp}_run_${index + 1}.${fileEnding}`;
+                    const fileContent =
+                        formatToDownload === 'run'
+                            ? run.text.trim()
+                            : this._runToPnmlService.parseRunToPnml(
+                                  fileName,
+                                  run
+                              );
+                    zip?.file(fileName, fileContent);
+                });
+                zip?.generateAsync({ type: 'blob' }).then(function (content) {
+                    saveAs(content, name ? `${name}` : `${timestamp}` + '.zip');
+                });
+            }
         });
     }
 
