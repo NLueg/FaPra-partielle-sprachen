@@ -16,10 +16,14 @@
                 margin: var(--spaces) 0;
             }
         }
+        mat-checkbox{
+            padding: var(--spaces);
+
+        }
 
         ::ng-deep mat-form-field .mat-form-field-wrapper {
             width: 300px;
-            padding-bottom: var(--spaces);
+            padding-bottom: var(---spaces);
         }
     }
 

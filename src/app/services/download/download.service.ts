@@ -6,7 +6,6 @@ import { first, Subject } from 'rxjs';
 import { Run } from '../../classes/diagram/run';
 import { MergeService } from '../../components/display-merged-run/merge.service';
 import {
-    Compression,
     DownloadableContent,
     DownloadFormat,
 } from '../../components/download/download.const';
@@ -35,7 +34,7 @@ export class DownloadService implements OnDestroy {
         name: string,
         contentToDownload: DownloadableContent,
         formatToDownload: DownloadFormat,
-        compression: Compression
+        compression: boolean
     ): void {
         const runsToDownload =
             contentToDownload === 'mergeRuns'
@@ -46,7 +45,7 @@ export class DownloadService implements OnDestroy {
             const timestamp = Date.now();
             const fileEnding = getFileEndingForFormat(formatToDownload);
 
-            if (compression == 'no') {
+            if (!compression) {
                 runs.forEach((run, index) => {
                     const fileName = name
                         ? `${name}_${index + 1}.${fileEnding}`
@@ -54,7 +53,7 @@ export class DownloadService implements OnDestroy {
 
                     this.downloadRun(fileName, formatToDownload, run);
                 });
-            } else if (compression == 'zip') {
+            } else if (compression) {
                 const zip = new JSZip();
                 runs.forEach((run, index) => {
                     const fileName = name
