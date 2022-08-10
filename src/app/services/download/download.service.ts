@@ -1,9 +1,12 @@
 import { Injectable, OnDestroy } from '@angular/core';
+import { saveAs } from 'file-saver';
+import JSZip from 'jszip';
 import { first, Subject } from 'rxjs';
 
 import { Run } from '../../classes/diagram/run';
 import { MergeService } from '../../components/display-merged-run/merge.service';
 import {
+    Compression,
     DownloadableContent,
     DownloadFormat,
 } from '../../components/download/download.const';
@@ -31,7 +34,8 @@ export class DownloadService implements OnDestroy {
     downloadRuns(
         name: string,
         contentToDownload: DownloadableContent,
-        formatToDownload: DownloadFormat
+        formatToDownload: DownloadFormat,
+        compression: Compression
     ): void {
         const runsToDownload =
             contentToDownload === 'mergeRuns'
@@ -42,13 +46,35 @@ export class DownloadService implements OnDestroy {
             const timestamp = Date.now();
             const fileEnding = getFileEndingForFormat(formatToDownload);
 
-            runs.forEach((run, index) => {
-                const fileName = name
-                    ? `${name}_${index + 1}.${fileEnding}`
-                    : `${timestamp}_run_${index + 1}.${fileEnding}`;
+            if (compression == 'no') {
+                runs.forEach((run, index) => {
+                    const fileName = name
+                        ? `${name}_${index + 1}.${fileEnding}`
+                        : `${timestamp}_run_${index + 1}.${fileEnding}`;
 
-                this.downloadRun(fileName, formatToDownload, run);
-            });
+                    this.downloadRun(fileName, formatToDownload, run);
+                });
+            } else if (compression == 'zip') {
+                const folderName = name ? `${name}` : `${timestamp}`;
+                const zip = new JSZip().folder(folderName);
+                console.log(folderName);
+                runs.forEach((run, index) => {
+                    const fileName = name
+                        ? `${name}_${index + 1}.${fileEnding}`
+                        : `${timestamp}_run_${index + 1}.${fileEnding}`;
+                    const fileContent =
+                        formatToDownload === 'run'
+                            ? run.text.trim()
+                            : this._runToPnmlService.parseRunToPnml(
+                                  fileName,
+                                  run
+                              );
+                    zip?.file(fileName, fileContent);
+                });
+                zip?.generateAsync({ type: 'blob' }).then(function (content) {
+                    saveAs(content, folderName + '.zip');
+                });
+            }
         });
     }
 
