@@ -1,6 +1,6 @@
-export const emptyContent = `.type ps
+export const emptyContent = `.type run
 
-.transitions
+.events
 
 .arcs
 
