@@ -55,9 +55,7 @@ export class DownloadService implements OnDestroy {
                     this.downloadRun(fileName, formatToDownload, run);
                 });
             } else if (compression == 'zip') {
-                const folderName = name ? `${name}` : `${timestamp}`;
-                const zip = new JSZip().folder(folderName);
-                console.log(folderName);
+                const zip = new JSZip();
                 runs.forEach((run, index) => {
                     const fileName = name
                         ? `${name}_${index + 1}.${fileEnding}`
@@ -72,7 +70,7 @@ export class DownloadService implements OnDestroy {
                     zip?.file(fileName, fileContent);
                 });
                 zip?.generateAsync({ type: 'blob' }).then(function (content) {
-                    saveAs(content, folderName + '.zip');
+                    saveAs(content, name ? `${name}` : `${timestamp}` + '.zip');
                 });
             }
         });
