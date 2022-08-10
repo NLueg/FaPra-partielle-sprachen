@@ -11,7 +11,5 @@ export interface Run {
 }
 
 export function isRunEmpty(run: Run): boolean {
-    return (
-        !run.text.trim() && run.arcs.length === 0 && run.elements.length === 0
-    );
+    return run.arcs.length === 0 && run.elements.length === 0;
 }
