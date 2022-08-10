@@ -46,6 +46,7 @@ export class RunToPnmlService {
     private layoutRun(run: Run): { parsedRun: Run; places: Element[] } {
         const places: Element[] = run.arcs.map((arc) => ({
             label: getPlaceNameByArc(arc),
+            id: '1',
             incomingArcs: [],
             outgoingArcs: [],
         }));

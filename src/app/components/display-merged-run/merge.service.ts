@@ -53,7 +53,7 @@ export class MergeService {
                 continue;
             }
 
-            if (baseStart.label === startElementForMerge.label) {
+            if (baseStart.id === startElementForMerge.id) {
                 mergeRuns(baseRun, runToMerge, startElementForMerge);
             } else {
                 runsToCheck.push(runToMerge);
@@ -87,7 +87,7 @@ function mergeRuns(
     }
 
     const foundElement = baseRun.elements.find(
-        (element) => element.label === startElementOfRunToMerge.label
+        (element) => element.id === startElementOfRunToMerge.id
     );
     if (!foundElement) {
         addElement(baseRun, copyElement(startElementOfRunToMerge));
@@ -97,7 +97,7 @@ function mergeRuns(
 
     for (const outgoingArc of startElementOfRunToMerge.outgoingArcs) {
         const element = runToMerge.elements.find(
-            (element) => element.label === outgoingArc.target
+            (element) => element.id === outgoingArc.target
         );
         if (!element) {
             continue;

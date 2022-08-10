@@ -11,19 +11,19 @@ import {
 import { Run } from '../../classes/diagram/run';
 import {
     arcsAttribute,
+    eventsAttribute,
     offsetAttribute,
-    transitionsAttribute,
     typeKey,
 } from './parsing-constants';
 
-type ParsingStates = 'initial' | 'type' | 'transitions' | 'arcs' | 'offset';
+type ParsingStates = 'initial' | 'type' | 'events' | 'arcs' | 'offset';
 
 @Injectable({
     providedIn: 'root',
 })
 export class ParserService {
     constructor(private toastr: ToastrService) {}
-    static transitionRegex = new RegExp('^([^\\[ ]+)(\\s?\\[\\d+\\])?$');
+    // static transitionRegex = new RegExp('^([^\\[ ]+)(\\s?\\[\\d+\\])?$');
     static arcRegex = new RegExp('^([^\\[ ]+)\\s([^\\[ ]+)(\\s?\\[\\d+\\])*$');
     static breakpointRegex = new RegExp('\\[\\d+\\]');
     static offsetRegex = new RegExp('-?\\d+ -?\\d+');
@@ -58,9 +58,9 @@ export class ParserService {
                         currentParsingState = 'type';
                         break;
                     } else {
-                        errors.add(`The type of the file has to be 'ps'`);
+                        errors.add(`The type has to be '` + typeKey + `'`);
                         this.toastr.error(
-                            `The type of the file has to be 'ps'`,
+                            `The type has to be '` + typeKey + `'`,
                             `Unable to parse file`
                         );
                         return null;
@@ -68,8 +68,8 @@ export class ParserService {
                 case 'type':
                     if (trimmedLine === '') {
                         break;
-                    } else if (trimmedLine === transitionsAttribute) {
-                        currentParsingState = 'transitions';
+                    } else if (trimmedLine === eventsAttribute) {
+                        currentParsingState = 'events';
                         fileContainsTransitions = true;
                         break;
                     } else if (trimmedLine === arcsAttribute) {
@@ -84,42 +84,46 @@ export class ParserService {
                         );
                         return null;
                     }
-                case 'transitions':
-                    if (
-                        trimmedLine === '' ||
-                        trimmedLine === transitionsAttribute
-                    ) {
+                case 'events':
+                    if (trimmedLine === '' || trimmedLine === eventsAttribute) {
                         break;
                     } else if (
                         trimmedLine !== arcsAttribute &&
                         trimmedLine !== offsetAttribute
                     ) {
                         let label: string;
+                        let id: string;
                         let layerPos: number | undefined;
-                        if (!ParserService.transitionRegex.test(trimmedLine)) {
-                            label = trimmedLine.split(' ')[0];
-                            run.warnings.push(`Invalid transition definition`);
-                            this.toastr.warning(
-                                `Invalid transition definition`,
-                                `Only first word is used`
+                        if (
+                            trimmedLine.split(' | ').length == 0 ||
+                            trimmedLine.split(' | ')[0] == '' ||
+                            trimmedLine.split(' | ')[1] == ''
+                        ) {
+                            run.warnings.push(`Invalid event definition`);
+                            this.toastr.error(
+                                `Invalid event definition`,
+                                `Events have to have a label and an ID separated by '|'`
                             );
+                            return null;
                         } else {
-                            const match =
-                                ParserService.transitionRegex.exec(trimmedLine);
-                            if (match) {
-                                label = match[1];
-                                if (match[2]) {
-                                    //extract coordinates
-                                    layerPos = parseInt(
-                                        match[2].substring(
-                                            match[2].indexOf('[') + 1,
-                                            match[2].indexOf(']')
-                                        )
-                                    );
-                                }
-                            } else {
-                                label = trimmedLine.split(' ')[0];
-                            }
+                            label = trimmedLine.split(' | ')[0];
+                            id = trimmedLine.split(' | ')[1];
+                            // const match =
+                            //     ParserService.transitionRegex.exec(trimmedLine);
+                            // if (match) {
+                            //     label = match[1];
+                            //     if (match[2]) {
+                            //         //extract coordinates
+                            //         layerPos = parseInt(
+                            //             match[2].substring(
+                            //                 match[2].indexOf('[') + 1,
+                            //                 match[2].indexOf(']')
+                            //             )
+                            //         );
+                            //     }
+                            // } else {
+                            //     label = trimmedLine.split(' ')[0];
+                            // }
                         }
 
                         if (
@@ -128,16 +132,17 @@ export class ParserService {
                                 layerPos: layerPos,
                                 incomingArcs: [],
                                 outgoingArcs: [],
+                                id: id,
                             })
                         ) {
                             run.warnings.push(
-                                `File contains duplicate transition (${
+                                `File contains duplicate events (${
                                     trimmedLine.split(' ')[0]
                                 })`
                             );
                             this.toastr.warning(
-                                `File contains duplicate transitions`,
-                                `Duplicate transitions are ignored`
+                                `File contains duplicate events`,
+                                `Duplicate events are ignored`
                             );
                         }
                         break;
@@ -159,7 +164,7 @@ export class ParserService {
                     } else if (trimmedLine === offsetAttribute) {
                         currentParsingState = 'offset';
                         break;
-                    } else if (trimmedLine !== transitionsAttribute) {
+                    } else if (trimmedLine !== eventsAttribute) {
                         let source: string, target: string;
                         const breakpoints: Breakpoint[] = [];
 
@@ -231,8 +236,8 @@ export class ParserService {
                             );
                         }
                         break;
-                    } else if (trimmedLine === transitionsAttribute) {
-                        currentParsingState = 'transitions';
+                    } else if (trimmedLine === eventsAttribute) {
+                        currentParsingState = 'events';
                         fileContainsTransitions = true;
                         break;
                     } else {
@@ -263,11 +268,9 @@ export class ParserService {
         }
         if (fileContainsTransitions && fileContainsArcs) {
             if (!setRefs(run)) {
-                run.warnings.push(
-                    `File contains arcs for non existing transitions`
-                );
+                run.warnings.push(`File contains arcs for non existing events`);
                 this.toastr.warning(
-                    `File contains arcs for non existing transitions`,
+                    `File contains arcs for non existing events`,
                     `Invalid arcs are ignored`
                 );
             }
@@ -277,15 +280,15 @@ export class ParserService {
                 run.warnings.push(`File contains cycles`);
                 this.toastr.warning(
                     `File contains cycles`,
-                    `Could not apply Sugiyama layout`
+                    `A partial language cannot contain cycles`
                 );
             }
 
             return run;
         } else {
-            errors.add(`File does not contain transitions and arcs`);
+            errors.add(`File does not contain events and arcs`);
             this.toastr.error(
-                `File does not contain transitions and arcs`,
+                `File does not contain events and arcs`,
                 `Unable to parse file`
             );
             return null;

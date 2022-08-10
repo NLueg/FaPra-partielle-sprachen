@@ -2,7 +2,7 @@ import clonedeep from 'lodash.clonedeep';
 
 import {
     arcsAttribute,
-    transitionsAttribute,
+    eventsAttribute,
     typeKey,
 } from '../../../services/parser/parsing-constants';
 import { Arc } from '../arc';
@@ -23,10 +23,10 @@ export function resolveWarnings(run: Run): Run {
 
 export function generateTextForRun(run: Run): string {
     const lines = [typeKey];
-    lines.push(transitionsAttribute);
+    lines.push(eventsAttribute);
     run.elements.forEach((e) => {
-        if (e.layerPos) lines.push(`${e.label} [${e.layerPos}]`);
-        else lines.push(e.label);
+        if (e.layerPos) lines.push(`${e.id} [${e.layerPos}]`);
+        else lines.push(e.id);
     });
 
     lines.push(arcsAttribute);
@@ -34,10 +34,10 @@ export function generateTextForRun(run: Run): string {
         ...run.arcs
             .filter((arc) => {
                 const source = run.elements.find(
-                    (element) => element.label === arc.source
+                    (element) => element.id === arc.source
                 );
                 const target = run.elements.find(
-                    (element) => element.label === arc.target
+                    (element) => element.id === arc.target
                 );
                 return source && target;
             })
@@ -70,7 +70,7 @@ function removeCycles(run: Run): void {
 }
 
 export function addElement(run: Run, element: Element): boolean {
-    const contained = run.elements.some((item) => item.label === element.label);
+    const contained = run.elements.some((item) => item.id == element.id);
     if (contained) {
         return false;
     }
@@ -81,7 +81,7 @@ export function addElement(run: Run, element: Element): boolean {
 
 export function addArc(run: Run, arc: Arc): boolean {
     const contained = run.arcs.some(
-        (item) => item.source === arc.source && item.target === arc.target
+        (item) => item.source == arc.source && item.target == arc.target
     );
     if (contained) {
         return false;
@@ -103,8 +103,8 @@ export function setRefs(run: Run): boolean {
     });
 
     run.arcs.forEach((a) => {
-        const source = run.elements.find((e) => e.label == a.source);
-        const target = run.elements.find((e) => e.label == a.target);
+        const source = run.elements.find((e) => e.id == a.source);
+        const target = run.elements.find((e) => e.id == a.target);
 
         if (!source || !target) {
             check = false;
@@ -123,7 +123,12 @@ export function copyArc(arc: Arc): Arc {
 }
 
 export function copyElement(element: Element): Element {
-    return { label: element.label, incomingArcs: [], outgoingArcs: [] };
+    return {
+        label: element.label,
+        incomingArcs: [],
+        outgoingArcs: [],
+        id: element.id,
+    };
 }
 
 export function copyRun(run: Run, copyCoordinates: boolean): Run {
