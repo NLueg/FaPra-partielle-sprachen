@@ -25,7 +25,6 @@ export function generateTextForRun(run: Run): string {
     const lines = [typeKey];
     lines.push(eventsAttribute);
     run.elements.forEach((e) => {
-
         const identifier =
             e.label === e.id ? e.id : `${e.id + ' | ' + e.label}`;
 
