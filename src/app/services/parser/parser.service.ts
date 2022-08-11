@@ -251,7 +251,6 @@ export class ParserService {
                     `Please remove all cycles from file or input field`,
                     `Provided input is no partial language`
                 );
-                return getEmptyRun();
             }
 
             return run;
