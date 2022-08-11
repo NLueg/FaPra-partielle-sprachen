@@ -77,11 +77,14 @@ export class DraggingCreationService {
                 y: asInt(nodes[i], 'y2'),
             };
 
+            //Check if line intersects the current element bounds
             if (
-                c.y >= coords.y &&
-                c.y <= coords.y + transitionSize &&
-                c.x >= coords.x &&
-                c.x <= coords.x + transitionSize / 2
+                (transition.nodeName === 'rect' &&
+                    c.y >= coords.y &&
+                    c.y <= coords.y + transitionSize &&
+                    c.x >= coords.x &&
+                    c.x <= coords.x + transitionSize / 2) ||
+                (c.y == coords.y && c.x == coords.x)
             ) {
                 incomingLines.push(nodes[i] as HTMLElement);
             }
@@ -105,11 +108,14 @@ export class DraggingCreationService {
                 y: asInt(nodes[i], 'y1'),
             };
 
+            //Check if line intersects the current element bounds
             if (
-                c.y >= coords.y &&
-                c.y <= coords.y + transitionSize &&
-                c.x >= coords.x + transitionSize / 2 &&
-                c.x <= coords.x + transitionSize
+                (transition.nodeName === 'rect' &&
+                    c.y >= coords.y &&
+                    c.y <= coords.y + transitionSize &&
+                    c.x >= coords.x + transitionSize / 2 &&
+                    c.x <= coords.x + transitionSize) ||
+                (c.x == coords.x && c.y == coords.y)
             ) {
                 outgoingLines.push(nodes[i] as HTMLElement);
             }
