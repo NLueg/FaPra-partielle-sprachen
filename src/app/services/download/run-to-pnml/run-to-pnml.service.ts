@@ -2,10 +2,13 @@ import { Injectable } from '@angular/core';
 
 import { Arc } from '../../../classes/diagram/arc';
 import { Element } from '../../../classes/diagram/element';
+import { generateTextForRun } from '../../../classes/diagram/functions/run-helper.fn';
 import { Run } from '../../../classes/diagram/run';
 import { LayoutService } from '../../layout.service';
 
 const encoding = '<?xml version="1.0" encoding="UTF-8"?>\n';
+
+const firstPlaceId = 'p0';
 
 @Injectable({
     providedIn: 'root',
@@ -53,6 +56,12 @@ export class RunToPnmlService {
                 outgoingArcs: [],
             };
         });
+        places.unshift({
+            id: firstPlaceId,
+            label: firstPlaceId,
+            incomingArcs: [],
+            outgoingArcs: [],
+        });
 
         const newArcArray: Arc[] = run.arcs.flatMap((arc) => {
             const placeName = getPlaceNameByArc(arc);
@@ -61,6 +70,24 @@ export class RunToPnmlService {
                 { source: placeName, target: arc.target, breakpoints: [] },
             ];
         });
+
+        const firstElement = run.elements.length > 0 ? run.elements[0] : null;
+        if (firstElement) {
+            newArcArray.unshift({
+                source: firstPlaceId,
+                target: firstElement.id,
+                breakpoints: [],
+            });
+        }
+
+        console.log(
+            generateTextForRun({
+                arcs: newArcArray,
+                elements: [...run.elements, ...places],
+                warnings: [],
+                text: '',
+            })
+        );
 
         const parsedRun = this._layoutService.layout({
             arcs: newArcArray,
@@ -94,7 +121,7 @@ function parseTransition(transition: Element): string {
 
 function parsePlaces(places: Element[]): string {
     return places
-        .map((place) => {
+        .map((place, index) => {
             return `               <place id="${place.id}">
                     <name>
                          <text>${place.label}</text>
@@ -106,7 +133,7 @@ function parsePlaces(places: Element[]): string {
                          <position x="${place.x ?? 0}" y="${place.y ?? 0}"/>
                     </graphics>
                     <initialMarking>
-                         <text>1</text>
+                         <text>${index === 0 ? 1 : 0}</text>
                     </initialMarking>
                </place>`;
         })
