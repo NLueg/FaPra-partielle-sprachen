@@ -23,73 +23,166 @@ describe('ParserService', () => {
         const result = service.parse(exampleContent, errors);
 
         expect(result).toEqual({
-            text: '.type ps\n.transitions\nt1\nt2\nt3\nt4\nt5\nt6\n.arcs\nt1 t2\nt2 t4\nt4 t3\nt4 t5\nt5 t3\nt5 t6\nt6 t3\n',
             arcs: [
-                { source: 't1', target: 't2', breakpoints: [] },
-                { source: 't2', target: 't4', breakpoints: [] },
-                { source: 't4', target: 't3', breakpoints: [] },
-                { source: 't4', target: 't5', breakpoints: [] },
-                { source: 't5', target: 't3', breakpoints: [] },
-                { source: 't5', target: 't6', breakpoints: [] },
-                { source: 't6', target: 't3', breakpoints: [] },
+                {
+                    breakpoints: [],
+                    source: 't1',
+                    target: 't2',
+                },
+                {
+                    breakpoints: [],
+                    source: 't2',
+                    target: 't4',
+                },
+                {
+                    breakpoints: [],
+                    source: 't4',
+                    target: 't3',
+                },
+                {
+                    breakpoints: [],
+                    source: 't4',
+                    target: 't5',
+                },
+                {
+                    breakpoints: [],
+                    source: 't5',
+                    target: 't3',
+                },
+                {
+                    breakpoints: [],
+                    source: 't5',
+                    target: 'Verreisen',
+                },
+                {
+                    breakpoints: [],
+                    source: 'Verreisen',
+                    target: 't3',
+                },
             ],
-            offset: { x: 0, y: 0 },
             elements: [
                 {
-                    label: 't1',
+                    id: 't1',
                     incomingArcs: [],
+                    label: 'Reiseziel auswählen',
                     outgoingArcs: [
-                        { source: 't1', target: 't2', breakpoints: [] },
+                        {
+                            breakpoints: [],
+                            source: 't1',
+                            target: 't2',
+                        },
                     ],
                 },
                 {
-                    label: 't2',
+                    id: 't2',
                     incomingArcs: [
-                        { source: 't1', target: 't2', breakpoints: [] },
+                        {
+                            breakpoints: [],
+                            source: 't1',
+                            target: 't2',
+                        },
                     ],
+                    label: 'Flug buchen',
                     outgoingArcs: [
-                        { source: 't2', target: 't4', breakpoints: [] },
+                        {
+                            breakpoints: [],
+                            source: 't2',
+                            target: 't4',
+                        },
                     ],
                 },
                 {
-                    label: 't3',
+                    id: 't3',
                     incomingArcs: [
-                        { source: 't4', target: 't3', breakpoints: [] },
-                        { source: 't5', target: 't3', breakpoints: [] },
-                        { source: 't6', target: 't3', breakpoints: [] },
+                        {
+                            breakpoints: [],
+                            source: 't4',
+                            target: 't3',
+                        },
+                        {
+                            breakpoints: [],
+                            source: 't5',
+                            target: 't3',
+                        },
+                        {
+                            breakpoints: [],
+                            source: 'Verreisen',
+                            target: 't3',
+                        },
                     ],
+                    label: 'Hotel buchen',
                     outgoingArcs: [],
                 },
                 {
-                    label: 't4',
+                    id: 't4',
                     incomingArcs: [
-                        { source: 't2', target: 't4', breakpoints: [] },
+                        {
+                            breakpoints: [],
+                            source: 't2',
+                            target: 't4',
+                        },
                     ],
+                    label: 'Flug stornieren',
                     outgoingArcs: [
-                        { source: 't4', target: 't3', breakpoints: [] },
-                        { source: 't4', target: 't5', breakpoints: [] },
+                        {
+                            breakpoints: [],
+                            source: 't4',
+                            target: 't3',
+                        },
+                        {
+                            breakpoints: [],
+                            source: 't4',
+                            target: 't5',
+                        },
                     ],
                 },
                 {
-                    label: 't5',
+                    id: 't5',
                     incomingArcs: [
-                        { source: 't4', target: 't5', breakpoints: [] },
+                        {
+                            breakpoints: [],
+                            source: 't4',
+                            target: 't5',
+                        },
                     ],
+                    label: 'Flug buchen',
                     outgoingArcs: [
-                        { source: 't5', target: 't3', breakpoints: [] },
-                        { source: 't5', target: 't6', breakpoints: [] },
+                        {
+                            breakpoints: [],
+                            source: 't5',
+                            target: 't3',
+                        },
+                        {
+                            breakpoints: [],
+                            source: 't5',
+                            target: 'Verreisen',
+                        },
                     ],
                 },
                 {
-                    label: 't6',
+                    id: 'Verreisen',
                     incomingArcs: [
-                        { source: 't5', target: 't6', breakpoints: [] },
+                        {
+                            breakpoints: [],
+                            source: 't5',
+                            target: 'Verreisen',
+                        },
                     ],
+                    label: 'Verreisen',
                     outgoingArcs: [
-                        { source: 't6', target: 't3', breakpoints: [] },
+                        {
+                            breakpoints: [],
+                            source: 'Verreisen',
+                            target: 't3',
+                        },
                     ],
                 },
             ],
+            offset: {
+                x: 0,
+                y: 0,
+            },
+            text: '.type run\n.events\nt1 | Reiseziel auswählen\nt2 | Flug buchen\nt3 | Hotel buchen\nt4 | Flug stornieren\nt5 | Flug buchen\nVerreisen\n.arcs\nt1 t2\nt2 t4\nt4 t3\nt4 t5\nt5 t3\nt5 Verreisen\nVerreisen t3\n',
             warnings: [],
         });
     });

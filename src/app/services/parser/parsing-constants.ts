@@ -1,6 +1,6 @@
-export const typeKey = '.type ps';
+export const typeKey = '.type run';
 
-export const transitionsAttribute = '.transitions';
+export const eventsAttribute = '.events';
 
 export const arcsAttribute = '.arcs';
 

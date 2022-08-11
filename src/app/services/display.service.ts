@@ -3,10 +3,11 @@ import { BehaviorSubject, map, Observable, switchMap } from 'rxjs';
 
 import { Coordinates, CoordinatesInfo } from '../classes/diagram/coordinates';
 import { isRunEmpty, Run } from '../classes/diagram/run';
+import { emptyContent } from './empty-file';
 
 function getEmptyRun(): Run {
     return {
-        text: '',
+        text: emptyContent,
         arcs: [],
         elements: [],
         warnings: [],

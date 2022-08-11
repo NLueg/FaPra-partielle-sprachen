@@ -50,7 +50,7 @@ export class SvgService {
 
             run.elements.forEach((el) => {
                 elementWithNoIncomingArc.forEach((e) => {
-                    if (el.incomingArcs.length == 0 && el.label == e.label) {
+                    if (el.incomingArcs.length == 0 && el.id == e.id) {
                         samePrefix = true;
                     }
                 });
@@ -61,7 +61,7 @@ export class SvgService {
             run.elements.forEach((el) => {
                 let isCurrentRun = false;
                 currentRun.elements.forEach((element) => {
-                    if (element.label == el.label) {
+                    if (element.id == el.id) {
                         isCurrentRun = true;
                         return;
                     }
@@ -69,12 +69,8 @@ export class SvgService {
                 result.push(...createSvgForElement(el, isCurrentRun, offset));
             });
             run.arcs.forEach((arc) => {
-                const source = run.elements.find(
-                    (el) => el.label === arc.source
-                );
-                const target = run.elements.find(
-                    (el) => el.label === arc.target
-                );
+                const source = run.elements.find((el) => el.id === arc.source);
+                const target = run.elements.find((el) => el.id === arc.target);
                 let isCurrentRun = false;
                 currentRun.arcs.forEach((currentArc) => {
                     if (
@@ -104,12 +100,8 @@ export class SvgService {
                 result.push(...createSvgForElement(el, false, offset));
             });
             run.arcs.forEach((arc) => {
-                const source = run.elements.find(
-                    (el) => el.label === arc.source
-                );
-                const target = run.elements.find(
-                    (el) => el.label === arc.target
-                );
+                const source = run.elements.find((el) => el.id === arc.source);
+                const target = run.elements.find((el) => el.id === arc.target);
                 const arrow = createSvgForArc(
                     arc,
                     source,
@@ -227,15 +219,15 @@ function createSvgForArc(
             )
         );
         elements.push(
-            createCircle(arc.breakpoints, 0, source.label, target.label, offset)
+            createCircle(arc.breakpoints, 0, source.id, target.id, offset)
         );
         for (let i = 0; i < arc.breakpoints.length - 1; i++) {
             elements.push(
                 createCircle(
                     arc.breakpoints,
                     i + 1,
-                    source.label,
-                    target.label,
+                    source.id,
+                    target.id,
                     offset
                 )
             );

@@ -58,6 +58,7 @@ describe('LayoutService', () => {
             elements: [
                 {
                     incomingArcs: [],
+                    id: 't1',
                     label: 't1',
                     layerPos: 0,
                     outgoingArcs: [
@@ -78,6 +79,7 @@ describe('LayoutService', () => {
                             target: 't2',
                         },
                     ],
+                    id: 't2',
                     label: 't2',
                     layerPos: 0,
                     outgoingArcs: [
@@ -108,6 +110,7 @@ describe('LayoutService', () => {
                             target: 't3',
                         },
                     ],
+                    id: 't3',
                     label: 't3',
                     layerPos: 0,
                     outgoingArcs: [],
@@ -122,6 +125,7 @@ describe('LayoutService', () => {
                             target: 't4',
                         },
                     ],
+                    id: 't4',
                     label: 't4',
                     layerPos: 0,
                     outgoingArcs: [
@@ -160,6 +164,7 @@ describe('LayoutService', () => {
                             target: 't5',
                         },
                     ],
+                    id: 't5',
                     label: 't5',
                     layerPos: 1,
                     outgoingArcs: [
@@ -192,6 +197,7 @@ describe('LayoutService', () => {
                             target: 't6',
                         },
                     ],
+                    id: 't6',
                     label: 't6',
                     layerPos: 1,
                     outgoingArcs: [
@@ -224,16 +230,19 @@ const exampleInput: Run = {
     ],
     elements: [
         {
+            id: 't1',
             label: 't1',
             incomingArcs: [],
             outgoingArcs: [{ source: 't1', target: 't2', breakpoints: [] }],
         },
         {
+            id: 't2',
             label: 't2',
             incomingArcs: [{ source: 't1', target: 't2', breakpoints: [] }],
             outgoingArcs: [{ source: 't2', target: 't4', breakpoints: [] }],
         },
         {
+            id: 't3',
             label: 't3',
             incomingArcs: [
                 { source: 't4', target: 't3', breakpoints: [] },
@@ -243,6 +252,7 @@ const exampleInput: Run = {
             outgoingArcs: [],
         },
         {
+            id: 't4',
             label: 't4',
             incomingArcs: [{ source: 't2', target: 't4', breakpoints: [] }],
             outgoingArcs: [
@@ -251,6 +261,7 @@ const exampleInput: Run = {
             ],
         },
         {
+            id: 't5',
             label: 't5',
             incomingArcs: [{ source: 't4', target: 't5', breakpoints: [] }],
             outgoingArcs: [
@@ -259,6 +270,7 @@ const exampleInput: Run = {
             ],
         },
         {
+            id: 't6',
             label: 't6',
             incomingArcs: [{ source: 't5', target: 't6', breakpoints: [] }],
             outgoingArcs: [{ source: 't6', target: 't3', breakpoints: [] }],

@@ -58,9 +58,9 @@ export class LayoutService {
         while (elements.length > 0) {
             const layer = new Array<Element>();
             const elementsWithIncomingArcs = arcs
-                .filter((a) => elements.find((e) => e.label == a.source))
+                .filter((a) => elements.find((e) => e.id == a.source))
                 .map((a) =>
-                    elements.find((element) => element.label === a.target)
+                    elements.find((element) => element.id === a.target)
                 );
             //filter all elements without incoming arcs => add them to the current layer and remove their outgoing arcs
             elements
@@ -68,14 +68,14 @@ export class LayoutService {
                     (element) =>
                         elementsWithIncomingArcs.findIndex(
                             (elementWithIncomingArcs) =>
-                                elementWithIncomingArcs?.label === element.label
+                                elementWithIncomingArcs?.id === element.id
                         ) === -1
                 )
                 .forEach((element) => {
                     layer.push(element);
 
                     const indexOfElement = elements.findIndex(
-                        (innerElement) => innerElement.label === element.label
+                        (innerElement) => innerElement.id === element.id
                     );
                     elements.splice(indexOfElement, 1);
 
@@ -115,7 +115,7 @@ export class LayoutService {
                 .forEach((a: Arc) => {
                     //arc loop
                     const target = currentRun.elements.find(
-                        (element) => element.label === a.target
+                        (element) => element.id === a.target
                     );
 
                     //find layer of target
@@ -279,7 +279,7 @@ export class LayoutService {
                 index,
                 layerIndex,
             };
-            if ('label' in e) {
+            if ('id' in e) {
                 //Check outgoing and incoming lines from element to the next/previous breakpoint or element
                 connections.incoming.push(
                     ...this.findIncomingConnections(e.incomingArcs, layerInfo)
@@ -319,7 +319,7 @@ export class LayoutService {
         const breakpointIndex = breakpoint.arc.breakpoints.indexOf(breakpoint);
 
         const source = currentRun.elements.find(
-            (element) => element.label === breakpoint.arc.source
+            (element) => element.id === breakpoint.arc.source
         );
         if (breakpointIndex == 0 && source) {
             prev = source;
@@ -328,7 +328,7 @@ export class LayoutService {
         }
 
         const target = currentRun.elements.find(
-            (element) => element.label === breakpoint.arc.target
+            (element) => element.id === breakpoint.arc.target
         );
         if (
             breakpointIndex == breakpoint.arc.breakpoints.length - 1 &&
@@ -376,7 +376,7 @@ export class LayoutService {
                 );
             } else {
                 sourcePos = layers[layerIndex - 1].findIndex(
-                    (layer) => 'label' in layer && layer.label === arc.source
+                    (layer) => 'id' in layer && layer.id === arc.source
                 );
             }
 
@@ -409,7 +409,7 @@ export class LayoutService {
                 targetPos = layers[layerIndex + 1].indexOf(arc.breakpoints[0]);
             } else {
                 targetPos = layers[layerIndex + 1].findIndex(
-                    (layer) => 'label' in layer && layer.label === arc.target
+                    (layer) => 'id' in layer && layer.id === arc.target
                 );
             }
 

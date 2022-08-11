@@ -14,7 +14,7 @@ export function getCycles(run: Run): Arc[] {
         const visitedTransitions = new Set<Element>();
 
         const source = run.elements.find(
-            (element) => element.label === arc.source
+            (element) => element.id === arc.source
         );
         if (source) {
             visitedTransitions.add(source);
@@ -41,7 +41,7 @@ function checkArcCycle(
     cyclicArcs: Arc[]
 ): void {
     const target = currentRun.elements.find(
-        (element) => element.label === arc.target
+        (element) => element.id === arc.target
     );
     if (visitedArcs.has(arc) || !target) {
         return;

@@ -2,7 +2,7 @@ import { X2jOptionsOptional, XMLParser } from 'fast-xml-parser';
 
 import {
     arcsAttribute,
-    transitionsAttribute,
+    eventsAttribute,
     typeKey,
 } from '../../parser/parsing-constants';
 import { PnmlPage, PnmlWrapper } from './pnml.type';
@@ -19,9 +19,14 @@ export function getRunTextFromPnml(xmlContent: string): string {
     const page: PnmlPage = pnml.pnml.net.page;
 
     const lines = [typeKey];
-    lines.push(transitionsAttribute);
+    lines.push(eventsAttribute);
     page.transition.forEach((transition) => {
-        lines.push(transition.id);
+        const name = transition.name?.text;
+        if (name && name !== transition.id) {
+            lines.push(`${transition.id} | ${name}`);
+        } else {
+            lines.push(transition.id);
+        }
     });
 
     lines.push(arcsAttribute);

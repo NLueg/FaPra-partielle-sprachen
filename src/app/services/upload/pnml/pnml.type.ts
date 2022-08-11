@@ -26,7 +26,7 @@ type PnmlPlace = {
 
 type PnmlTransitions = {
     id: string;
-    name: {
-        text: string;
+    name?: {
+        text?: string;
     };
 };
