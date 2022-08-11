@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { Arc, Breakpoint } from '../../classes/diagram/arc';
 import { Coordinates } from '../../classes/diagram/coordinates';
 import { Element } from '../../classes/diagram/element';
+import { getIntersection } from '../../classes/diagram/functions/display.fn';
 import { Run } from '../../classes/diagram/run';
 import { ColorService } from '../color.service';
 import { DisplayService } from '../display.service';
@@ -168,22 +169,43 @@ function createSvgForArc(
     }
 
     if (arc.breakpoints.length == 0) {
+        const start = getIntersection(
+            (source.x ?? 0) + transitionSize / 2,
+            (source.y ?? 0) + transitionSize / 2,
+            (target.x ?? 0) + transitionSize / 2,
+            (target.y ?? 0) + transitionSize / 2,
+            false
+        );
+        const end = getIntersection(
+            (target.x ?? 0) + transitionSize / 2,
+            (target.y ?? 0) + transitionSize / 2,
+            (source.x ?? 0) + transitionSize / 2,
+            (source.y ?? 0) + transitionSize / 2,
+            true
+        );
         elements.push(
             createLine(
-                (source.x ?? 0) + transitionSize + offset.x,
-                (source.y ?? 0) + transitionSize / 2 + offset.y,
-                (target.x ?? 0) + offset.x,
-                (target.y ?? 0) + transitionSize / 2 + offset.y,
+                start.x + offset.x,
+                start.y + offset.y,
+                end.x + offset.x,
+                end.y + offset.y,
                 true,
                 hightlight
             )
         );
     } else {
         //source -> first breakpoint
+        const start = getIntersection(
+            (source.x ?? 0) + transitionSize / 2,
+            (source.y ?? 0) + transitionSize / 2,
+            arc.breakpoints[0].x + transitionSize / 2,
+            arc.breakpoints[0].y + transitionSize / 2,
+            false
+        );
         elements.push(
             createLine(
-                (source.x ?? 0) + transitionSize + offset.x,
-                (source.y ?? 0) + transitionSize / 2 + offset.y,
+                start.x + offset.x,
+                start.y + offset.y,
                 arc.breakpoints[0].x + transitionSize / 2 + offset.x,
                 arc.breakpoints[0].y + transitionSize / 2 + offset.y,
                 false,
@@ -204,6 +226,13 @@ function createSvgForArc(
             );
         }
         //last breakpoint -> target
+        const end = getIntersection(
+            (target.x ?? 0) + transitionSize / 2,
+            (target.y ?? 0) + transitionSize / 2,
+            arc.breakpoints[arc.breakpoints.length - 1].x + transitionSize / 2,
+            arc.breakpoints[arc.breakpoints.length - 1].y + transitionSize / 2,
+            true
+        );
         elements.push(
             createLine(
                 arc.breakpoints[arc.breakpoints.length - 1].x +
@@ -212,8 +241,8 @@ function createSvgForArc(
                 arc.breakpoints[arc.breakpoints.length - 1].y +
                     transitionSize / 2 +
                     offset.y,
-                (target.x ?? 0) + offset.x,
-                (target.y ?? 0) + 25 + offset.y,
+                end.x + offset.x,
+                end.y + offset.y,
                 true,
                 hightlight
             )
