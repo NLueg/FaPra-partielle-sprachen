@@ -6,6 +6,7 @@ import { hasCycles } from '../../classes/diagram/functions/cycles.fn';
 import {
     addArc,
     addElement,
+    getEmptyRun,
     setRefs,
 } from '../../classes/diagram/functions/run-helper.fn';
 import { Run } from '../../classes/diagram/run';
@@ -247,9 +248,10 @@ export class ParserService {
             if (hasCycles(run)) {
                 run.warnings.push(`File contains cycles`);
                 this.toastr.warning(
-                    `File contains cycles`,
-                    `A partial language cannot contain cycles`
+                    `Please remove all cycles from file or input field`,
+                    `Provided input is no partial language`
                 );
+                return getEmptyRun();
             }
 
             return run;

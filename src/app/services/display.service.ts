@@ -2,17 +2,8 @@ import { Injectable, OnDestroy } from '@angular/core';
 import { BehaviorSubject, map, Observable, switchMap } from 'rxjs';
 
 import { Coordinates, CoordinatesInfo } from '../classes/diagram/coordinates';
+import { getEmptyRun } from '../classes/diagram/functions/run-helper.fn';
 import { isRunEmpty, Run } from '../classes/diagram/run';
-import { emptyContent } from './empty-file';
-
-function getEmptyRun(): Run {
-    return {
-        text: emptyContent,
-        arcs: [],
-        elements: [],
-        warnings: [],
-    };
-}
 
 @Injectable({
     providedIn: 'root',
