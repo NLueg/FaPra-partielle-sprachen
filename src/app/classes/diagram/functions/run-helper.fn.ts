@@ -1,5 +1,6 @@
 import clonedeep from 'lodash.clonedeep';
 
+import { emptyContent } from '../../../services/empty-file';
 import {
     arcsAttribute,
     eventsAttribute,
@@ -164,4 +165,13 @@ export function copyRun(run: Run, copyCoordinates: boolean): Run {
 
         return targetRun;
     }
+}
+
+export function getEmptyRun(): Run {
+    return {
+        text: emptyContent,
+        arcs: [],
+        elements: [],
+        warnings: [],
+    };
 }
