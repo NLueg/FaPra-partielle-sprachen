@@ -25,7 +25,9 @@ export function generateTextForRun(run: Run): string {
     const lines = [typeKey];
     lines.push(eventsAttribute);
     run.elements.forEach((e) => {
-        const identifier = e.label === e.id ? e.id : `${e.label} | ${e.id}`;
+
+        const identifier =
+            e.label === e.id ? e.id : `${e.id + ' | ' + e.label}`;
 
         if (e.layerPos) lines.push(`${identifier} [${e.layerPos}]`);
         else lines.push(identifier);
