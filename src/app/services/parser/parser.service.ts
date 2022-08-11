@@ -23,10 +23,12 @@ type ParsingStates = 'initial' | 'type' | 'events' | 'arcs' | 'offset';
 })
 export class ParserService {
     constructor(private toastr: ToastrService) {}
-    // static transitionRegex = new RegExp('^([^\\[ ]+)(\\s?\\[\\d+\\])?$');
-    static arcRegex = new RegExp('^([^\\[ ]+)\\s([^\\[ ]+)(\\s?\\[\\d+\\])*$');
-    static breakpointRegex = new RegExp('\\[\\d+\\]');
-    static offsetRegex = new RegExp('-?\\d+ -?\\d+');
+    readonly transitionRegex = new RegExp('^([^\\[ ]+)(\\s?\\[\\d+\\])?$');
+    readonly arcRegex = new RegExp(
+        '^([^\\[ ]+)\\s([^\\[ ]+)(\\s?\\[\\d+\\])*$'
+    );
+    readonly breakpointRegex = new RegExp('\\[\\d+\\]');
+    readonly offsetRegex = new RegExp('-?\\d+ -?\\d+');
 
     parse(content: string, errors: Set<string>): Run | null {
         const contentLines = content.split('\n');
@@ -91,40 +93,8 @@ export class ParserService {
                         trimmedLine !== arcsAttribute &&
                         trimmedLine !== offsetAttribute
                     ) {
-                        let label: string;
-                        let id: string;
-                        let layerPos: number | undefined;
-                        if (
-                            trimmedLine.split(' | ').length == 0 ||
-                            trimmedLine.split(' | ')[0] == '' ||
-                            trimmedLine.split(' | ')[1] == ''
-                        ) {
-                            run.warnings.push(`Invalid event definition`);
-                            this.toastr.error(
-                                `Invalid event definition`,
-                                `Events have to have a label and an ID separated by '|'`
-                            );
-                            return null;
-                        } else {
-                            label = trimmedLine.split(' | ')[0];
-                            id = trimmedLine.split(' | ')[1];
-                            // const match =
-                            //     ParserService.transitionRegex.exec(trimmedLine);
-                            // if (match) {
-                            //     label = match[1];
-                            //     if (match[2]) {
-                            //         //extract coordinates
-                            //         layerPos = parseInt(
-                            //             match[2].substring(
-                            //                 match[2].indexOf('[') + 1,
-                            //                 match[2].indexOf(']')
-                            //             )
-                            //         );
-                            //     }
-                            // } else {
-                            //     label = trimmedLine.split(' ')[0];
-                            // }
-                        }
+                        const { id, label, layerPos } =
+                            this.parseTransition(trimmedLine);
 
                         if (
                             !addElement(run, {
@@ -168,9 +138,8 @@ export class ParserService {
                         let source: string, target: string;
                         const breakpoints: Breakpoint[] = [];
 
-                        if (ParserService.arcRegex.test(trimmedLine)) {
-                            const match =
-                                ParserService.arcRegex.exec(trimmedLine);
+                        if (this.arcRegex.test(trimmedLine)) {
+                            const match = this.arcRegex.exec(trimmedLine);
 
                             if (match) {
                                 source = match[1];
@@ -204,7 +173,7 @@ export class ParserService {
                                 if (arc) {
                                     let trimmedLineTmp = trimmedLine;
                                     while (
-                                        ParserService.breakpointRegex.test(
+                                        this.breakpointRegex.test(
                                             trimmedLineTmp
                                         )
                                     ) {
@@ -252,9 +221,8 @@ export class ParserService {
                         fileHasOffset
                     ) {
                         break;
-                    } else if (ParserService.offsetRegex.test(trimmedLine)) {
-                        const matches =
-                            ParserService.offsetRegex.exec(trimmedLine);
+                    } else if (this.offsetRegex.test(trimmedLine)) {
+                        const matches = this.offsetRegex.exec(trimmedLine);
                         if (matches) {
                             fileHasOffset = true;
                             const coordinates = matches[0].split(' ');
@@ -293,5 +261,46 @@ export class ParserService {
             );
             return null;
         }
+    }
+
+    private parseTransition(trimmedLine: string): {
+        label: string;
+        id: string;
+        layerPos: number | undefined;
+    } {
+        let id: string;
+        let label: string;
+        let layerPos: number | undefined;
+
+        let textToCheckForLabel = trimmedLine;
+
+        const match = this.transitionRegex.exec(trimmedLine);
+        if (match) {
+            textToCheckForLabel = match[1];
+            if (match[2]) {
+                //extract coordinates
+                layerPos = parseInt(
+                    match[2].substring(
+                        match[2].indexOf('[') + 1,
+                        match[2].indexOf(']')
+                    )
+                );
+            }
+        }
+
+        if (textToCheckForLabel.includes('|')) {
+            const splittLine = textToCheckForLabel.split('|');
+            id = splittLine[0].trim();
+            label = splittLine[1].trim();
+        } else {
+            id = textToCheckForLabel.trim();
+            label = textToCheckForLabel.trim();
+        }
+
+        return {
+            id,
+            label,
+            layerPos,
+        };
     }
 }

@@ -75,6 +75,7 @@ describe('MergeService', () => {
                 elements: [
                     {
                         incomingArcs: [],
+                        id: 't1',
                         label: 't1',
                         outgoingArcs: [
                             {
@@ -92,6 +93,7 @@ describe('MergeService', () => {
                                 target: 't2',
                             },
                         ],
+                        id: 't2',
                         label: 't2',
                         outgoingArcs: [
                             {
@@ -114,6 +116,7 @@ describe('MergeService', () => {
                                 target: 't4',
                             },
                         ],
+                        id: 't4',
                         label: 't4',
                         outgoingArcs: [
                             {
@@ -146,6 +149,7 @@ describe('MergeService', () => {
                                 target: 't7',
                             },
                         ],
+                        id: 't7',
                         label: 't7',
                         outgoingArcs: [],
                     },
@@ -157,6 +161,7 @@ describe('MergeService', () => {
                                 target: 't5',
                             },
                         ],
+                        id: 't5',
                         label: 't5',
                         outgoingArcs: [
                             {
@@ -179,6 +184,7 @@ describe('MergeService', () => {
                                 target: 't6',
                             },
                         ],
+                        id: 't6',
                         label: 't6',
                         outgoingArcs: [
                             {
@@ -206,11 +212,12 @@ describe('MergeService', () => {
                                 target: 't3',
                             },
                         ],
+                        id: 't3',
                         label: 't3',
                         outgoingArcs: [],
                     },
                 ],
-                text: '.type ps\n.transitions\nt1\nt2\nt4\nt7\nt5\nt6\nt3\n.arcs\nt1 t2\nt2 t4\nt4 t7\nt2 t7\nt4 t5\nt5 t6\nt6 t3\nt5 t3\nt4 t3',
+                text: '.type run\n.events\nt1\nt2\nt4\nt7\nt5\nt6\nt3\n.arcs\nt1 t2\nt2 t4\nt4 t7\nt2 t7\nt4 t5\nt5 t6\nt6 t3\nt5 t3\nt4 t3',
                 warnings: [],
             },
             {
@@ -249,6 +256,7 @@ describe('MergeService', () => {
                 elements: [
                     {
                         incomingArcs: [],
+                        id: 't6',
                         label: 't6',
                         outgoingArcs: [
                             {
@@ -276,6 +284,7 @@ describe('MergeService', () => {
                                 target: 't21',
                             },
                         ],
+                        id: 't21',
                         label: 't21',
                         outgoingArcs: [
                             {
@@ -298,6 +307,7 @@ describe('MergeService', () => {
                                 target: 't22',
                             },
                         ],
+                        id: 't22',
                         label: 't22',
                         outgoingArcs: [
                             {
@@ -320,6 +330,7 @@ describe('MergeService', () => {
                                 target: 't3',
                             },
                         ],
+                        id: 't3',
                         label: 't3',
                         outgoingArcs: [],
                     },
@@ -331,6 +342,7 @@ describe('MergeService', () => {
                                 target: 't10',
                             },
                         ],
+                        id: 't10',
                         label: 't10',
                         outgoingArcs: [],
                     },
@@ -342,11 +354,12 @@ describe('MergeService', () => {
                                 target: 't33',
                             },
                         ],
+                        id: 't33',
                         label: 't33',
                         outgoingArcs: [],
                     },
                 ],
-                text: '.type ps\n.transitions\nt6\nt21\nt22\nt3\nt10\nt33\n.arcs\nt6 t21\nt6 t22\nt22 t3\nt21 t3\nt6 t33\nt21 t10',
+                text: '.type run\n.events\nt6\nt21\nt22\nt3\nt10\nt33\n.arcs\nt6 t21\nt6 t22\nt22 t3\nt21 t3\nt6 t33\nt21 t10',
                 warnings: [],
             },
         ]);
@@ -363,11 +376,13 @@ const firstExampleFirstRun: Run = {
     ],
     elements: [
         {
+            id: 't1',
             label: 't1',
             incomingArcs: [],
             outgoingArcs: [{ source: 't1', target: 't2', breakpoints: [] }],
         },
         {
+            id: 't2',
             label: 't2',
             incomingArcs: [{ source: 't1', target: 't2', breakpoints: [] }],
             outgoingArcs: [
@@ -376,11 +391,13 @@ const firstExampleFirstRun: Run = {
             ],
         },
         {
+            id: 't4',
             label: 't4',
             incomingArcs: [{ source: 't2', target: 't4', breakpoints: [] }],
             outgoingArcs: [{ source: 't4', target: 't7', breakpoints: [] }],
         },
         {
+            id: 't7',
             label: 't7',
             incomingArcs: [
                 { source: 't4', target: 't7', breakpoints: [] },
@@ -405,16 +422,19 @@ const firstExampleSecondRun: Run = {
     ],
     elements: [
         {
+            id: 't1',
             label: 't1',
             incomingArcs: [],
             outgoingArcs: [{ source: 't1', target: 't2', breakpoints: [] }],
         },
         {
+            id: 't2',
             label: 't2',
             incomingArcs: [{ source: 't1', target: 't2', breakpoints: [] }],
             outgoingArcs: [{ source: 't2', target: 't4', breakpoints: [] }],
         },
         {
+            id: 't3',
             label: 't3',
             incomingArcs: [
                 { source: 't6', target: 't3', breakpoints: [] },
@@ -424,6 +444,7 @@ const firstExampleSecondRun: Run = {
             outgoingArcs: [],
         },
         {
+            id: 't4',
             label: 't4',
             incomingArcs: [{ source: 't2', target: 't4', breakpoints: [] }],
             outgoingArcs: [
@@ -432,6 +453,7 @@ const firstExampleSecondRun: Run = {
             ],
         },
         {
+            id: 't5',
             label: 't5',
             incomingArcs: [{ source: 't4', target: 't5', breakpoints: [] }],
             outgoingArcs: [
@@ -440,6 +462,7 @@ const firstExampleSecondRun: Run = {
             ],
         },
         {
+            id: 't6',
             label: 't6',
             incomingArcs: [{ source: 't5', target: 't6', breakpoints: [] }],
             outgoingArcs: [{ source: 't6', target: 't3', breakpoints: [] }],
@@ -458,6 +481,7 @@ const secondExampleFirstRun: Run = {
     ],
     elements: [
         {
+            id: 't6',
             label: 't6',
             incomingArcs: [],
             outgoingArcs: [
@@ -466,16 +490,19 @@ const secondExampleFirstRun: Run = {
             ],
         },
         {
+            id: 't21',
             label: 't21',
             incomingArcs: [{ source: 't6', target: 't21', breakpoints: [] }],
             outgoingArcs: [{ source: 't21', target: 't3', breakpoints: [] }],
         },
         {
+            id: 't22',
             label: 't22',
             incomingArcs: [{ source: 't6', target: 't22', breakpoints: [] }],
             outgoingArcs: [{ source: 't22', target: 't3', breakpoints: [] }],
         },
         {
+            id: 't3',
             label: 't3',
             incomingArcs: [
                 { source: 't22', target: 't3', breakpoints: [] },
@@ -496,6 +523,7 @@ const secondExampleSecondRun: Run = {
     ],
     elements: [
         {
+            id: 't6',
             label: 't6',
             incomingArcs: [],
             outgoingArcs: [
@@ -504,16 +532,19 @@ const secondExampleSecondRun: Run = {
             ],
         },
         {
+            id: 't21',
             label: 't21',
             incomingArcs: [{ source: 't6', target: 't21', breakpoints: [] }],
             outgoingArcs: [{ source: 't21', target: 't10', breakpoints: [] }],
         },
         {
+            id: 't33',
             label: 't33',
             incomingArcs: [{ source: 't6', target: 't33', breakpoints: [] }],
             outgoingArcs: [],
         },
         {
+            id: 't10',
             label: 't10',
             incomingArcs: [{ source: 't21', target: 't10', breakpoints: [] }],
             outgoingArcs: [],

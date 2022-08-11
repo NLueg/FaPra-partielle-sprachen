@@ -25,8 +25,10 @@ export function generateTextForRun(run: Run): string {
     const lines = [typeKey];
     lines.push(eventsAttribute);
     run.elements.forEach((e) => {
-        if (e.layerPos) lines.push(`${e.label + ' | ' + e.id} [${e.layerPos}]`);
-        else lines.push(`${e.label + ' | ' + e.id}`);
+        const identifier = e.label === e.id ? e.id : `${e.label} | ${e.id}`;
+
+        if (e.layerPos) lines.push(`${identifier} [${e.layerPos}]`);
+        else lines.push(identifier);
     });
 
     lines.push(arcsAttribute);

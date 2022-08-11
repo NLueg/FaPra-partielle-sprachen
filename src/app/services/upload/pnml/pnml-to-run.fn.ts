@@ -21,7 +21,12 @@ export function getRunTextFromPnml(xmlContent: string): string {
     const lines = [typeKey];
     lines.push(eventsAttribute);
     page.transition.forEach((transition) => {
-        lines.push(transition.id);
+        const name = transition.name?.text;
+        if (name && name !== transition.id) {
+            lines.push(`${transition.id} | ${name}`);
+        } else {
+            lines.push(transition.id);
+        }
     });
 
     lines.push(arcsAttribute);

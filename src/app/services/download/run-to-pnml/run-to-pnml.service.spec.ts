@@ -297,7 +297,7 @@ const parsedPnml = `<?xml version="1.0" encoding="UTF-8"?>
 </pnml>`;
 
 const exampleRun: Run = {
-    text: '.type ps\n.transitions\nt1\nt2\nt3\nt4\nt5\nt6\n.arcs\nt1 t2\nt2 t4\nt4 t3\nt4 t5\nt5 t3\nt5 t6\nt6 t3\n',
+    text: '.type run\n.events\nt1\nt2\nt3\nt4\nt5\nt6\n.arcs\nt1 t2\nt2 t4\nt4 t3\nt4 t5\nt5 t3\nt5 t6\nt6 t3\n',
     arcs: [
         { source: 't1', target: 't2', breakpoints: [] },
         { source: 't2', target: 't4', breakpoints: [] },
@@ -309,31 +309,37 @@ const exampleRun: Run = {
     ],
     elements: [
         {
+            id: 't1',
             label: 't1',
             incomingArcs: [],
             outgoingArcs: [],
         },
         {
+            id: 't2',
             label: 't2',
             incomingArcs: [],
             outgoingArcs: [],
         },
         {
+            id: 't3',
             label: 't3',
             incomingArcs: [],
             outgoingArcs: [],
         },
         {
+            id: 't4',
             label: 't4',
             incomingArcs: [],
             outgoingArcs: [],
         },
         {
+            id: 't5',
             label: 't5',
             incomingArcs: [],
             outgoingArcs: [],
         },
         {
+            id: 't6',
             label: 't6',
             incomingArcs: [],
             outgoingArcs: [],

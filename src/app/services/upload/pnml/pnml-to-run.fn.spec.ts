@@ -5,15 +5,15 @@ describe('pnml-to-run', () => {
         const result = getRunTextFromPnml(exampleContent);
 
         expect(result).toEqual(
-            '.type ps\n' +
-                '.transitions\n' +
-                'T1\n' +
-                'T2\n' +
-                'T3\n' +
-                'T4\n' +
-                'T5\n' +
-                'T6\n' +
-                'T7\n' +
+            '.type run\n' +
+                '.events\n' +
+                'T1 | a\n' +
+                'T2 | x\n' +
+                'T3 | b\n' +
+                'T4 | y\n' +
+                'T5 | c\n' +
+                'T6 | u\n' +
+                'T7 | v\n' +
                 '.arcs\n' +
                 'T1 T2\n' +
                 'T1 T6\n' +

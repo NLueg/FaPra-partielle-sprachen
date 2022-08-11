@@ -44,12 +44,15 @@ export class RunToPnmlService {
     }
 
     private layoutRun(run: Run): { parsedRun: Run; places: Element[] } {
-        const places: Element[] = run.arcs.map((arc) => ({
-            label: getPlaceNameByArc(arc),
-            id: '1',
-            incomingArcs: [],
-            outgoingArcs: [],
-        }));
+        const places: Element[] = run.arcs.map((arc) => {
+            const name = getPlaceNameByArc(arc);
+            return {
+                label: name,
+                id: name,
+                incomingArcs: [],
+                outgoingArcs: [],
+            };
+        });
 
         const newArcArray: Arc[] = run.arcs.flatMap((arc) => {
             const placeName = getPlaceNameByArc(arc);
@@ -74,7 +77,7 @@ export class RunToPnmlService {
 }
 
 function parseTransition(transition: Element): string {
-    return `               <transition id="${transition.label}">
+    return `               <transition id="${transition.id}">
                     <name>
                          <text>${transition.label}</text>
                          <graphics>
@@ -92,7 +95,7 @@ function parseTransition(transition: Element): string {
 function parsePlaces(places: Element[]): string {
     return places
         .map((place) => {
-            return `               <place id="${place.label}">
+            return `               <place id="${place.id}">
                     <name>
                          <text>${place.label}</text>
                          <graphics>
