@@ -1,17 +1,43 @@
-export const exampleContent = `.type run
+export const exampleContent1 = `.type run
 .events
-t1 | Reiseziel auswählen
-t2 | Flug buchen
-t3 | Hotel buchen
-t4 | Flug stornieren
-t5 | Flug buchen
-Verreisen
+1 | Reise planen
+2 | Prüfen
+6 | Flug suchen
+7 | Flug buchen
+8 | Hotel suchen
+9 | Hotel buchen
+10 | Unterlagen speichern
 .arcs
-t1 t2
-t2 t4
-t4 t3
-t4 t5
-t5 t3
-t5 Verreisen
-Verreisen t3
+1 2
+2 6
+2 8
+6 7
+7 10
+8 9
+9 10
+`;
+
+export const exampleContent2 = `.type run
+.events
+1 | Reise planen
+2 | Prüfen
+3 | Änderung anfordern
+4 | Reise planen
+5 | Prüfen
+11 | Flug suchen
+12 | Flug buchen
+13 | Hotel suchen
+14 | Hotel buchen
+15 | Unterlagen speichern
+.arcs
+1 2
+2 3
+3 4
+4 5
+5 11
+5 13
+11 12
+12 15
+13 14
+14 15
 `;
