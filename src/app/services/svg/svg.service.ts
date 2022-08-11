@@ -137,14 +137,17 @@ function createSvgForElement(
     svg.setAttribute('fill-opacity', '0');
     svg.setAttribute(layerPosYAttibute, `${element.layerPos ?? 0}`);
 
-    const text = createSvgElement('text');
-    text.textContent = element.label;
-    text.setAttribute('x', `${x + transitionSize / 2}`);
-    text.setAttribute('y', `${y + transitionSize * 1.5}`);
+    const text = createSvgElement('foreignObject');
+    text.setAttribute('x', `${x - (100 - transitionSize) / 2}`);
+    text.setAttribute('y', `${y + transitionSize + 2}`);
+
+    text.setAttribute('width', '100');
+    text.setAttribute('height', '40');
+    text.append(element.label);
 
     if (hightlight) {
         svg.setAttribute('stroke', highlightColor);
-        text.setAttribute('fill', highlightColor);
+        text.setAttribute('style', `color: ${highlightColor};`);
     }
 
     return [svg, text];
