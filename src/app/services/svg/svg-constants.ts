@@ -13,3 +13,5 @@ export const fromTransitionAttribute = 'to-transition';
 export const toTransitionAttribute = 'from-transition';
 
 export const breakpointTrail = 'breakpoint-positions';
+
+export const eventId = 'event-id';
