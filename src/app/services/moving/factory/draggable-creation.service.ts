@@ -66,25 +66,25 @@ export class DraggingCreationService {
     ): Array<HTMLElement> {
         const coords =
             DraggingCreationService.createCoordsFromElement(transition);
-        let offsetIncoming = 0;
-        if (transition.nodeName === 'rect') {
-            offsetIncoming = transitionSize / 2;
-        }
-        const currentXForIncomingLines = coords.x;
-        const currentYForLines = coords.y + offsetIncoming;
-        const selectorForIncomingLines =
-            'line[y2="' +
-            currentYForLines +
-            '"][x2="' +
-            currentXForIncomingLines +
-            '"]';
-        const matchingNodes = FindElementsService.getAllElementsFromCanvas(
-            selectorForIncomingLines,
+        const nodes = FindElementsService.getAllElementsFromCanvas(
+            '*',
             drawingArea
         );
         const incomingLines = [];
-        for (let i = 0; i < matchingNodes.length; i++) {
-            incomingLines.push(matchingNodes[i] as HTMLElement);
+        for (let i = 0; i < nodes.length; i++) {
+            const c: Coordinates = {
+                x: asInt(nodes[i], 'x2'),
+                y: asInt(nodes[i], 'y2'),
+            };
+
+            if (
+                c.y >= coords.y &&
+                c.y <= coords.y + transitionSize &&
+                c.x >= coords.x &&
+                c.x <= coords.x + transitionSize / 2
+            ) {
+                incomingLines.push(nodes[i] as HTMLElement);
+            }
         }
         return incomingLines;
     }
@@ -94,27 +94,25 @@ export class DraggingCreationService {
         drawingArea?: ElementRef<SVGElement>
     ): Array<HTMLElement> {
         const coords = FindElementsService.createCoordsFromElement(transition);
-        let offsetXOutgoing = 0;
-        let offsetYOutgoing = 0;
-        if (transition.nodeName === 'rect') {
-            offsetXOutgoing = transitionSize;
-            offsetYOutgoing = transitionSize / 2;
-        }
-        const currentXForOutgoingLines = coords.x + offsetXOutgoing;
-        const currentYForLines = coords.y + offsetYOutgoing;
-        const selectorForOutgoingLines =
-            'line[y1="' +
-            currentYForLines +
-            '"][x1="' +
-            currentXForOutgoingLines +
-            '"]';
-        const matchingNodes = FindElementsService.getAllElementsFromCanvas(
-            selectorForOutgoingLines,
+        const nodes = FindElementsService.getAllElementsFromCanvas(
+            '*',
             drawingArea
         );
         const outgoingLines = [];
-        for (let i = 0; i < matchingNodes.length; i++) {
-            outgoingLines.push(matchingNodes[i] as HTMLElement);
+        for (let i = 0; i < nodes.length; i++) {
+            const c: Coordinates = {
+                x: asInt(nodes[i], 'x1'),
+                y: asInt(nodes[i], 'y1'),
+            };
+
+            if (
+                c.y >= coords.y &&
+                c.y <= coords.y + transitionSize &&
+                c.x >= coords.x + transitionSize / 2 &&
+                c.x <= coords.x + transitionSize
+            ) {
+                outgoingLines.push(nodes[i] as HTMLElement);
+            }
         }
         return outgoingLines;
     }
