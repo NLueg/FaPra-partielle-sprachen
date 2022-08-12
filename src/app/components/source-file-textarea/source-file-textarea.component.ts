@@ -183,15 +183,15 @@ export class SourceFileTextareaComponent implements OnDestroy, OnInit {
                 if (infoElement.transitionType === 'rect') {
                     const eventIdArray = currentValue.match(
                         new RegExp(
-                            `\n${infoText}\\s+(\\|.*)?(\\[\\d+\\])*?\\n`,
+                            `\n${infoText}\\s+(\\|.*)?(\\[\\d+\\])?\\n`,
                             'g'
                         )
                     );
                     if (eventIdArray) {
-                        infoText = eventIdArray[0].replace(
-                            /(\r\n|\n|\r)/gm,
-                            ''
-                        );
+                        infoText = eventIdArray[0]
+                            .replace(/(\r\n|\n|\r)/gm, '')
+                            .split('[')[0]
+                            .trim();
                     }
                 }
                 let patternString = `\\n${infoText.replace(
@@ -204,9 +204,8 @@ export class SourceFileTextareaComponent implements OnDestroy, OnInit {
                     patternString = `\\n${infoText.replace(
                         '|',
                         '\\|'
-                    )}( \\[\\-?\\d+])?\\s*\\n`;
+                    )}(\\s*\\[\\-?\\d+])?\\s*\\n`;
                 }
-                console.log(patternString);
                 const replacePattern = new RegExp(patternString, 'g');
                 const newValue = currentValue.replace(
                     replacePattern,
