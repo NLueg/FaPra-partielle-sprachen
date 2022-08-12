@@ -140,9 +140,10 @@ function createSvgForElement(
     const text = createSvgElement('foreignObject');
     text.setAttribute('x', `${x - (100 - transitionSize) / 2}`);
     text.setAttribute('y', `${y + transitionSize + 2}`);
-
-    text.setAttribute('width', '100');
-    text.setAttribute('height', '40');
+    const height = element.label.length * 1.7;
+    const width = 100;
+    text.setAttribute('height', `${height}`);
+    text.setAttribute('width', `${width}`);
     text.append(element.label);
 
     if (hightlight) {
