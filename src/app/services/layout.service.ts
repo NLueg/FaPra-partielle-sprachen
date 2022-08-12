@@ -3,7 +3,10 @@ import { Injectable } from '@angular/core';
 import { Arc, Breakpoint } from '../classes/diagram/arc';
 import { Element } from '../classes/diagram/element';
 import { hasCycles } from '../classes/diagram/functions/cycles.fn';
-import { copyRun } from '../classes/diagram/functions/run-helper.fn';
+import {
+    copyRun,
+    getEmptyRun,
+} from '../classes/diagram/functions/run-helper.fn';
 import { Run } from '../classes/diagram/run';
 
 type Layer = Element | Breakpoint;
@@ -19,7 +22,7 @@ export class LayoutService {
     private static readonly LAYER_WIDTH = 100;
 
     layout(run: Run, positionOffset = 0): { run: Run; diagrammHeight: number } {
-        const runClone: Run = copyRun(run, true);
+        let runClone: Run = copyRun(run, true);
         let diagrammHeight = 0;
         //if run hast no cycles use sugiyama layout
         if (!hasCycles(runClone)) {
@@ -30,14 +33,7 @@ export class LayoutService {
             this.updateLayerPos(layers);
             diagrammHeight = this.calculatePosition(layers, positionOffset);
         } else {
-            runClone.elements.forEach((el) => {
-                el.x =
-                    Math.floor(Math.random() * LayoutService.RANGE) +
-                    LayoutService.OFFSET;
-                el.y =
-                    Math.floor(Math.random() * LayoutService.RANGE) +
-                    LayoutService.OFFSET;
-            });
+            runClone = getEmptyRun();
         }
 
         return { run: runClone, diagrammHeight };

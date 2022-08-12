@@ -3,17 +3,20 @@
     <a href="https://www.fernuni-hagen.de/ilovepetrinets/"
         ><h1>I <span class="red">❤</span> Petri Nets</h1></a
     >
-    <h2>Partial language</h2>
+    <h2>
+        <span class="red">❤</span> ...and Partial Languages
+        <span class="red">❤</span>
+    </h2>
 
     <!--    Main content    -->
     <mat-tab-group (selectedIndexChange)="updateTabIndex($event)">
-        <mat-tab id="separate" label="Separate Runs">
+        <mat-tab id="separate" label="Current Run">
             <app-display class="padding full-size"></app-display>
             <button (click)="resetSvgPositioning()" class="reset-button">
                 Reset
             </button>
         </mat-tab>
-        <mat-tab id="merged" label="Merged Runs">
+        <mat-tab id="merged" label="Prime-Event-Structure">
             <app-color></app-color>
             <app-display-merged-run
                 class="padding full-size"

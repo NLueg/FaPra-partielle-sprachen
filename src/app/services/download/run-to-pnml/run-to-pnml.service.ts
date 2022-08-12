@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 
 import { Arc } from '../../../classes/diagram/arc';
 import { Element } from '../../../classes/diagram/element';
-import { generateTextForRun } from '../../../classes/diagram/functions/run-helper.fn';
 import { Run } from '../../../classes/diagram/run';
 import { LayoutService } from '../../layout.service';
 
@@ -83,18 +82,19 @@ export class RunToPnmlService {
             });
         }
 
-        console.log(
-            generateTextForRun({
-                arcs: newArcArray,
-                elements: [...run.elements, ...places],
-                warnings: [],
-                text: '',
-            })
-        );
+        const elements = [...run.elements, ...places].map((element) => {
+            element.incomingArcs = newArcArray.filter(
+                (arc) => arc.target === element.id
+            );
+            element.outgoingArcs = newArcArray.filter(
+                (arc) => arc.source === element.id
+            );
+            return element;
+        });
 
         const parsedRun = this._layoutService.layout({
             arcs: newArcArray,
-            elements: [...run.elements, ...places],
+            elements,
             warnings: [],
             text: '',
         }).run;
@@ -154,7 +154,7 @@ function parseArcs(run: Run): string {
             (arc) => `               <arc id="A"
                     source="${arc.source}" target="${arc.target}">
                     <inscription>
-                         <text>1</text>
+                        <text>1</text>
                     </inscription>
                     <graphics/>
                </arc>`

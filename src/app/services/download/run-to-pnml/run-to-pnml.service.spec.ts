@@ -32,263 +32,290 @@ const parsedPnml = `<?xml version="1.0" encoding="UTF-8"?>
           <page id="p1">
                <transition id="t1">
                     <name>
-                         <text>t1</text>
+                        <text>t1</text>
+                        <graphics>
+                             <offset x="200" y="200"/>
+                        </graphics>
+                    </name>
+                    <graphics>
+                         <position x="200" y="160"/>
+                         <dimension x="40" y="40"></dimension>
+                    </graphics>
+               </transition>
+               <transition id="t2">
+                    <name>
+                        <text>t2</text>
+                        <graphics>
+                             <offset x="400" y="200"/>
+                        </graphics>
+                    </name>
+                    <graphics>
+                         <position x="400" y="160"/>
+                         <dimension x="40" y="40"></dimension>
+                    </graphics>
+               </transition>
+               <transition id="t3">
+                    <name>
+                        <text>t3</text>
+                        <graphics>
+                             <offset x="1200" y="200"/>
+                        </graphics>
+                    </name>
+                    <graphics>
+                         <position x="1200" y="160"/>
+                         <dimension x="40" y="40"></dimension>
+                    </graphics>
+               </transition>
+               <transition id="t4">
+                    <name>
+                        <text>t4</text>
+                        <graphics>
+                             <offset x="600" y="200"/>
+                        </graphics>
+                    </name>
+                    <graphics>
+                         <position x="600" y="160"/>
+                         <dimension x="40" y="40"></dimension>
+                    </graphics>
+               </transition>
+               <transition id="t5">
+                    <name>
+                        <text>t5</text>
+                        <graphics>
+                             <offset x="800" y="120"/>
+                        </graphics>
+                    </name>
+                    <graphics>
+                         <position x="800" y="80"/>
+                         <dimension x="40" y="40"></dimension>
+                    </graphics>
+               </transition>
+               <transition id="t6">
+                    <name>
+                        <text>t6</text>
+                        <graphics>
+                             <offset x="1000" y="80"/>
+                        </graphics>
+                    </name>
+                    <graphics>
+                         <position x="1000" y="40"/>
+                         <dimension x="40" y="40"></dimension>
+                    </graphics>
+               </transition>
+               <place id="p0">
+                    <name>
+                         <text>p0</text>
                          <graphics>
-                              <offset x="0" y="0"/>
+                              <offset x="100" y="200"/>
                          </graphics>
                     </name>
                     <graphics>
                          <position x="100" y="160"/>
                     </graphics>
-               </transition>
-               <transition id="t2">
+                    <initialMarking>
+                         <text>1</text>
+                    </initialMarking>
+               </place>
+               <place id="t1t2">
                     <name>
-                         <text>t2</text>
+                         <text>t1t2</text>
                          <graphics>
-                              <offset x="0" y="0"/>
+                              <offset x="300" y="200"/>
                          </graphics>
                     </name>
                     <graphics>
                          <position x="300" y="160"/>
                     </graphics>
-               </transition>
-               <transition id="t3">
-                    <name>
-                         <text>t3</text>
-                         <graphics>
-                              <offset x="0" y="0"/>
-                         </graphics>
-                    </name>
-                    <graphics>
-                         <position x="1100" y="160"/>
-                    </graphics>
-               </transition>
-               <transition id="t4">
-                    <name>
-                         <text>t4</text>
-                         <graphics>
-                              <offset x="0" y="0"/>
-                         </graphics>
-                    </name>
-                    <graphics>
-                         <position x="500" y="160"/>
-                    </graphics>
-               </transition>
-               <transition id="t5">
-                    <name>
-                         <text>t5</text>
-                         <graphics>
-                              <offset x="0" y="0"/>
-                         </graphics>
-                    </name>
-                    <graphics>
-                         <position x="700" y="160"/>
-                    </graphics>
-               </transition>
-               <transition id="t6">
-                    <name>
-                         <text>t6</text>
-                         <graphics>
-                              <offset x="0" y="0"/>
-                         </graphics>
-                    </name>
-                    <graphics>
-                         <position x="900" y="160"/>
-                    </graphics>
-               </transition>
-               <place id="t1t2">
-                    <name>
-                         <text>t1t2</text>
-                         <graphics>
-                              <offset x="0" y="0"/>
-                         </graphics>
-                    </name>
-                    <graphics>
-                         <position x="200" y="160"/>
-                    </graphics>
                     <initialMarking>
-                         <text>1</text>
+                         <text>0</text>
                     </initialMarking>
                </place>
                <place id="t2t4">
                     <name>
                          <text>t2t4</text>
                          <graphics>
-                              <offset x="0" y="0"/>
+                              <offset x="500" y="200"/>
                          </graphics>
                     </name>
                     <graphics>
-                         <position x="400" y="160"/>
+                         <position x="500" y="160"/>
                     </graphics>
                     <initialMarking>
-                         <text>1</text>
+                         <text>0</text>
                     </initialMarking>
                </place>
                <place id="t4t3">
                     <name>
                          <text>t4t3</text>
                          <graphics>
-                              <offset x="0" y="0"/>
+                              <offset x="700" y="120"/>
                          </graphics>
                     </name>
                     <graphics>
-                         <position x="600" y="80"/>
+                         <position x="700" y="80"/>
                     </graphics>
                     <initialMarking>
-                         <text>1</text>
+                         <text>0</text>
                     </initialMarking>
                </place>
                <place id="t4t5">
                     <name>
                          <text>t4t5</text>
                          <graphics>
-                              <offset x="0" y="0"/>
+                              <offset x="700" y="280"/>
                          </graphics>
                     </name>
                     <graphics>
-                         <position x="600" y="240"/>
+                         <position x="700" y="240"/>
                     </graphics>
                     <initialMarking>
-                         <text>1</text>
+                         <text>0</text>
                     </initialMarking>
                </place>
                <place id="t5t3">
                     <name>
                          <text>t5t3</text>
                          <graphics>
-                              <offset x="0" y="0"/>
+                              <offset x="900" y="320"/>
                          </graphics>
                     </name>
                     <graphics>
-                         <position x="800" y="80"/>
+                         <position x="900" y="280"/>
                     </graphics>
                     <initialMarking>
-                         <text>1</text>
+                         <text>0</text>
                     </initialMarking>
                </place>
                <place id="t5t6">
                     <name>
                          <text>t5t6</text>
                          <graphics>
-                              <offset x="0" y="0"/>
+                              <offset x="900" y="80"/>
                          </graphics>
                     </name>
                     <graphics>
-                         <position x="800" y="240"/>
+                         <position x="900" y="40"/>
                     </graphics>
                     <initialMarking>
-                         <text>1</text>
+                         <text>0</text>
                     </initialMarking>
                </place>
                <place id="t6t3">
                     <name>
                          <text>t6t3</text>
                          <graphics>
-                              <offset x="0" y="0"/>
+                              <offset x="1100" y="80"/>
                          </graphics>
                     </name>
                     <graphics>
-                         <position x="1000" y="160"/>
+                         <position x="1100" y="40"/>
                     </graphics>
                     <initialMarking>
-                         <text>1</text>
+                         <text>0</text>
                     </initialMarking>
                </place>
                <arc id="A"
+                    source="p0" target="t1">
+                    <inscription>
+                        <text>1</text>
+                    </inscription>
+                    <graphics/>
+               </arc>
+                <arc id="A"
                     source="t1" target="t1t2">
                     <inscription>
-                         <text>1</text>
+                        <text>1</text>
                     </inscription>
                     <graphics/>
                </arc>
                 <arc id="A"
                     source="t1t2" target="t2">
                     <inscription>
-                         <text>1</text>
+                        <text>1</text>
                     </inscription>
                     <graphics/>
                </arc>
                 <arc id="A"
                     source="t2" target="t2t4">
                     <inscription>
-                         <text>1</text>
+                        <text>1</text>
                     </inscription>
                     <graphics/>
                </arc>
                 <arc id="A"
                     source="t2t4" target="t4">
                     <inscription>
-                         <text>1</text>
+                        <text>1</text>
                     </inscription>
                     <graphics/>
                </arc>
                 <arc id="A"
                     source="t4" target="t4t3">
                     <inscription>
-                         <text>1</text>
+                        <text>1</text>
                     </inscription>
                     <graphics/>
                </arc>
                 <arc id="A"
                     source="t4t3" target="t3">
                     <inscription>
-                         <text>1</text>
+                        <text>1</text>
                     </inscription>
                     <graphics/>
                </arc>
                 <arc id="A"
                     source="t4" target="t4t5">
                     <inscription>
-                         <text>1</text>
+                        <text>1</text>
                     </inscription>
                     <graphics/>
                </arc>
                 <arc id="A"
                     source="t4t5" target="t5">
                     <inscription>
-                         <text>1</text>
+                        <text>1</text>
                     </inscription>
                     <graphics/>
                </arc>
                 <arc id="A"
                     source="t5" target="t5t3">
                     <inscription>
-                         <text>1</text>
+                        <text>1</text>
                     </inscription>
                     <graphics/>
                </arc>
                 <arc id="A"
                     source="t5t3" target="t3">
                     <inscription>
-                         <text>1</text>
+                        <text>1</text>
                     </inscription>
                     <graphics/>
                </arc>
                 <arc id="A"
                     source="t5" target="t5t6">
                     <inscription>
-                         <text>1</text>
+                        <text>1</text>
                     </inscription>
                     <graphics/>
                </arc>
                 <arc id="A"
                     source="t5t6" target="t6">
                     <inscription>
-                         <text>1</text>
+                        <text>1</text>
                     </inscription>
                     <graphics/>
                </arc>
                 <arc id="A"
                     source="t6" target="t6t3">
                     <inscription>
-                         <text>1</text>
+                        <text>1</text>
                     </inscription>
                     <graphics/>
                </arc>
                 <arc id="A"
                     source="t6t3" target="t3">
                     <inscription>
-                         <text>1</text>
+                        <text>1</text>
                     </inscription>
                     <graphics/>
                </arc>

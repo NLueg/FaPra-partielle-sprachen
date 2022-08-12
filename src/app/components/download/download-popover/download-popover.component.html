@@ -1,9 +1,11 @@
 <h1 mat-dialog-title>
     Download
     <ng-container *ngIf="data.contentToDownload === 'mergeRuns'"
-        >merged</ng-container
+        >Prime-Event-Structure</ng-container
     >
-    run
+    <ng-container *ngIf="data.contentToDownload === 'separateRuns'"
+        >Run(s)</ng-container
+    >
 </h1>
 
 <div class="content" mat-dialog-content>
