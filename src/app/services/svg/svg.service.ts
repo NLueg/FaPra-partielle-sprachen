@@ -140,11 +140,14 @@ function createSvgForElement(
     const text = createSvgElement('foreignObject');
     text.setAttribute('x', `${x - (100 - transitionSize) / 2}`);
     text.setAttribute('y', `${y + transitionSize + 2}`);
-    const height = element.label.length * 1.7;
+    const height = 40;
     const width = 100;
     text.setAttribute('height', `${height}`);
     text.setAttribute('width', `${width}`);
-    text.append(element.label);
+    const span = document.createElement('span');
+    span.setAttribute('title', element.label);
+    span.textContent = element.label;
+    text.append(span);
 
     if (hightlight) {
         svg.setAttribute('stroke', highlightColor);
