@@ -159,7 +159,7 @@ describe('ParserService', () => {
                             target: '6',
                         },
                     ],
-                    label: 'Hoten buchen',
+                    label: 'Hotel buchen',
                     outgoingArcs: [
                         {
                             breakpoints: [],
@@ -182,7 +182,7 @@ describe('ParserService', () => {
                             target: '7',
                         },
                     ],
-                    label: 'Hoten buchen',
+                    label: 'Unterlagen speichern',
                     outgoingArcs: [],
                 },
             ],
@@ -190,7 +190,7 @@ describe('ParserService', () => {
                 x: 0,
                 y: 0,
             },
-            text: '.type run\n.events\n1 | Reise planen\n2 | Prüfen\n3 | Flug suchen\n4 | Flug buchen\n5 | Hotel suchen\n6 | Hotel buchen\n7 | Unterlagen speichern\n.arcs\n1 2\n2 3\n2 5\n3 4\n4 7\n5 6\n6 7',
+            text: '.type run\n.events\n1 | Reise planen\n2 | Prüfen\n3 | Flug suchen\n4 | Flug buchen\n5 | Hotel suchen\n6 | Hotel buchen\n7 | Unterlagen speichern\n.arcs\n1 2\n2 3\n2 5\n3 4\n4 7\n5 6\n6 7\n',
             warnings: [],
         });
     });
