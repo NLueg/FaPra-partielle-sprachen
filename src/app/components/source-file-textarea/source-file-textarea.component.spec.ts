@@ -2,6 +2,7 @@ import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 
+import { Run } from '../../classes/diagram/run';
 import { DisplayService } from '../../services/display.service';
 import { ParserService } from '../../services/parser/parser.service';
 import { UploadService } from '../../services/upload/upload.service';
@@ -15,6 +16,13 @@ describe('SourceFileTextareaComponent', () => {
         getUpload$: () => of(undefined),
     };
 
+    const run: Run = {
+        text: '',
+        elements: [],
+        warnings: [],
+        arcs: [],
+    };
+
     const mockDisplayService = {
         hasPreviousRun$: () => of(undefined),
         hasNextRun$: () => of(undefined),
@@ -23,13 +31,15 @@ describe('SourceFileTextareaComponent', () => {
         getRunCount$: () => of(undefined),
         coordsInfoAdded: () => of(undefined),
         offsetInfoAdded: () => of(undefined),
+        setPreviousRun: () => run,
+        registerRun: jest.fn(),
     };
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
             declarations: [SourceFileTextareaComponent],
             providers: [
-                { provide: ParserService, useValue: {} },
+                { provide: ParserService, useValue: { parse: () => run } },
                 { provide: DisplayService, useValue: mockDisplayService },
                 { provide: UploadService, useValue: mockUploadService },
             ],

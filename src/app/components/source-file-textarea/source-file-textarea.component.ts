@@ -17,7 +17,10 @@ import { isRunEmpty, Run } from '../../classes/diagram/run';
 import { DisplayService } from '../../services/display.service';
 import { ParserService } from '../../services/parser/parser.service';
 import { offsetAttribute } from '../../services/parser/parsing-constants';
-import { exampleContent } from '../../services/upload/example-file';
+import {
+    exampleContent1,
+    exampleContent2,
+} from '../../services/upload/example-file';
 import { UploadService } from '../../services/upload/upload.service';
 
 type Valid = 'error' | 'warn' | 'success';
@@ -92,8 +95,6 @@ export class SourceFileTextareaComponent implements OnDestroy, OnInit {
         this._fileSub = this._uploadService
             .getUpload$()
             .subscribe((content) => this.processNewSource(content));
-
-        this.textareaFc.setValue(exampleContent);
     }
 
     ngOnInit(): void {
@@ -103,6 +104,9 @@ export class SourceFileTextareaComponent implements OnDestroy, OnInit {
         this._resetEventSubscription = this.resetEvent?.subscribe(() =>
             this.removeOffset()
         );
+        this.processNewSource(exampleContent1);
+        this.processNewSource(exampleContent2);
+        this.previousRun();
     }
 
     ngOnDestroy(): void {
