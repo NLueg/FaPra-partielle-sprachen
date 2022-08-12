@@ -9,6 +9,7 @@ import { LayoutService } from '../../layout.service';
 const encoding = '<?xml version="1.0" encoding="UTF-8"?>\n';
 
 const firstPlaceId = 'p0';
+const transitionDimension = 40;
 
 @Injectable({
     providedIn: 'root',
@@ -18,6 +19,8 @@ export class RunToPnmlService {
 
     parseRunToPnml(name: string, run: Run): string {
         const { parsedRun, places } = this.layoutRun(run);
+
+        console.log(parsedRun);
 
         const parsedPlaces = parsedRun.elements.filter((element) =>
             places.find((place) => element.label === place.label)
@@ -106,15 +109,18 @@ export class RunToPnmlService {
 function parseTransition(transition: Element): string {
     return `               <transition id="${transition.id}">
                     <name>
-                         <text>${transition.label}</text>
-                         <graphics>
-                              <offset x="0" y="0"/>
-                         </graphics>
+                        <text>${transition.label}</text>
+                        <graphics>
+                             <offset x="${transition.x ?? 0}" y="${
+        (transition.y ?? 0) + transitionDimension
+    }"/>
+                        </graphics>
                     </name>
                     <graphics>
                          <position x="${transition.x ?? 0}" y="${
         transition.y ?? 0
     }"/>
+                         <dimension x="${transitionDimension}" y="${transitionDimension}"></dimension>
                     </graphics>
                </transition>`;
 }
@@ -126,7 +132,9 @@ function parsePlaces(places: Element[]): string {
                     <name>
                          <text>${place.label}</text>
                          <graphics>
-                              <offset x="0" y="0"/>
+                              <offset x="${place.x ?? 0}" y="${
+                (place.y ?? 0) + transitionDimension ?? 0
+            }"/>
                          </graphics>
                     </name>
                     <graphics>

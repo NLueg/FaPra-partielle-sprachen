@@ -1,8 +1,8 @@
 export type PnmlWrapper = {
     pnml: {
         net: {
-            page: PnmlPage;
-        };
+            page?: PnmlPage;
+        } & PnmlPage;
     };
 };
 
