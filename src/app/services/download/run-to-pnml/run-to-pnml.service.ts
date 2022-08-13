@@ -73,14 +73,16 @@ export class RunToPnmlService {
             ];
         });
 
-        const firstElement = run.elements.length > 0 ? run.elements[0] : null;
-        if (firstElement) {
-            newArcArray.unshift({
-                source: firstPlaceId,
-                target: firstElement.id,
-                breakpoints: [],
+        //Add arc from first place to all start-events
+        run.elements
+            .filter((e) => e.incomingArcs.length == 0)
+            .forEach((e) => {
+                newArcArray.unshift({
+                    source: firstPlaceId,
+                    target: e.id,
+                    breakpoints: [],
+                });
             });
-        }
 
         const elements = [...run.elements, ...places].map((element) => {
             element.incomingArcs = newArcArray.filter(
