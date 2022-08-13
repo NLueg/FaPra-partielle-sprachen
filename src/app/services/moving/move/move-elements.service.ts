@@ -13,8 +13,6 @@ export class MoveElementsService {
     public static moveElement(draggable: Draggable, newY: number): void {
         const transition = draggable.transition;
         const attributePraefix = getAttributePraefix(transition);
-        console.log(transition);
-        console.log(newY);
         transition.setAttribute(attributePraefix + 'y', `${newY}`);
         const newYInfo = newY + transitionSize * 1.5;
         draggable.infoElement?.setAttribute('y', `${newYInfo}`);

@@ -5,6 +5,7 @@ import { Draggable } from '../../classes/diagram/draggable';
 import {
     breakpointPositionAttribute,
     breakpointTrail,
+    eventId,
     fromTransitionAttribute,
     layerPosYAttibute,
     toTransitionAttribute,
@@ -49,7 +50,7 @@ export class DraggingService {
         elements.forEach((element) => {
             const y = asInt(element, layerPosYAttibute);
             let x = -1;
-            let infoText = this.findInfoText(element);
+            let infoText = element.getAttribute(eventId) ?? '';
             if (element.nodeName === 'circle') {
                 x = asInt(element, breakpointPositionAttribute);
                 infoText =
