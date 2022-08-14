@@ -11,6 +11,7 @@ import {
     breakpointPositionAttribute,
     breakpointTrail,
     circleSize,
+    eventId,
     fromTransitionAttribute,
     layerPosYAttibute,
     toTransitionAttribute,
@@ -137,6 +138,7 @@ function createSvgForElement(
     svg.setAttribute('stroke-width', '2');
     svg.setAttribute('fill-opacity', '0');
     svg.setAttribute(layerPosYAttibute, `${element.layerPos ?? 0}`);
+    svg.setAttribute(eventId, `${element.id}`);
 
     const text = createSvgElement('text');
     text.textContent = element.label;

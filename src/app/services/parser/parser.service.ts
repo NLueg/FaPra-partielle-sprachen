@@ -24,7 +24,7 @@ type ParsingStates = 'initial' | 'type' | 'events' | 'arcs' | 'offset';
 })
 export class ParserService {
     constructor(private toastr: ToastrService) {}
-    readonly transitionRegex = new RegExp('^([^\\[ ]+)(\\s?\\[\\d+\\])?$');
+    readonly transitionRegex = /^(.*)(\[\d*])$/;
     readonly arcRegex = new RegExp(
         '^([^\\[ ]+)\\s([^\\[ ]+)(\\s?\\[\\d+\\])*$'
     );

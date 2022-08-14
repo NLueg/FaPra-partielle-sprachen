@@ -183,14 +183,32 @@ export class SourceFileTextareaComponent implements OnDestroy, OnInit {
                 infoElement.transitionType === 'circle'
             ) {
                 const currentValue = this.textareaFc.value;
-                let patternString = `\\n${infoElement.transitionName.replace(
+                let infoText = infoElement.transitionName;
+                if (infoElement.transitionType === 'rect') {
+                    const eventIdArray = currentValue.match(
+                        new RegExp(
+                            `\n${infoText}\\s+(\\|.*)?(\\[\\d+\\])?\\n`,
+                            'g'
+                        )
+                    );
+                    if (eventIdArray) {
+                        infoText = eventIdArray[0]
+                            .replace(/(\r\n|\n|\r)/gm, '')
+                            .split('[')[0]
+                            .trim();
+                    }
+                }
+                let patternString = `\\n${infoText.replace(
                     new RegExp('\\[\\d+\\]', 'g'),
                     ''
                 )}(\\[\\d+\\])*?\\n`;
                 let coordsString = `\n${infoElement.transitionName}\n`;
                 if (infoElement.transitionType === 'rect') {
-                    coordsString = `\n${infoElement.transitionName} [${infoElement.coordinates.y}]\n`;
-                    patternString = `\\n${infoElement.transitionName}( \\[\\-?\\d+])?\\s*\\n`;
+                    coordsString = `\n${infoText} [${infoElement.coordinates.y}]\n`;
+                    patternString = `\\n${infoText.replace(
+                        '|',
+                        '\\|'
+                    )}(\\s*\\[\\-?\\d+])?\\s*\\n`;
                 }
                 const replacePattern = new RegExp(patternString, 'g');
                 const newValue = currentValue.replace(
