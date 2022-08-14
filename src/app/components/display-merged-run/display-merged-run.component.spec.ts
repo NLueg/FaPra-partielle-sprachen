@@ -7,6 +7,13 @@ import { DisplayMergedRunComponent } from './display-merged-run.component';
 import { MergeService } from './merge.service';
 
 describe('DisplayMergedRunComponent', () => {
+    window.ResizeObserver =
+        window.ResizeObserver ||
+        jest.fn().mockImplementation(() => ({
+            disconnect: jest.fn(),
+            observe: jest.fn(),
+            unobserve: jest.fn(),
+        }));
     let component: DisplayMergedRunComponent;
     let fixture: ComponentFixture<DisplayMergedRunComponent>;
 

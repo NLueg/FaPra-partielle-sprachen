@@ -1,7 +1,6 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
-import { map, Observable, of } from 'rxjs';
+import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
+import { map, Observable } from 'rxjs';
 
-import { Run } from '../../classes/diagram/run';
 import { DisplayService } from '../../services/display.service';
 import { LayoutService } from '../../services/layout.service';
 import { SvgService } from '../../services/svg/svg.service';
@@ -12,11 +11,10 @@ import { CanvasComponent } from '../canvas/canvas.component';
     templateUrl: './display.component.html',
     styleUrls: ['./display.component.scss'],
 })
-export class DisplayComponent {
+export class DisplayComponent implements AfterViewInit {
     svgElements$: Observable<SVGElement[]>;
     @ViewChild('canvas') canvas: CanvasComponent | undefined;
     @ViewChild('svg_wrapper') svgWrapper: ElementRef<HTMLElement> | undefined;
-
 
     ngAfterViewInit(): void {
         const observer = new ResizeObserver((entries) => {

@@ -1,4 +1,5 @@
 import {
+    AfterViewInit,
     Component,
     ElementRef,
     OnDestroy,
@@ -20,7 +21,9 @@ import { MergeService } from './merge.service';
     templateUrl: './display-merged-run.component.html',
     styleUrls: ['./display-merged-run.component.scss'],
 })
-export class DisplayMergedRunComponent implements OnInit, OnDestroy {
+export class DisplayMergedRunComponent
+    implements OnInit, OnDestroy, AfterViewInit
+{
     svgElements$?: Observable<{ list: SVGElement[]; height: number }>;
     @ViewChild('canvas') canvas: CanvasComponent | undefined;
     @ViewChild('svg_wrapper') svgWrapper: ElementRef<HTMLElement> | undefined;
@@ -82,7 +85,7 @@ export class DisplayMergedRunComponent implements OnInit, OnDestroy {
                 return {
                     list: runs.flatMap((run) =>
                         this.svgService.createSvgElements(run, this.highlight)
-                ),
+                    ),
                     height: totalDiagrammHeight,
                 };
             })
