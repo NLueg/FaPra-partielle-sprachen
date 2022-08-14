@@ -1,4 +1,10 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import {
+    Component,
+    ElementRef,
+    OnDestroy,
+    OnInit,
+    ViewChild,
+} from '@angular/core';
 import { map, Observable, Subscription, tap } from 'rxjs';
 
 import { Run } from '../../classes/diagram/run';
@@ -6,6 +12,7 @@ import { ColorService } from '../../services/color.service';
 import { DisplayService } from '../../services/display.service';
 import { LayoutService } from '../../services/layout.service';
 import { SvgService } from '../../services/svg/svg.service';
+import { CanvasComponent } from '../canvas/canvas.component';
 import { MergeService } from './merge.service';
 
 @Component({
@@ -15,6 +22,8 @@ import { MergeService } from './merge.service';
 })
 export class DisplayMergedRunComponent implements OnInit, OnDestroy {
     svgElements$?: Observable<{ list: SVGElement[]; height: number }>;
+    @ViewChild('canvas') canvas: CanvasComponent | undefined;
+    @ViewChild('svg_wrapper') svgWrapper: ElementRef<HTMLElement> | undefined;
     private _sub?: Subscription;
     private _colorSub?: Subscription;
     private _highlightSub?: Subscription;
@@ -43,6 +52,15 @@ export class DisplayMergedRunComponent implements OnInit, OnDestroy {
                 this.update();
             });
     }
+
+    ngAfterViewInit(): void {
+        const observer = new ResizeObserver((entries) => {
+            entries.forEach(() => {
+                this.update();
+            });
+        });
+        if (this.svgWrapper) observer.observe(this.svgWrapper.nativeElement);
+    }
     ngOnDestroy(): void {
         this._sub?.unsubscribe();
         this._colorSub?.unsubscribe();
@@ -53,12 +71,21 @@ export class DisplayMergedRunComponent implements OnInit, OnDestroy {
         this.svgElements$ = this.mergeService.getMergedRuns$().pipe(
             tap((runs) => console.log('Merged runs:', runs)),
             map((currentRuns) => this.layoutMergedRuns(currentRuns)),
-            map(({ runs, totalDiagrammHeight }) => ({
-                list: runs.flatMap((run) =>
-                    this.svgService.createSvgElements(run, this.highlight)
+            map(({ runs, totalDiagrammHeight }) => {
+                if (this.canvas && this.canvas.drawingArea) {
+                    const w = this.canvas.drawingArea.nativeElement.clientWidth;
+                    const h =
+                        this.canvas.drawingArea.nativeElement.clientHeight;
+                    if (w > 0 && h > 0)
+                        this.layoutService.centerRuns(runs, w / 2, h / 2);
+                }
+                return {
+                    list: runs.flatMap((run) =>
+                        this.svgService.createSvgElements(run, this.highlight)
                 ),
-                height: totalDiagrammHeight,
-            }))
+                    height: totalDiagrammHeight,
+                };
+            })
         );
     }
 

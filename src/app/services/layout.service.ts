@@ -8,6 +8,8 @@ import {
     getEmptyRun,
 } from '../classes/diagram/functions/run-helper.fn';
 import { Run } from '../classes/diagram/run';
+import { StatehandlerService } from './moving/statehandler/statehandler.service';
+import { transitionSize } from './svg/svg-constants';
 
 type Layer = Element | Breakpoint;
 
@@ -21,9 +23,12 @@ export class LayoutService {
     private static readonly ELEMENT_HEIGHT = 80;
     private static readonly LAYER_WIDTH = 100;
 
+    constructor(private stateHandler: StatehandlerService) {}
+
     layout(run: Run, positionOffset = 0): { run: Run; diagrammHeight: number } {
         let runClone: Run = copyRun(run, true);
         let diagrammHeight = 0;
+        //let diagrammWidth = 0;
         //if run hast no cycles use sugiyama layout
         if (!hasCycles(runClone)) {
             const layers: Array<Layer[]> = this.assignLayers(runClone);
@@ -32,6 +37,7 @@ export class LayoutService {
             this.minimizeCrossing(runClone, layers);
             this.updateLayerPos(layers);
             diagrammHeight = this.calculatePosition(layers, positionOffset);
+            //diagrammWidht = layers.length * LayoutService.LAYER_WIDTH;
         } else {
             runClone = getEmptyRun();
         }
@@ -476,6 +482,68 @@ export class LayoutService {
         });
 
         return height;
+    }
+
+    public centerRuns(runs: Run[], centerX: number, centerY: number): void {
+        let runBoundsXMin = Math.min(),
+            runBoundsXMax = Math.max(),
+            runBoundsYMin = Math.min(),
+            runBoundsYMax = Math.max();
+        runs.forEach((run) => {
+            run.elements.forEach((e) => {
+                if ((e.x ?? 0) < runBoundsXMin) {
+                    runBoundsXMin = e.x ?? 0;
+                }
+                if ((e.x ?? 0) > runBoundsXMax) {
+                    runBoundsXMax = (e.x ?? 0) + transitionSize;
+                }
+                if ((e.x ?? 0) < runBoundsYMin) {
+                    runBoundsYMin = e.y ?? 0;
+                }
+                if ((e.y ?? 0) > runBoundsYMax) {
+                    runBoundsYMax = (e.y ?? 0) + transitionSize;
+                }
+            });
+            run.arcs.forEach((arc) => {
+                arc.breakpoints.forEach((e) => {
+                    if ((e.x ?? 0) < runBoundsXMin) {
+                        runBoundsXMin = e.x ?? 0;
+                    }
+                    if ((e.x ?? 0) > runBoundsXMax) {
+                        runBoundsXMax = e.x ?? 0;
+                    }
+                    if ((e.x ?? 0) < runBoundsYMin) {
+                        runBoundsYMin = e.y ?? 0;
+                    }
+                    if ((e.y ?? 0) > runBoundsYMax) {
+                        runBoundsYMax = e.y ?? 0;
+                    }
+                });
+            });
+        });
+
+        const centerRunX = runBoundsXMin + (runBoundsXMax - runBoundsXMin) / 2;
+        const centerRunY = runBoundsYMin + (runBoundsYMax - runBoundsYMin) / 2;
+        const offsetX = Math.round(centerX - centerRunX);
+        const offsetY = Math.round(centerY - centerRunY);
+
+        if (runs.length == 1) {
+            runs[0].offset = { x: offsetX, y: offsetY };
+            this.stateHandler.resetOffset(runs[0].offset);
+        } else {
+            runs.forEach((run) => {
+                run.elements.forEach((e) => {
+                    e.x = (e.x ?? 0) + offsetX;
+                    e.y = (e.y ?? 0) + offsetY;
+                });
+                run.arcs.forEach((arc) => {
+                    arc.breakpoints.forEach((e) => {
+                        e.x = (e.x ?? 0) + offsetX;
+                        e.y = (e.y ?? 0) + offsetY;
+                    });
+                });
+            });
+        }
     }
 }
 

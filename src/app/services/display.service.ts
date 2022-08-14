@@ -95,6 +95,10 @@ export class DisplayService implements OnDestroy {
         return this._currentRun$.asObservable();
     }
 
+    public get currentRun(): Run {
+        return this._currentRun$.getValue();
+    }
+
     public addEmptyRun(): Run {
         this.registerRun(getEmptyRun());
         return this._currentRun$.getValue();
