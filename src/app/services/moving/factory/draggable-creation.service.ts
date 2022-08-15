@@ -42,10 +42,10 @@ export class DraggingCreationService {
     ): HTMLElement {
         const x = asInt(transition, getXAttribute(transition));
         const y = asInt(transition, getYAttribute(transition));
-        const currentXForInfolement = +x + +transitionSize / 2;
-        const currentYInfoElement = +y + transitionSize * 1.5;
+        const currentXForInfolement = x - (100 - transitionSize) / 2;
+        const currentYInfoElement = y + transitionSize + 2;
         const selector =
-            'text[y="' +
+            'foreignObject[y="' +
             currentYInfoElement +
             '"][x="' +
             currentXForInfolement +

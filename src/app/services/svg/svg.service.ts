@@ -140,14 +140,21 @@ function createSvgForElement(
     svg.setAttribute(layerPosYAttibute, `${element.layerPos ?? 0}`);
     svg.setAttribute(eventId, `${element.id}`);
 
-    const text = createSvgElement('text');
-    text.textContent = element.label;
-    text.setAttribute('x', `${x + transitionSize / 2}`);
-    text.setAttribute('y', `${y + transitionSize * 1.5}`);
+    const text = createSvgElement('foreignObject');
+    text.setAttribute('x', `${x - (100 - transitionSize) / 2}`);
+    text.setAttribute('y', `${y + transitionSize + 2}`);
+    const height = 40;
+    const width = 100;
+    text.setAttribute('height', `${height}`);
+    text.setAttribute('width', `${width}`);
+    const span = document.createElement('span');
+    span.setAttribute('title', element.label);
+    span.textContent = element.label;
+    text.append(span);
 
     if (hightlight) {
         svg.setAttribute('stroke', highlightColor);
-        text.setAttribute('fill', highlightColor);
+        text.setAttribute('style', `color: ${highlightColor};`);
     }
 
     return [svg, text];

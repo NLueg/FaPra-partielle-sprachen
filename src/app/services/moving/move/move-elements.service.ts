@@ -14,7 +14,7 @@ export class MoveElementsService {
         const transition = draggable.transition;
         const attributePraefix = getAttributePraefix(transition);
         transition.setAttribute(attributePraefix + 'y', `${newY}`);
-        const newYInfo = newY + transitionSize * 1.5;
+        const newYInfo = newY + transitionSize + 2;
         draggable.infoElement?.setAttribute('y', `${newYInfo}`);
         let offsetIncoming = 0;
         if (transition.nodeName === 'rect') {
@@ -110,7 +110,11 @@ export class MoveElementsService {
         Array.from(drawingArea.children).forEach((e) => {
             const x = changes.x;
             const y = changes.y;
-            if (e.nodeName === 'rect' || e.nodeName === 'text') {
+            if (
+                e.nodeName === 'rect' ||
+                e.nodeName === 'text' ||
+                e.nodeName === 'foreignObject'
+            ) {
                 const currentX = +asInt(e, 'x') + +x;
                 const currentY = +asInt(e, 'y') + +y;
                 e.setAttribute('x', `${currentX}`);
