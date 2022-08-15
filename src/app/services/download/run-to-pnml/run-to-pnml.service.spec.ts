@@ -34,11 +34,11 @@ const parsedPnml = `<?xml version="1.0" encoding="UTF-8"?>
                     <name>
                         <text>t1</text>
                         <graphics>
-                             <offset x="200" y="200"/>
+                             <offset x="200" y="40"/>
                         </graphics>
                     </name>
                     <graphics>
-                         <position x="200" y="160"/>
+                         <position x="200" y="0"/>
                          <dimension x="40" y="40"></dimension>
                     </graphics>
                </transition>
@@ -46,11 +46,11 @@ const parsedPnml = `<?xml version="1.0" encoding="UTF-8"?>
                     <name>
                         <text>t2</text>
                         <graphics>
-                             <offset x="400" y="200"/>
+                             <offset x="400" y="426.6666666666667"/>
                         </graphics>
                     </name>
                     <graphics>
-                         <position x="400" y="160"/>
+                         <position x="400" y="386.6666666666667"/>
                          <dimension x="40" y="40"></dimension>
                     </graphics>
                </transition>
@@ -58,11 +58,11 @@ const parsedPnml = `<?xml version="1.0" encoding="UTF-8"?>
                     <name>
                         <text>t3</text>
                         <graphics>
-                             <offset x="1200" y="200"/>
+                             <offset x="1200" y="240"/>
                         </graphics>
                     </name>
                     <graphics>
-                         <position x="1200" y="160"/>
+                         <position x="1200" y="200"/>
                          <dimension x="40" y="40"></dimension>
                     </graphics>
                </transition>
@@ -70,11 +70,11 @@ const parsedPnml = `<?xml version="1.0" encoding="UTF-8"?>
                     <name>
                         <text>t4</text>
                         <graphics>
-                             <offset x="600" y="200"/>
+                             <offset x="600" y="296"/>
                         </graphics>
                     </name>
                     <graphics>
-                         <position x="600" y="160"/>
+                         <position x="600" y="256"/>
                          <dimension x="40" y="40"></dimension>
                     </graphics>
                </transition>
@@ -82,11 +82,11 @@ const parsedPnml = `<?xml version="1.0" encoding="UTF-8"?>
                     <name>
                         <text>t5</text>
                         <graphics>
-                             <offset x="800" y="120"/>
+                             <offset x="800" y="184"/>
                         </graphics>
                     </name>
                     <graphics>
-                         <position x="800" y="80"/>
+                         <position x="800" y="144"/>
                          <dimension x="40" y="40"></dimension>
                     </graphics>
                </transition>
@@ -94,11 +94,11 @@ const parsedPnml = `<?xml version="1.0" encoding="UTF-8"?>
                     <name>
                         <text>t6</text>
                         <graphics>
-                             <offset x="1000" y="80"/>
+                             <offset x="1000" y="72"/>
                         </graphics>
                     </name>
                     <graphics>
-                         <position x="1000" y="40"/>
+                         <position x="1000" y="32"/>
                          <dimension x="40" y="40"></dimension>
                     </graphics>
                </transition>
@@ -106,11 +106,11 @@ const parsedPnml = `<?xml version="1.0" encoding="UTF-8"?>
                     <name>
                          <text>p0</text>
                          <graphics>
-                              <offset x="100" y="200"/>
+                              <offset x="100" y="240"/>
                          </graphics>
                     </name>
                     <graphics>
-                         <position x="100" y="160"/>
+                         <position x="100" y="200"/>
                     </graphics>
                     <initialMarking>
                          <text>1</text>
@@ -120,11 +120,11 @@ const parsedPnml = `<?xml version="1.0" encoding="UTF-8"?>
                     <name>
                          <text>t1t2</text>
                          <graphics>
-                              <offset x="300" y="200"/>
+                              <offset x="300" y="40"/>
                          </graphics>
                     </name>
                     <graphics>
-                         <position x="300" y="160"/>
+                         <position x="300" y="0"/>
                     </graphics>
                     <initialMarking>
                          <text>0</text>
@@ -134,11 +134,11 @@ const parsedPnml = `<?xml version="1.0" encoding="UTF-8"?>
                     <name>
                          <text>t2t4</text>
                          <graphics>
-                              <offset x="500" y="200"/>
+                              <offset x="500" y="426.6666666666667"/>
                          </graphics>
                     </name>
                     <graphics>
-                         <position x="500" y="160"/>
+                         <position x="500" y="386.6666666666667"/>
                     </graphics>
                     <initialMarking>
                          <text>0</text>
@@ -148,11 +148,11 @@ const parsedPnml = `<?xml version="1.0" encoding="UTF-8"?>
                     <name>
                          <text>t4t3</text>
                          <graphics>
-                              <offset x="700" y="120"/>
+                              <offset x="700" y="240"/>
                          </graphics>
                     </name>
                     <graphics>
-                         <position x="700" y="80"/>
+                         <position x="700" y="200"/>
                     </graphics>
                     <initialMarking>
                          <text>0</text>
@@ -162,11 +162,11 @@ const parsedPnml = `<?xml version="1.0" encoding="UTF-8"?>
                     <name>
                          <text>t4t5</text>
                          <graphics>
-                              <offset x="700" y="280"/>
+                              <offset x="700" y="333.3333333333333"/>
                          </graphics>
                     </name>
                     <graphics>
-                         <position x="700" y="240"/>
+                         <position x="700" y="293.3333333333333"/>
                     </graphics>
                     <initialMarking>
                          <text>0</text>
@@ -176,11 +176,11 @@ const parsedPnml = `<?xml version="1.0" encoding="UTF-8"?>
                     <name>
                          <text>t5t3</text>
                          <graphics>
-                              <offset x="900" y="320"/>
+                              <offset x="900" y="240"/>
                          </graphics>
                     </name>
                     <graphics>
-                         <position x="900" y="280"/>
+                         <position x="900" y="200"/>
                     </graphics>
                     <initialMarking>
                          <text>0</text>
@@ -190,11 +190,11 @@ const parsedPnml = `<?xml version="1.0" encoding="UTF-8"?>
                     <name>
                          <text>t5t6</text>
                          <graphics>
-                              <offset x="900" y="80"/>
+                              <offset x="900" y="146.66666666666669"/>
                          </graphics>
                     </name>
                     <graphics>
-                         <position x="900" y="40"/>
+                         <position x="900" y="106.66666666666667"/>
                     </graphics>
                     <initialMarking>
                          <text>0</text>
@@ -204,17 +204,52 @@ const parsedPnml = `<?xml version="1.0" encoding="UTF-8"?>
                     <name>
                          <text>t6t3</text>
                          <graphics>
-                              <offset x="1100" y="80"/>
+                              <offset x="1100" y="72"/>
                          </graphics>
                     </name>
                     <graphics>
-                         <position x="1100" y="40"/>
+                         <position x="1100" y="32"/>
                     </graphics>
                     <initialMarking>
                          <text>0</text>
                     </initialMarking>
                </place>
                <arc id="A"
+                    source="p0" target="t6">
+                    <inscription>
+                        <text>1</text>
+                    </inscription>
+                    <graphics/>
+               </arc>
+                <arc id="A"
+                    source="p0" target="t5">
+                    <inscription>
+                        <text>1</text>
+                    </inscription>
+                    <graphics/>
+               </arc>
+                <arc id="A"
+                    source="p0" target="t4">
+                    <inscription>
+                        <text>1</text>
+                    </inscription>
+                    <graphics/>
+               </arc>
+                <arc id="A"
+                    source="p0" target="t3">
+                    <inscription>
+                        <text>1</text>
+                    </inscription>
+                    <graphics/>
+               </arc>
+                <arc id="A"
+                    source="p0" target="t2">
+                    <inscription>
+                        <text>1</text>
+                    </inscription>
+                    <graphics/>
+               </arc>
+                <arc id="A"
                     source="p0" target="t1">
                     <inscription>
                         <text>1</text>
