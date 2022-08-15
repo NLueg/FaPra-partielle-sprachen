@@ -16,7 +16,7 @@ export function getRunTextFromPnml(xmlContent: string): string {
     const parser = new XMLParser(options);
 
     const pnml: PnmlWrapper = parser.parse(xmlContent);
-    const page: PnmlPage = pnml.pnml.net.page;
+    const page: PnmlPage = pnml.pnml.net.page ?? pnml.pnml.net;
 
     const lines = [typeKey];
     lines.push(eventsAttribute);

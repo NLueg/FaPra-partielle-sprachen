@@ -7,6 +7,9 @@ import { LayoutService } from '../../layout.service';
 
 const encoding = '<?xml version="1.0" encoding="UTF-8"?>\n';
 
+const firstPlaceId = 'p0';
+const transitionDimension = 40;
+
 @Injectable({
     providedIn: 'root',
 })
@@ -15,6 +18,8 @@ export class RunToPnmlService {
 
     parseRunToPnml(name: string, run: Run): string {
         const { parsedRun, places } = this.layoutRun(run);
+
+        console.log(parsedRun);
 
         const parsedPlaces = parsedRun.elements.filter((element) =>
             places.find((place) => element.label === place.label)
@@ -53,6 +58,12 @@ export class RunToPnmlService {
                 outgoingArcs: [],
             };
         });
+        places.unshift({
+            id: firstPlaceId,
+            label: firstPlaceId,
+            incomingArcs: [],
+            outgoingArcs: [],
+        });
 
         const newArcArray: Arc[] = run.arcs.flatMap((arc) => {
             const placeName = getPlaceNameByArc(arc);
@@ -62,9 +73,30 @@ export class RunToPnmlService {
             ];
         });
 
+        //Add arc from first place to all start-events
+        run.elements
+            .filter((e) => e.incomingArcs.length == 0)
+            .forEach((e) => {
+                newArcArray.unshift({
+                    source: firstPlaceId,
+                    target: e.id,
+                    breakpoints: [],
+                });
+            });
+
+        const elements = [...run.elements, ...places].map((element) => {
+            element.incomingArcs = newArcArray.filter(
+                (arc) => arc.target === element.id
+            );
+            element.outgoingArcs = newArcArray.filter(
+                (arc) => arc.source === element.id
+            );
+            return element;
+        });
+
         const parsedRun = this._layoutService.layout({
             arcs: newArcArray,
-            elements: [...run.elements, ...places],
+            elements,
             warnings: [],
             text: '',
         }).run;
@@ -79,34 +111,39 @@ export class RunToPnmlService {
 function parseTransition(transition: Element): string {
     return `               <transition id="${transition.id}">
                     <name>
-                         <text>${transition.label}</text>
-                         <graphics>
-                              <offset x="0" y="0"/>
-                         </graphics>
+                        <text>${transition.label}</text>
+                        <graphics>
+                             <offset x="${transition.x ?? 0}" y="${
+        (transition.y ?? 0) + transitionDimension
+    }"/>
+                        </graphics>
                     </name>
                     <graphics>
                          <position x="${transition.x ?? 0}" y="${
         transition.y ?? 0
     }"/>
+                         <dimension x="${transitionDimension}" y="${transitionDimension}"></dimension>
                     </graphics>
                </transition>`;
 }
 
 function parsePlaces(places: Element[]): string {
     return places
-        .map((place) => {
+        .map((place, index) => {
             return `               <place id="${place.id}">
                     <name>
                          <text>${place.label}</text>
                          <graphics>
-                              <offset x="0" y="0"/>
+                              <offset x="${place.x ?? 0}" y="${
+                (place.y ?? 0) + transitionDimension ?? 0
+            }"/>
                          </graphics>
                     </name>
                     <graphics>
                          <position x="${place.x ?? 0}" y="${place.y ?? 0}"/>
                     </graphics>
                     <initialMarking>
-                         <text>1</text>
+                         <text>${index === 0 ? 1 : 0}</text>
                     </initialMarking>
                </place>`;
         })
@@ -119,7 +156,7 @@ function parseArcs(run: Run): string {
             (arc) => `               <arc id="A"
                     source="${arc.source}" target="${arc.target}">
                     <inscription>
-                         <text>1</text>
+                        <text>1</text>
                     </inscription>
                     <graphics/>
                </arc>`

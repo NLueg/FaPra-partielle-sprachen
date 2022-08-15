@@ -222,18 +222,22 @@ export class SourceFileTextareaComponent implements OnDestroy, OnInit {
     }
 
     private addOffsetInfo(offset: Coordinates): void {
-        const currentValue = this.textareaFc.value;
-        if (currentValue) {
-            const offsetString =
-                offsetAttribute + '\n' + offset.x + ' ' + offset.y;
-            const patternString = '\\.offset\\n-?\\d+ -?\\d+';
-            const replacePattern = new RegExp(patternString, 'g');
-            let newValue = currentValue + offsetString;
-            if (replacePattern.test(currentValue)) {
-                newValue = currentValue.replace(replacePattern, offsetString);
-            }
-            this.textareaFc.setValue(newValue, { emitEvent: true });
+        let currentValue = this.textareaFc.value;
+        if (!currentValue) {
+            return;
         }
+
+        if (!currentValue.endsWith('\n')) {
+            currentValue += '\n';
+        }
+        const offsetString = `${offsetAttribute}\n${offset.x} ${offset.y}`;
+        const patternString = '\\.offset\\n-?\\d+ -?\\d+';
+        const replacePattern = new RegExp(patternString, 'g');
+        let newValue = currentValue + offsetString;
+        if (replacePattern.test(currentValue)) {
+            newValue = currentValue.replace(replacePattern, offsetString);
+        }
+        this.textareaFc.setValue(newValue, { emitEvent: true });
     }
 
     public removeCoordinates(): void {
