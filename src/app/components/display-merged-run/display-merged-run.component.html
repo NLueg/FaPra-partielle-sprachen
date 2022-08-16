@@ -1,5 +1,6 @@
-<div class="svg-scroller">
+<div class="svg-scroller" #svg_wrapper>
     <app-canvas
+        #canvas
         *ngIf="svgElements$ | async as svgElements"
         [svgElements]="svgElements.list"
         [canvasHeight]="svgElements.height"
