@@ -40,6 +40,9 @@ export class MergeService {
         const primeEventStructure = getEmptyRun();
         let nextArcs: Array<Arc> = [];
         let nextElements: Array<Element> = [];
+        /* erstelle einen neunen Run, und füge alle Events und Arcs hinzu.
+        Um sicher zu stellen, dass die IDs eindeutig sind werden diese erneuert als 
+        Kombination von Index und alter ID */
         if (runs.length === 0) {
             return getEmptyRun();
         } else {
@@ -57,14 +60,20 @@ export class MergeService {
             }
             let end = false;
             let first = true;
+            /*Jetzt werden die Layer nacheinander Durchgegangen und geprüft ob es zwei
+            Elemente gibt, welche das gleiche Label besitzen und alle einsteffen Arcs übereinstimmen.
+            Diese werden gemerged, es sei denn sie stammen aus demselben Run und sollen somit Nebenläufig sein*/
             while (!end) {
                 if (first) {
+                    /*Am Anfang wird der erste Layer bearbeitet*/
                     primeEventStructure.elements.forEach((element) => {
                         if (element.incomingArcs.length == 0) {
                             nextElements.push(element);
                         }
                     });
                 } else {
+                    /* der nächste Layer besteht aus denjenige Elementen, bei denen alle Incoming Arcs bereits besucht
+                    wurden */
                     primeEventStructure.elements.forEach((element) => {
                         let allIncomingArcs = true;
                         if (element.incomingArcs.length > 0) {
@@ -92,7 +101,10 @@ export class MergeService {
                         }
                     });
                 }
+
                 if (nextElements.length > 1) {
+                    /* Um die Ausnahme zu berücksichtigen, dass zwei Elemente aus einem Run stammen und diese gemerged werden
+                    werden alle label bis auch den ersten provisorisch geändert */
                     for (
                         let index = 0;
                         index < nextElements.length - 1;
@@ -111,45 +123,68 @@ export class MergeService {
                                     nextElements[index2]
                                 )
                             ) {
-                                nextElements[index2].outgoingArcs.forEach(
-                                    (arc) => {
-                                        arc.source = nextElements[index].id;
-                                        nextElements[index].outgoingArcs.push(
-                                            arc
-                                        );
-                                    }
-                                );
                                 if (
-                                    doesElementBelongToCurrentRun(
-                                        nextElements[index2]
-                                    )
+                                    nextElements[index].id.split('_')[0] ==
+                                    nextElements[index2].id.split('_')[0]
                                 ) {
-                                    nextElements[index].currentRun = true;
-                                    nextElements[index].incomingArcs.forEach(
-                                        (arc) => (arc.currentRun = true)
-                                    );
+                                    nextElements[index2].label =
+                                        nextElements[index2].label + '_???_';
                                 }
-                                primeEventStructure.elements =
-                                    primeEventStructure.elements.filter(
-                                        (element) =>
-                                            element != nextElements[index2]
-                                    );
-
-                                primeEventStructure.arcs =
-                                    primeEventStructure.arcs.filter(
-                                        (arc) =>
-                                            arc.target !=
-                                            nextElements[index2].id
-                                    );
-                                nextElements = nextElements.filter(
-                                    (element) => element != nextElements[index2]
-                                );
-                                index2 = index2 - 1;
                             }
                         }
                     }
                 }
+                /* Es folgt der eigentliche Merge Prozess */
+                for (let index = 0; index < nextElements.length - 1; index++) {
+                    for (
+                        let index2 = index + 1;
+                        index2 < nextElements.length;
+                        index2++
+                    ) {
+                        if (
+                            nextElements[index].label ==
+                                nextElements[index2].label &&
+                            haveSameIncomingArcs(
+                                nextElements[index],
+                                nextElements[index2]
+                            )
+                        ) {
+                            nextElements[index2].outgoingArcs.forEach((arc) => {
+                                arc.source = nextElements[index].id;
+                                nextElements[index].outgoingArcs.push(arc);
+                            });
+                            if (
+                                doesElementBelongToCurrentRun(
+                                    nextElements[index2]
+                                )
+                            ) {
+                                nextElements[index].currentRun = true;
+                                nextElements[index].incomingArcs.forEach(
+                                    (arc) => (arc.currentRun = true)
+                                );
+                            }
 
+                            /*arcs die auf gemergte elements elements zeigen werden entfernt */
+                            primeEventStructure.arcs =
+                                primeEventStructure.arcs.filter(
+                                    (arc) =>
+                                        arc.target != nextElements[index2].id
+                                );
+                            /*gemergte elements werden entfernt */
+                            primeEventStructure.elements =
+                                primeEventStructure.elements.filter(
+                                    (element) => element != nextElements[index2]
+                                );
+
+                            nextElements = nextElements.filter(
+                                (element) => element != nextElements[index2]
+                            );
+                            index2 = index2 - 1;
+                        }
+                    }
+                }
+
+                /*outgoing Arcs werden besucht */
                 nextElements.forEach((element) => {
                     element.outgoingArcs.forEach((arc) => {
                         nextArcs.push(arc);
@@ -158,19 +193,19 @@ export class MergeService {
 
                 nextElements = [];
 
+                /*Schleife ist beendet sobald keine Kanten (outgoing Arcs) mehr besucht werden können*/
                 if (nextArcs.length == 0) {
                     end = true;
                 }
                 first = false;
             }
+            /*provisorische Label werden wieder zurückgesetzt  */
+            primeEventStructure.elements.forEach((element) => {
+                element.label = element.label.split('_???_')[0];
+            });
 
             setRefs(primeEventStructure);
             primeEventStructure.text = generateTextForRun(primeEventStructure);
-
-            // primeEventStructure.elements.forEach((element) => {
-            //     console.log(element.id + ' + ' + element.label);
-            // });
-
             return primeEventStructure;
         }
     }
@@ -179,22 +214,25 @@ export class MergeService {
 function haveSameIncomingArcs(element1: Element, element2: Element): boolean {
     let haveSame = true;
     element1.incomingArcs.forEach((arc1) => {
-        if (
-            element2.incomingArcs.find((arc2) => {
-                arc2.source == arc1.source;
-            })
-        ) {
+        let found = false;
+        element2.incomingArcs.forEach((arc2) => {
+            if (arc2.source == arc1.source) {
+                found = true;
+            }
+        });
+        if (!found) {
             haveSame = false;
         }
     });
-
     if (haveSame) {
-        element2.incomingArcs.forEach((arc1) => {
-            if (
-                element1.incomingArcs.find((arc2) => {
-                    arc2.source == arc1.source;
-                })
-            ) {
+        element2.incomingArcs.forEach((arc2) => {
+            let found = false;
+            element2.incomingArcs.forEach((arc1) => {
+                if (arc1.source == arc2.source) {
+                    found = true;
+                }
+            });
+            if (!found) {
                 haveSame = false;
             }
         });
