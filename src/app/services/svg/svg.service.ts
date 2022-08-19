@@ -26,7 +26,6 @@ import {
 } from './svg-constants';
 
 let highlightColor: string;
-let currentRun: Run;
 
 @Injectable({
     providedIn: 'root',
