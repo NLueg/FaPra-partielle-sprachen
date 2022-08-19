@@ -60,16 +60,6 @@ export class SvgService {
         }
 
         if (merge && samePrefix) {
-            run.elements.forEach((el) => {
-                let isCurrentRun = false;
-                currentRun.elements.forEach((element) => {
-                    if (element.id == el.id) {
-                        isCurrentRun = true;
-                        return;
-                    }
-                });
-                result.push(...createSvgForElement(el, isCurrentRun, offset));
-            });
             run.arcs.forEach((arc) => {
                 const source = run.elements.find((el) => el.id === arc.source);
                 const target = run.elements.find((el) => el.id === arc.target);
@@ -97,10 +87,17 @@ export class SvgService {
                     });
                 }
             });
-        } else {
             run.elements.forEach((el) => {
-                result.push(...createSvgForElement(el, false, offset));
+                let isCurrentRun = false;
+                currentRun.elements.forEach((element) => {
+                    if (element.id == el.id) {
+                        isCurrentRun = true;
+                        return;
+                    }
+                });
+                result.push(...createSvgForElement(el, isCurrentRun, offset));
             });
+        } else {
             run.arcs.forEach((arc) => {
                 const source = run.elements.find((el) => el.id === arc.source);
                 const target = run.elements.find((el) => el.id === arc.target);
@@ -116,6 +113,9 @@ export class SvgService {
                         result.push(a);
                     });
                 }
+            });
+            run.elements.forEach((el) => {
+                result.push(...createSvgForElement(el, false, offset));
             });
         }
         return result;
