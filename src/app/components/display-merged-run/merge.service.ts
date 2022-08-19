@@ -10,6 +10,7 @@ import {
     copyElement,
     copyRun,
     generateTextForRun,
+    getEmptyRun,
     setRefs,
 } from '../../classes/diagram/functions/run-helper.fn';
 import { Run } from '../../classes/diagram/run';
@@ -27,7 +28,7 @@ export class MergeService {
         this.currentRuns$ = displayService.runs$;
 
         this.mergedRun$ = displayService.runs$.pipe(
-            map((runs) => this.mergeRuns(runs)),
+            map((runs) => this.mergeRunsNew(runs)),
             shareReplay(1)
         );
     }
@@ -36,35 +37,160 @@ export class MergeService {
         return this.mergedRun$;
     }
 
-    mergeRuns(runs: Run[]): Run[] {
+    mergeRunsNew(runs: Run[]): Run[] {
+        const primeEventStructure = getEmptyRun();
+        let nextArcs: Array<Arc> = [];
+        let nextElements: Array<Element> = [];
         if (runs.length === 0) {
             return [];
-        }
+        } else {
+            for (let index = 0; index < runs.length; index++) {
+                const runToMerge = copyRun(runs[index], false);
+                runToMerge.elements.forEach(
+                    (element) => (element.id = index + '_' + element.id)
+                );
+                runToMerge.arcs.forEach((arc) => {
+                    arc.source = index + '_' + arc.source;
+                    arc.target = index + '_' + arc.target;
+                });
+                primeEventStructure.elements.push(...runToMerge.elements);
+                primeEventStructure.arcs.push(...runToMerge.arcs);
+            }
+            let end = false;
+            let first = true;
+            while (!end) {
+                if (first) {
+                    primeEventStructure.elements.forEach((element) => {
+                        if (element.incomingArcs.length == 0) {
+                            nextElements.push(element);
+                        }
+                    });
+                } else {
+                    primeEventStructure.elements.forEach((element) => {
+                        let allIncomingArcs = true;
+                        if (element.incomingArcs.length > 0) {
+                            for (
+                                let index = 0;
+                                index < element.incomingArcs.length;
+                                index++
+                            ) {
+                                if (
+                                    !nextArcs.includes(
+                                        element.incomingArcs[index]
+                                    )
+                                ) {
+                                    allIncomingArcs = false;
+                                }
+                            }
+                            if (allIncomingArcs) {
+                                nextElements.push(element);
+                                element.incomingArcs.forEach((arc) => {
+                                    nextArcs = nextArcs.filter(
+                                        (arc2) => arc != arc2
+                                    );
+                                });
+                            }
+                        }
+                    });
+                }
+                if (nextElements.length > 1) {
+                    for (
+                        let index = 0;
+                        index < nextElements.length - 1;
+                        index++
+                    ) {
+                        for (
+                            let index2 = index + 1;
+                            index2 < nextElements.length;
+                            index2++
+                        ) {
+                            if (
+                                nextElements[index].label ==
+                                    nextElements[index2].label &&
+                                haveSameIncomingArcs(
+                                    nextElements[index],
+                                    nextElements[index2]
+                                )
+                            ) {
+                                nextElements[index2].outgoingArcs.forEach(
+                                    (arc) => {
+                                        arc.source = nextElements[index].id;
+                                        nextElements[index].outgoingArcs.push(
+                                            arc
+                                        );
+                                    }
+                                );
 
-        const baseRun = copyRun(runs[0], false);
-        const runsToCheck: Run[] = [];
+                                primeEventStructure.elements =
+                                    primeEventStructure.elements.filter(
+                                        (element) =>
+                                            element != nextElements[index2]
+                                    );
 
-        for (let index = 1; index < runs.length; index++) {
-            const runToMerge = runs[index];
+                                primeEventStructure.arcs =
+                                    primeEventStructure.arcs.filter(
+                                        (arc) =>
+                                            arc.target !=
+                                            nextElements[index2].id
+                                    );
+                                nextElements = nextElements.filter(
+                                    (element) => element != nextElements[index2]
+                                );
+                                index2 = index2 - 1;
+                            }
+                        }
+                    }
+                }
 
-            const baseStart = getStartOfRun(baseRun);
-            const startElementForMerge = getStartOfRun(runToMerge);
-            if (!baseStart || !startElementForMerge) {
-                continue;
+                nextElements.forEach((element) => {
+                    element.outgoingArcs.forEach((arc) => {
+                        nextArcs.push(arc);
+                    });
+                });
+
+                nextElements = [];
+
+                if (nextArcs.length == 0) {
+                    end = true;
+                }
+                first = false;
             }
 
-            if (baseStart.id === startElementForMerge.id) {
-                mergeRuns(baseRun, runToMerge, startElementForMerge);
-            } else {
-                runsToCheck.push(runToMerge);
-            }
+            setRefs(primeEventStructure);
+            primeEventStructure.text = generateTextForRun(primeEventStructure);
+            return [primeEventStructure];
         }
-        setRefs(baseRun);
-        baseRun.text = generateTextForRun(baseRun);
-        return [baseRun, ...this.mergeRuns(runsToCheck)];
     }
 }
 
+//     mergeRuns(runs: Run[]): Run[] {
+//         if (runs.length === 0) {
+//             return [];
+//         }
+
+//         const baseRun = copyRun(runs[0], false);
+//         const runsToCheck: Run[] = [];
+
+//         for (let index = 1; index < runs.length; index++) {
+//             const runToMerge = runs[index];
+
+//             const baseStart = getStartOfRun(baseRun);
+//             const startElementForMerge = getStartOfRun(runToMerge);
+//             if (!baseStart || !startElementForMerge) {
+//                 continue;
+//             }
+
+//             if (baseStart.id === startElementForMerge.id) {
+//                 mergeRuns(baseRun, runToMerge, startElementForMerge);
+//             } else {
+//                 runsToCheck.push(runToMerge);
+//             }
+//         }
+//         setRefs(baseRun);
+//         baseRun.text = generateTextForRun(baseRun);
+//         return [baseRun, ...this.mergeRuns(runsToCheck)];
+//     }
+// }
 /**
  * Receives the first element of a run
  * @param run run to analyze
@@ -118,4 +244,31 @@ function mergeArcs(baseRun: Run, arcsToMerge: Arc[]): void {
             addArc(baseRun, copyArc(arcToMerge));
         }
     });
+}
+
+function haveSameIncomingArcs(element1: Element, element2: Element): boolean {
+    let haveSame = true;
+    element1.incomingArcs.forEach((arc1) => {
+        if (
+            element2.incomingArcs.find((arc2) => {
+                arc2.source == arc1.source;
+            })
+        ) {
+            haveSame = false;
+        }
+    });
+
+    if (haveSame) {
+        element2.incomingArcs.forEach((arc1) => {
+            if (
+                element1.incomingArcs.find((arc2) => {
+                    arc2.source == arc1.source;
+                })
+            ) {
+                haveSame = false;
+            }
+        });
+    }
+
+    return haveSame;
 }
