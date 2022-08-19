@@ -11,11 +11,11 @@ import {
     breakpointPositionAttribute,
     breakpointTrail,
     circleSize,
-    eventId,
+    eventIdAttribute,
     fromTransitionAttribute,
-    layerPosYAttibute,
+    layerPosYAttibute, textOffset,
     toTransitionAttribute,
-    transitionSize,
+    eventSize,
 } from './svg-constants';
 
 let highlightColor: string;
@@ -132,32 +132,36 @@ function createSvgForElement(
     const y = (element.y ?? 0) + offset.y;
     svg.setAttribute('x', `${x}`);
     svg.setAttribute('y', `${y}`);
-    svg.setAttribute('width', `${transitionSize}`);
-    svg.setAttribute('height', `${transitionSize}`);
+    svg.setAttribute('width', `${eventSize}`);
+    svg.setAttribute('height', `${eventSize}`);
     svg.setAttribute('stroke', 'black');
     svg.setAttribute('stroke-width', '2');
     svg.setAttribute('fill-opacity', '0');
     svg.setAttribute(layerPosYAttibute, `${element.layerPos ?? 0}`);
-    svg.setAttribute(eventId, `${element.id}`);
+    svg.setAttribute(eventIdAttribute, `${element.id}`);
 
-    const text = createSvgElement('foreignObject');
-    text.setAttribute('x', `${x - (100 - transitionSize) / 2}`);
-    text.setAttribute('y', `${y + transitionSize + 2}`);
+    const text = createSvgElement('text');
+    text.setAttribute('x', `${x + eventSize / 2 - cropText(element.label).length*3.2}`);
+    text.setAttribute('y', `${y + eventSize + textOffset}`);
     const height = 40;
     const width = 100;
     text.setAttribute('height', `${height}`);
     text.setAttribute('width', `${width}`);
-    const span = document.createElement('span');
-    span.setAttribute('title', element.label);
-    span.textContent = element.label;
-    text.append(span);
-
+    text.setAttribute('describes-event', element.id)
+    text.innerHTML = '<title>' + element.label + '</title>' + cropText(element.label);
     if (hightlight) {
         svg.setAttribute('stroke', highlightColor);
         text.setAttribute('style', `color: ${highlightColor};`);
     }
 
     return [svg, text];
+}
+
+function cropText(text: string): string {
+    if (text.length > 15) {
+        return text.substring(0, 12) + "...";
+    }
+    return text;
 }
 
 function createSvgElement(name: string): SVGElement {
@@ -179,17 +183,17 @@ function createSvgForArc(
 
     if (arc.breakpoints.length == 0) {
         const start = getIntersection(
-            (source.x ?? 0) + transitionSize / 2,
-            (source.y ?? 0) + transitionSize / 2,
-            (target.x ?? 0) + transitionSize / 2,
-            (target.y ?? 0) + transitionSize / 2,
+            (source.x ?? 0) + eventSize / 2,
+            (source.y ?? 0) + eventSize / 2,
+            (target.x ?? 0) + eventSize / 2,
+            (target.y ?? 0) + eventSize / 2,
             false
         );
         const end = getIntersection(
-            (target.x ?? 0) + transitionSize / 2,
-            (target.y ?? 0) + transitionSize / 2,
-            (source.x ?? 0) + transitionSize / 2,
-            (source.y ?? 0) + transitionSize / 2,
+            (target.x ?? 0) + eventSize / 2,
+            (target.y ?? 0) + eventSize / 2,
+            (source.x ?? 0) + eventSize / 2,
+            (source.y ?? 0) + eventSize / 2,
             true
         );
         elements.push(
@@ -199,61 +203,65 @@ function createSvgForArc(
                 end.x + offset.x,
                 end.y + offset.y,
                 true,
-                hightlight
+                hightlight,
+                arc
             )
         );
     } else {
         //source -> first breakpoint
         const start = getIntersection(
-            (source.x ?? 0) + transitionSize / 2,
-            (source.y ?? 0) + transitionSize / 2,
-            arc.breakpoints[0].x + transitionSize / 2,
-            arc.breakpoints[0].y + transitionSize / 2,
+            (source.x ?? 0) + eventSize / 2,
+            (source.y ?? 0) + eventSize / 2,
+            arc.breakpoints[0].x + eventSize / 2,
+            arc.breakpoints[0].y + eventSize / 2,
             false
         );
         elements.push(
             createLine(
                 start.x + offset.x,
                 start.y + offset.y,
-                arc.breakpoints[0].x + transitionSize / 2 + offset.x,
-                arc.breakpoints[0].y + transitionSize / 2 + offset.y,
+                arc.breakpoints[0].x + eventSize / 2 + offset.x,
+                arc.breakpoints[0].y + eventSize / 2 + offset.y,
                 false,
-                hightlight
+                hightlight,
+                arc
             )
         );
         //breakpoint -> next breakpoint
         for (let i = 0; i < arc.breakpoints.length - 1; i++) {
             elements.push(
                 createLine(
-                    arc.breakpoints[i].x + transitionSize / 2 + offset.x,
-                    arc.breakpoints[i].y + transitionSize / 2 + offset.y,
-                    arc.breakpoints[i + 1].x + transitionSize / 2 + offset.x,
-                    arc.breakpoints[i + 1].y + transitionSize / 2 + offset.y,
+                    arc.breakpoints[i].x + eventSize / 2 + offset.x,
+                    arc.breakpoints[i].y + eventSize / 2 + offset.y,
+                    arc.breakpoints[i + 1].x + eventSize / 2 + offset.x,
+                    arc.breakpoints[i + 1].y + eventSize / 2 + offset.y,
                     false,
-                    hightlight
+                    hightlight,
+                    arc
                 )
             );
         }
         //last breakpoint -> target
         const end = getIntersection(
-            (target.x ?? 0) + transitionSize / 2,
-            (target.y ?? 0) + transitionSize / 2,
-            arc.breakpoints[arc.breakpoints.length - 1].x + transitionSize / 2,
-            arc.breakpoints[arc.breakpoints.length - 1].y + transitionSize / 2,
+            (target.x ?? 0) + eventSize / 2,
+            (target.y ?? 0) + eventSize / 2,
+            arc.breakpoints[arc.breakpoints.length - 1].x + eventSize / 2,
+            arc.breakpoints[arc.breakpoints.length - 1].y + eventSize / 2,
             true
         );
         elements.push(
             createLine(
                 arc.breakpoints[arc.breakpoints.length - 1].x +
-                    transitionSize / 2 +
-                    offset.x,
+                eventSize / 2 +
+                offset.x,
                 arc.breakpoints[arc.breakpoints.length - 1].y +
-                    transitionSize / 2 +
-                    offset.y,
+                eventSize / 2 +
+                offset.y,
                 end.x + offset.x,
                 end.y + offset.y,
                 true,
-                hightlight
+                hightlight,
+                arc
             )
         );
         elements.push(
@@ -281,7 +289,8 @@ function createLine(
     x2: number,
     y2: number,
     showArrow: boolean,
-    hightlight: boolean
+    hightlight: boolean,
+    arc: Arc
 ): SVGElement {
     const line = createSvgElement('line');
     if (hightlight) {
@@ -289,12 +298,17 @@ function createLine(
     } else {
         line.setAttribute('stroke', 'black');
     }
-
     line.setAttribute('stroke-width', '1');
-    if (hightlight && showArrow) {
-        line.setAttribute('marker-end', 'url(#arrowheadhightlight )');
-    } else if (showArrow) {
-        line.setAttribute('marker-end', 'url(#arrowhead)');
+    if (arc.breakpoints.length === 0) {
+        line.setAttribute(fromTransitionAttribute, arc.source);
+        line.setAttribute(toTransitionAttribute, arc.target);
+    }
+    if (showArrow) {
+        if (hightlight) {
+            line.setAttribute('marker-end', 'url(#arrowheadhightlight )');
+        } else {
+            line.setAttribute('marker-end', 'url(#arrowhead)');
+        }
     }
     line.setAttribute('x1', `${x1}`);
     line.setAttribute('y1', `${y1}`);
@@ -311,8 +325,8 @@ function createCircle(
     offset: Coordinates
 ): SVGElement {
     const breakpoint = breakpoints[positionInRun];
-    const x = breakpoint.x + transitionSize / 2 + offset.x;
-    const y = breakpoint.y + transitionSize / 2 + offset.y;
+    const x = breakpoint.x + eventSize / 2 + offset.x;
+    const y = breakpoint.y + eventSize / 2 + offset.y;
     const circle = createSvgElement('circle');
     circle.setAttribute('r', `${circleSize}`);
     circle.setAttribute('cx', `${x}`);

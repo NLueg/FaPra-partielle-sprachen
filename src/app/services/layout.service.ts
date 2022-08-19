@@ -9,7 +9,7 @@ import {
 } from '../classes/diagram/functions/run-helper.fn';
 import { Run } from '../classes/diagram/run';
 import { StatehandlerService } from './moving/statehandler/statehandler.service';
-import { transitionSize } from './svg/svg-constants';
+import { eventSize } from './svg/svg-constants';
 
 type Layer = Element | Breakpoint;
 
@@ -495,13 +495,13 @@ export class LayoutService {
                     runBoundsXMin = e.x ?? 0;
                 }
                 if ((e.x ?? 0) > runBoundsXMax) {
-                    runBoundsXMax = (e.x ?? 0) + transitionSize;
+                    runBoundsXMax = (e.x ?? 0) + eventSize;
                 }
                 if ((e.x ?? 0) < runBoundsYMin) {
                     runBoundsYMin = e.y ?? 0;
                 }
                 if ((e.y ?? 0) > runBoundsYMax) {
-                    runBoundsYMax = (e.y ?? 0) + transitionSize;
+                    runBoundsYMax = (e.y ?? 0) + eventSize;
                 }
             });
             run.arcs.forEach((arc) => {

@@ -1,6 +1,8 @@
-export const transitionSize = 50;
+export const eventSize = 50;
 
 export const circleSize = 10;
+
+export const textOffset = 15;
 
 export const originalYAttribute = 'original-y';
 
@@ -14,4 +16,4 @@ export const toTransitionAttribute = 'from-transition';
 
 export const breakpointTrail = 'breakpoint-positions';
 
-export const eventId = 'event-id';
+export const eventIdAttribute = 'event-id';

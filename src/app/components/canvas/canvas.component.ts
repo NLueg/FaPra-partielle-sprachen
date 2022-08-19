@@ -13,7 +13,6 @@ import { Draggable } from 'src/app/classes/diagram/draggable';
 
 import { ColorService } from '../../services/color.service';
 import { DisplayService } from '../../services/display.service';
-import { DraggingService } from '../../services/moving/dragging.service';
 import { asInt, getYAttribute } from '../../services/moving/dragging-helper.fn';
 import { DraggingCreationService } from '../../services/moving/factory/draggable-creation.service';
 import { FindElementsService } from '../../services/moving/find/find-elements.service';
@@ -21,9 +20,12 @@ import { MoveElementsService } from '../../services/moving/move/move-elements.se
 import { StatehandlerService } from '../../services/moving/statehandler/statehandler.service';
 import { SvgService } from '../../services/svg/svg.service';
 import {
+    breakpointPositionAttribute, breakpointTrail,
+    eventIdAttribute, fromTransitionAttribute,
     layerPosYAttibute,
-    originalYAttribute,
+    originalYAttribute, toTransitionAttribute
 } from '../../services/svg/svg-constants';
+import {CoordinatesInfo} from "../../classes/diagram/coordinates";
 
 @Component({
     selector: 'app-canvas',
@@ -50,7 +52,6 @@ export class CanvasComponent implements OnChanges, OnInit, OnDestroy {
     constructor(
         private _svgService: SvgService,
         private _displayService: DisplayService,
-        private _draggingService: DraggingService,
         private _colorService: ColorService,
         private _stateHandler: StatehandlerService
     ) {
@@ -75,10 +76,8 @@ export class CanvasComponent implements OnChanges, OnInit, OnDestroy {
     }
 
     ngOnChanges(changes: SimpleChanges): void {
-        this._draggingService.setDrawingArea(this.drawingArea);
         if (changes['svgElements'] && this.drawingArea) {
             this.clearDrawingArea();
-
             for (const element of this.svgElements) {
                 this.drawingArea.nativeElement.appendChild(element);
             }
@@ -104,6 +103,7 @@ export class CanvasComponent implements OnChanges, OnInit, OnDestroy {
         drawingArea.onmousedown = (e) => {
             this._stateHandler.initMouseDownForRun(e);
         };
+
         drawingArea.onmousemove = (e) => {
             if (this._stateHandler.childIsBeingDragged()) {
                 this.moveChildElementIfExisting();
@@ -144,7 +144,7 @@ export class CanvasComponent implements OnChanges, OnInit, OnDestroy {
             const e = drawingArea.children[i] as HTMLElement;
             if (e.nodeName === 'rect' || e.nodeName === 'circle') {
                 this.registerMouseHandlerForDraggable(
-                    this._draggingService.createDraggable(e)
+                    this.createDraggable(e)
                 );
             }
         }
@@ -154,23 +154,23 @@ export class CanvasComponent implements OnChanges, OnInit, OnDestroy {
         if (element === null) {
             return;
         }
-        element.transition.onmouseenter = () => {
+        element.event.onmouseenter = () => {
             this._stateHandler.disableMouseMoveForRun();
         };
 
-        element.transition.onmousedown = (e) => {
+        element.event.onmousedown = (e) => {
             this._stateHandler.initMouseDownForDraggable(e);
         };
 
-        element.transition.onmousemove = (e) => {
+        element.event.onmousemove = (e) => {
             if (this._stateHandler.draggableCanBeMoved(element, e)) {
-                this.moveDraggable(element);
+                this.moveDraggable(this._stateHandler.getMovedDraggable() as Draggable);
             }
         };
-        element.transition.onmouseleave = () => {
+        element.event.onmouseleave = () => {
             this._stateHandler.disableFocusForChildElement();
         };
-        element.transition.onmouseup = (e) => {
+        element.event.onmouseup = (e) => {
             this.resetChildElementIfExisting();
             this._stateHandler.resetGlobalHandlers();
             this._stateHandler.updateChangeStateDraggable(e);
@@ -194,7 +194,7 @@ export class CanvasComponent implements OnChanges, OnInit, OnDestroy {
     private moveDraggable(draggable: Draggable) {
         this.determineActiveNeighbourElement(draggable);
         const y = this._stateHandler.getVerticalChanges();
-        const transition = draggable.transition;
+        const transition = draggable.event;
         const currentCoords =
             FindElementsService.createCoordsFromElement(transition);
         const currentY = currentCoords.y;
@@ -211,25 +211,24 @@ export class CanvasComponent implements OnChanges, OnInit, OnDestroy {
     }
 
     private handlePassedElement(draggable: Draggable) {
-        const passedElement = this._stateHandler.getActiveNeighbourElement()
-            ?.transition as HTMLElement;
-        const movingElement = draggable.transition;
+        const passedElement = this._stateHandler.getActiveNeighbourElement();
+        const movingElement = draggable.event;
         if (passedElement === undefined) {
             return;
         }
         MoveElementsService.switchElements(
             draggable,
-            this._draggingService.createDraggable(passedElement) as Draggable
+            passedElement
         );
         if (this.persistCoordinates) {
             const movedLayerPos = asInt(movingElement, layerPosYAttibute);
-            const passedLayerPos = asInt(passedElement, layerPosYAttibute);
+            const passedLayerPos = asInt(passedElement.event, layerPosYAttibute);
             movingElement.setAttribute(layerPosYAttibute, `${passedLayerPos}`);
-            passedElement.setAttribute(layerPosYAttibute, `${movedLayerPos}`);
-            this.persistLayerPosition([passedElement, movingElement]);
+            passedElement.event.setAttribute(layerPosYAttibute, `${movedLayerPos}`);
+            this.persistLayerPosition([passedElement.event, movingElement]);
         }
         movingElement.removeAttribute(originalYAttribute);
-        passedElement.removeAttribute(originalYAttribute);
+        passedElement.event.removeAttribute(originalYAttribute);
 
         this._stateHandler.resetCanvasHandlers();
     }
@@ -239,12 +238,11 @@ export class CanvasComponent implements OnChanges, OnInit, OnDestroy {
         if (activeNeighbour === undefined) {
             return false;
         }
-
         const yMoving = asInt(movingElement, getYAttribute(movingElement));
         const yOriginal = asInt(movingElement, originalYAttribute);
         const yPassed = asInt(
-            activeNeighbour.transition,
-            getYAttribute(activeNeighbour.transition)
+            activeNeighbour.event,
+            getYAttribute(activeNeighbour.event)
         );
         const direction = MoveElementsService.getMoveDirection(movingElement);
         if (!direction) {
@@ -265,7 +263,7 @@ export class CanvasComponent implements OnChanges, OnInit, OnDestroy {
         if (!movedElement || !this.drawingArea) {
             null;
         }
-        const transition = movedElement.transition;
+        const transition = movedElement.event;
         const yAttribute = getYAttribute(transition);
         const direction = MoveElementsService.getMoveDirection(transition);
         if (!direction) {
@@ -317,9 +315,67 @@ export class CanvasComponent implements OnChanges, OnInit, OnDestroy {
     }
 
     persistLayerPosition(elements: Array<HTMLElement>): void {
-        this._draggingService.setDrawingArea(this.drawingArea);
         this._displayService.setCoordsInfo(
-            this._draggingService.getCoordinates(elements)
+            this.getCoordinates(elements)
         );
+    }
+
+
+    public createDraggable(element: HTMLElement): Draggable | null {
+        return DraggingCreationService.createDraggableFromElement(
+            element,
+            this.drawingArea
+        );
+    }
+
+    public findInfoText(element: HTMLElement): string {
+        if (!this.drawingArea) {
+            return '';
+        }
+        return (
+            DraggingCreationService.findInfoElementForTransition(
+                element,
+                this.drawingArea
+            )?.textContent ?? ''
+        );
+    }
+
+    public getCoordinates(elements: Array<HTMLElement>): CoordinatesInfo[] {
+        const coordinatesInfo = [] as CoordinatesInfo[];
+        elements.forEach((element) => {
+            const y = asInt(element, layerPosYAttibute);
+            let x = -1;
+            let infoText = element.getAttribute(eventIdAttribute) ?? '';
+            if (element.nodeName === 'circle') {
+                x = asInt(element, breakpointPositionAttribute);
+                infoText =
+                    element.getAttribute(fromTransitionAttribute) +
+                    ' ' +
+                    element.getAttribute(toTransitionAttribute);
+                const breakPoints =
+                    element.getAttribute(breakpointTrail)?.split(',') ?? [];
+                for (let i = 0; i < breakPoints.length; i++) {
+                    const breakPoint = breakPoints[i].split(':');
+                    if (i === x) {
+                        infoText += '[' + (y + 1) + ']';
+                    } else {
+                        infoText += '[' + (parseInt(breakPoint[1]) + 1) + ']';
+                    }
+                }
+            }
+            coordinatesInfo.push({
+                transitionName: infoText.trim(),
+                transitionType: element.nodeName,
+                coordinates: {
+                    x: x + 1,
+                    y: y + 1,
+                },
+                globalOffset: {
+                    x: x + 1,
+                    y: y + 1,
+                },
+            });
+        });
+        return coordinatesInfo;
     }
 }
