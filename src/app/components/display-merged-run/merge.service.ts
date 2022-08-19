@@ -2,7 +2,10 @@ import { Injectable } from '@angular/core';
 import { map, Observable, shareReplay } from 'rxjs';
 
 import { Arc } from '../../classes/diagram/arc';
-import { Element } from '../../classes/diagram/element';
+import {
+    doesElementBelongToCurrentRun,
+    Element,
+} from '../../classes/diagram/element';
 import {
     addArc,
     addElement,
@@ -22,7 +25,7 @@ import { DisplayService } from '../../services/display.service';
 export class MergeService {
     private currentRuns$: Observable<Run[]>;
 
-    private readonly mergedRun$: Observable<Run[]>;
+    private readonly mergedRun$: Observable<Run>;
 
     constructor(displayService: DisplayService) {
         this.currentRuns$ = displayService.runs$;
@@ -33,16 +36,16 @@ export class MergeService {
         );
     }
 
-    getMergedRuns$(): Observable<Run[]> {
+    getMergedRun$(): Observable<Run> {
         return this.mergedRun$;
     }
 
-    mergeRunsNew(runs: Run[]): Run[] {
+    mergeRunsNew(runs: Run[]): Run {
         const primeEventStructure = getEmptyRun();
         let nextArcs: Array<Arc> = [];
         let nextElements: Array<Element> = [];
         if (runs.length === 0) {
-            return [];
+            return getEmptyRun();
         } else {
             for (let index = 0; index < runs.length; index++) {
                 const runToMerge = copyRun(runs[index], false);
@@ -120,7 +123,16 @@ export class MergeService {
                                         );
                                     }
                                 );
-
+                                if (
+                                    doesElementBelongToCurrentRun(
+                                        nextElements[index2]
+                                    )
+                                ) {
+                                    nextElements[index].currentRun = true;
+                                    nextElements[index].incomingArcs.forEach(
+                                        (arc) => (arc.currentRun = true)
+                                    );
+                                }
                                 primeEventStructure.elements =
                                     primeEventStructure.elements.filter(
                                         (element) =>
@@ -158,7 +170,8 @@ export class MergeService {
 
             setRefs(primeEventStructure);
             primeEventStructure.text = generateTextForRun(primeEventStructure);
-            return [primeEventStructure];
+
+            return primeEventStructure;
         }
     }
 }

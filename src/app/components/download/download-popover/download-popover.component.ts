@@ -12,7 +12,7 @@ import { DownloadableContent, DownloadFormat } from '../download.const';
 export class DownloadPopoverComponent {
     fileFormat: DownloadFormat = 'run';
     downloadName = '';
-    currentDownloadSelection: 'all' | 'current' = 'all';
+    currentDownloadSelection: 'current' | 'all' = 'current';
     compression = false;
 
     constructor(
@@ -26,13 +26,14 @@ export class DownloadPopoverComponent {
         if (this.currentDownloadSelection === 'all') {
             this._downloadService.downloadRuns(
                 this.downloadName,
-                this.data.contentToDownload,
+                // this.data.contentToDownload,
                 this.fileFormat,
                 this.compression
             );
         } else if (this.currentDownloadSelection === 'current') {
             this._downloadService.downloadCurrentRun(
                 this.downloadName,
+                this.data.contentToDownload,
                 this.fileFormat
             );
         }

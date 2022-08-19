@@ -24,7 +24,8 @@ import { MergeService } from './merge.service';
 export class DisplayMergedRunComponent
     implements OnInit, OnDestroy, AfterViewInit
 {
-    svgElements$?: Observable<{ list: SVGElement[]; height: number }>;
+    svgElements$: Observable<SVGElement[]> | undefined;
+    // svgElements$?: Observable<{ list: SVGElement[]; height: number }>;
     @ViewChild('canvas') canvas: CanvasComponent | undefined;
     @ViewChild('svg_wrapper') svgWrapper: ElementRef<HTMLElement> | undefined;
     private _sub?: Subscription;
@@ -71,45 +72,71 @@ export class DisplayMergedRunComponent
     }
 
     private update(): void {
-        this.svgElements$ = this.mergeService.getMergedRuns$().pipe(
-            tap((runs) => console.log('Merged runs:', runs)),
-            map((currentRuns) => this.layoutMergedRuns(currentRuns)),
-            map(({ runs, totalDiagrammHeight }) => {
-                if (this.canvas && this.canvas.drawingArea) {
+        this.svgElements$ = this.mergeService.getMergedRun$().pipe(
+            map(
+                (primeEventStructure) =>
+                    this.layoutService.layout(primeEventStructure).run
+            ),
+            map((modifiedRun) => {
+                if (
+                    this.canvas &&
+                    this.canvas.drawingArea &&
+                    (!modifiedRun.offset ||
+                        (!modifiedRun.offset.x && !modifiedRun.offset.y))
+                ) {
                     const w = this.canvas.drawingArea.nativeElement.clientWidth;
                     const h =
                         this.canvas.drawingArea.nativeElement.clientHeight;
                     if (w > 0 && h > 0)
-                        this.layoutService.centerRuns(runs, w / 2, h / 2);
+                        this.layoutService.centerRuns(
+                            [modifiedRun],
+                            w / 2,
+                            h / 2
+                        );
                 }
-                return {
-                    list: runs.flatMap((run) =>
-                        this.svgService.createSvgElements(run, this.highlight)
-                    ),
-                    height: totalDiagrammHeight,
-                };
+                return this.svgService.createSvgElements(
+                    modifiedRun,
+                    this.highlight
+                );
             })
+            // tap((runs) => console.log('Merged runs:', runs)),
+            // map((currentRuns) => this.layoutMergedRuns(currentRuns)),
+            // map(({ runs, totalDiagrammHeight }) => {
+            //     if (this.canvas && this.canvas.drawingArea) {
+            //         const w = this.canvas.drawingArea.nativeElement.clientWidth;
+            //         const h =
+            //             this.canvas.drawingArea.nativeElement.clientHeight;
+            //         if (w > 0 && h > 0)
+            //             this.layoutService.centerRuns(runs, w / 2, h / 2);
+            //     }
+            //     return {
+            //         list: runs.flatMap((run) =>
+            //             this.svgService.createSvgElements(run, this.highlight)
+            //         ),
+            //         height: totalDiagrammHeight,
+            //     };
+            // })
         );
     }
 
-    private layoutMergedRuns(currentRuns: Run[]): {
-        runs: Run[];
-        totalDiagrammHeight: number;
-    } {
-        let totalDiagrammHeight = 0;
+    // private layoutMergedRuns(currentRuns: Run[]): {
+    //     runs: Run[];
+    //     totalDiagrammHeight: number;
+    // } {
+    //     let totalDiagrammHeight = 0;
 
-        const runs = currentRuns.map((currentRun) => {
-            const { run, diagrammHeight } = this.layoutService.layout(
-                currentRun,
-                totalDiagrammHeight
-            );
-            totalDiagrammHeight += diagrammHeight;
-            return run;
-        });
+    //     const runs = currentRuns.map((currentRun) => {
+    //         const { run, diagrammHeight } = this.layoutService.layout(
+    //             currentRun,
+    //             totalDiagrammHeight
+    //         );
+    //         totalDiagrammHeight += diagrammHeight;
+    //         return run;
+    //     });
 
-        return {
-            runs,
-            totalDiagrammHeight,
-        };
-    }
+    //     return {
+    //         runs,
+    //         totalDiagrammHeight,
+    //     };
+    // }
 }

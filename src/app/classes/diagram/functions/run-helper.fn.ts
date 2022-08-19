@@ -123,7 +123,12 @@ export function setRefs(run: Run): boolean {
 }
 
 export function copyArc(arc: Arc): Arc {
-    return { source: arc.source, target: arc.target, breakpoints: [] };
+    return {
+        source: arc.source,
+        target: arc.target,
+        breakpoints: [],
+        currentRun: arc.currentRun,
+    };
 }
 
 export function copyElement(element: Element): Element {
@@ -132,6 +137,7 @@ export function copyElement(element: Element): Element {
         incomingArcs: [],
         outgoingArcs: [],
         id: element.id,
+        currentRun: element.currentRun,
     };
 }
 
