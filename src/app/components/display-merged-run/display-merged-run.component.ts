@@ -72,7 +72,6 @@ export class DisplayMergedRunComponent
 
     private update(): void {
         this.svgElements$ = this.mergeService.getMergedRuns$().pipe(
-            tap((runs) => console.log('Merged runs:', runs)),
             map((currentRuns) => this.layoutMergedRuns(currentRuns)),
             map(({ runs, totalDiagrammHeight }) => {
                 if (this.canvas && this.canvas.drawingArea) {

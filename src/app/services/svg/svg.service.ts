@@ -172,7 +172,7 @@ function createSvgForArc(
     arc: Arc,
     source: Element | undefined,
     target: Element | undefined,
-    hightlight: boolean,
+    highlight: boolean,
     offset: Coordinates
 ): SVGElement[] {
     const elements: SVGElement[] = [];
@@ -198,13 +198,21 @@ function createSvgForArc(
         );
         elements.push(
             createLine(
-                start.x + offset.x,
-                start.y + offset.y,
-                end.x + offset.x,
-                end.y + offset.y,
-                true,
-                hightlight,
-                arc
+                {
+                    x: start.x + offset.x,
+                    y: start.y + offset.y
+                },
+                {
+                    x:   end.x + offset.x,
+                    y: end.y + offset.y
+                },
+                arc,
+                {
+                    highlight: highlight,
+                    showArrow: true,
+                    hasFromAttribute: true,
+                    hasToAttribute: true
+                }
             )
         );
     } else {
@@ -218,26 +226,39 @@ function createSvgForArc(
         );
         elements.push(
             createLine(
-                start.x + offset.x,
-                start.y + offset.y,
-                arc.breakpoints[0].x + eventSize / 2 + offset.x,
-                arc.breakpoints[0].y + eventSize / 2 + offset.y,
-                false,
-                hightlight,
-                arc
+                {
+                    x: start.x + offset.x,
+                    y: start.y + offset.y
+                },
+                {
+                    x: arc.breakpoints[0].x + eventSize / 2 + offset.x,
+                    y: arc.breakpoints[0].y + eventSize / 2 + offset.y
+                },
+                arc,
+                {
+                    highlight: highlight,
+                    showArrow: false,
+                    hasFromAttribute: true
+                }
             )
         );
         //breakpoint -> next breakpoint
         for (let i = 0; i < arc.breakpoints.length - 1; i++) {
             elements.push(
                 createLine(
-                    arc.breakpoints[i].x + eventSize / 2 + offset.x,
-                    arc.breakpoints[i].y + eventSize / 2 + offset.y,
-                    arc.breakpoints[i + 1].x + eventSize / 2 + offset.x,
-                    arc.breakpoints[i + 1].y + eventSize / 2 + offset.y,
-                    false,
-                    hightlight,
-                    arc
+                    {
+                        x: arc.breakpoints[i].x + eventSize / 2 + offset.x,
+                        y: arc.breakpoints[i].y + eventSize / 2 + offset.y
+                    },
+                    {
+                        x: arc.breakpoints[i + 1].x + eventSize / 2 + offset.x,
+                        y: arc.breakpoints[i + 1].y + eventSize / 2 + offset.y
+                    },
+                    arc,
+                    {
+                        highlight: highlight,
+                        showArrow: false
+                    }
                 )
             );
         }
@@ -251,17 +272,24 @@ function createSvgForArc(
         );
         elements.push(
             createLine(
-                arc.breakpoints[arc.breakpoints.length - 1].x +
-                eventSize / 2 +
-                offset.x,
-                arc.breakpoints[arc.breakpoints.length - 1].y +
-                eventSize / 2 +
-                offset.y,
-                end.x + offset.x,
-                end.y + offset.y,
-                true,
-                hightlight,
-                arc
+                {
+                    x: arc.breakpoints[arc.breakpoints.length - 1].x +
+                        eventSize / 2 +
+                        offset.x,
+                    y: arc.breakpoints[arc.breakpoints.length - 1].y +
+                        eventSize / 2 +
+                        offset.y,
+                },
+                {
+                    x: end.x + offset.x,
+                    y: end.y + offset.y,
+                },
+                arc,
+                {
+                    highlight: highlight,
+                    showArrow: true,
+                    hasToAttribute: true
+                }
             )
         );
         elements.push(
@@ -284,36 +312,35 @@ function createSvgForArc(
 }
 
 function createLine(
-    x1: number,
-    y1: number,
-    x2: number,
-    y2: number,
-    showArrow: boolean,
-    hightlight: boolean,
-    arc: Arc
+    fromCoords: Coordinates,
+    toCoords: Coordinates,
+    arc: Arc,
+    displayInfo: ArcDisplayInfo
 ): SVGElement {
     const line = createSvgElement('line');
-    if (hightlight) {
+    if (displayInfo.highlight) {
         line.setAttribute('stroke', highlightColor);
     } else {
         line.setAttribute('stroke', 'black');
     }
     line.setAttribute('stroke-width', '1');
-    if (arc.breakpoints.length === 0) {
+    if (displayInfo.hasFromAttribute) {
         line.setAttribute(fromTransitionAttribute, arc.source);
+    }
+    if (displayInfo.hasToAttribute) {
         line.setAttribute(toTransitionAttribute, arc.target);
     }
-    if (showArrow) {
-        if (hightlight) {
+    if (displayInfo.showArrow) {
+        if (displayInfo.highlight) {
             line.setAttribute('marker-end', 'url(#arrowheadhightlight )');
         } else {
             line.setAttribute('marker-end', 'url(#arrowhead)');
         }
     }
-    line.setAttribute('x1', `${x1}`);
-    line.setAttribute('y1', `${y1}`);
-    line.setAttribute('x2', `${x2}`);
-    line.setAttribute('y2', `${y2}`);
+    line.setAttribute('x1', `${fromCoords.x}`);
+    line.setAttribute('y1', `${fromCoords.y}`);
+    line.setAttribute('x2', `${toCoords.x}`);
+    line.setAttribute('y2', `${toCoords.y}`);
     return line;
 }
 
@@ -345,4 +372,11 @@ function createCircle(
     }
     circle.setAttribute(breakpointTrail, trail);
     return circle;
+}
+
+type ArcDisplayInfo = {
+    highlight: boolean,
+    showArrow: boolean,
+    hasFromAttribute?: boolean,
+    hasToAttribute?: boolean
 }

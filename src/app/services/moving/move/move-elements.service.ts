@@ -16,54 +16,69 @@ import {
 import { FindElementsService } from '../find/find-elements.service';
 
 export class MoveElementsService {
-    public static moveElement(draggable: Draggable, newY: number): void {
-        const transition = draggable.event;
-        const attributePraefix = getAttributePrefix(transition);
-        transition.setAttribute(attributePraefix + 'y', `${newY}`);
 
+    public static moveElement(draggable: Draggable, newY: number): void {
+        const event = draggable.event;
+        event.setAttribute(getYAttribute(event), `${newY}`);
         const newYInfo = newY + eventSize + textOffset;
         draggable.infoElement?.setAttribute('y', `${newYInfo}`);
-
-        let offsetIncoming = 0;
-        if (transition.nodeName === 'rect') {
-            offsetIncoming = eventSize / 2;
-        }
-        const newYForLines = newY + offsetIncoming;
-        const coords = FindElementsService.createCoordsFromElement(transition);
-
-        if (transition.nodeName === 'rect') {
+        const coords = FindElementsService.createCoordsFromElement(event);
+        if (event.nodeName === 'rect') {
             for (let i = 0; i < draggable.incomingArcs.length; i++) {
-                const c = getIntersection(
+                const arc = draggable.incomingArcs[i];
+                let c = getIntersection(
                     coords.x + eventSize / 2,
                     coords.y + eventSize / 2,
-                    asInt(draggable.incomingArcs[i], 'x1'),
-                    asInt(draggable.incomingArcs[i], 'y1'),
+                    asInt(arc, 'x1'),
+                    asInt(arc, 'y1'),
                     true
                 );
-                const arc = draggable.incomingArcs[i];
+                arc.setAttribute('y2', `${c.y}`);
+                arc.setAttribute('x2', `${c.x}`);
+                MoveElementsService.rearrangeArcsForPredecessor(arc);
+                c = getIntersection(
+                    coords.x + eventSize / 2,
+                    coords.y + eventSize / 2,
+                    asInt(arc, 'x1'),
+                    asInt(arc, 'y1'),
+                    true
+                );
                 arc.setAttribute('y2', `${c.y}`);
                 arc.setAttribute('x2', `${c.x}`);
                 MoveElementsService.rearrangeArcsForPredecessor(arc);
             }
             for (let j = 0; j < draggable.outgoingArcs.length; j++) {
-                const c = getIntersection(
+                const arc = draggable.outgoingArcs[j];
+
+                let c = getIntersection(
                     coords.x + eventSize / 2,
                     coords.y + eventSize / 2,
-                    asInt(draggable.outgoingArcs[j], 'x2'),
-                    asInt(draggable.outgoingArcs[j], 'y2'),
+                    asInt(arc, 'x2'),
+                    asInt(arc, 'y2'),
                     false
                 );
-                const arc = draggable.outgoingArcs[j];
+                arc.setAttribute('y1', `${c.y}`);
+                arc.setAttribute('x1', `${c.x}`);
+                MoveElementsService.rearrangeArcsForSuccessor(arc);
+                c = getIntersection(
+                    coords.x + eventSize / 2,
+                    coords.y + eventSize / 2,
+                    asInt(arc, 'x2'),
+                    asInt(arc, 'y2'),
+                    false
+                );
                 arc.setAttribute('y1', `${c.y}`);
                 arc.setAttribute('x1', `${c.x}`);
                 MoveElementsService.rearrangeArcsForSuccessor(arc);
             }
         } else {
             for (let i = 0; i < draggable.incomingArcs.length; i++) {
-                draggable.incomingArcs[i].setAttribute('y2', `${newYForLines}`);
+                draggable.incomingArcs[i].setAttribute('y2', `${newY}`);
+                MoveElementsService.rearrangeArcsForPredecessor(draggable.incomingArcs[i]);
             }
             for (let j = 0; j < draggable.outgoingArcs.length; j++) {
-                draggable.outgoingArcs[j].setAttribute('y1', `${newYForLines}`);
+                draggable.outgoingArcs[j].setAttribute('y1', `${newY}`);
+                MoveElementsService.rearrangeArcsForSuccessor(draggable.incomingArcs[j]);
             }
         }
     }

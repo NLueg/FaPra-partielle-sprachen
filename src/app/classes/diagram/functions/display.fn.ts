@@ -41,6 +41,5 @@ export function getIntersection(
         point.y = sourceY + eventSize / 2;
         point.x = (point.y - n) / m;
     }
-
     return point;
 }

@@ -173,7 +173,6 @@ export class CanvasComponent implements OnChanges, OnInit, OnDestroy {
         element.event.onmouseup = (e) => {
             this.resetChildElementIfExisting();
             this._stateHandler.resetGlobalHandlers();
-            this._stateHandler.updateChangeStateDraggable(e);
         };
     }
 
