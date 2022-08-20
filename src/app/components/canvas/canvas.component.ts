@@ -11,6 +11,7 @@ import {
 import { Subscription } from 'rxjs';
 import { Draggable } from 'src/app/classes/diagram/draggable';
 
+import { CoordinatesInfo } from '../../classes/diagram/coordinates';
 import { ColorService } from '../../services/color.service';
 import { DisplayService } from '../../services/display.service';
 import { asInt, getYAttribute } from '../../services/moving/dragging-helper.fn';
@@ -20,12 +21,14 @@ import { MoveElementsService } from '../../services/moving/move/move-elements.se
 import { StatehandlerService } from '../../services/moving/statehandler/statehandler.service';
 import { SvgService } from '../../services/svg/svg.service';
 import {
-    breakpointPositionAttribute, breakpointTrail,
-    eventIdAttribute, fromTransitionAttribute,
+    breakpointPositionAttribute,
+    breakpointTrail,
+    eventIdAttribute,
+    fromTransitionAttribute,
     layerPosYAttibute,
-    originalYAttribute, toTransitionAttribute
+    originalYAttribute,
+    toTransitionAttribute,
 } from '../../services/svg/svg-constants';
-import {CoordinatesInfo} from "../../classes/diagram/coordinates";
 
 @Component({
     selector: 'app-canvas',
@@ -143,9 +146,7 @@ export class CanvasComponent implements OnChanges, OnInit, OnDestroy {
         for (let i = 0; i < drawingArea.children.length; i++) {
             const e = drawingArea.children[i] as HTMLElement;
             if (e.nodeName === 'rect' || e.nodeName === 'circle') {
-                this.registerMouseHandlerForDraggable(
-                    this.createDraggable(e)
-                );
+                this.registerMouseHandlerForDraggable(this.createDraggable(e));
             }
         }
     }
@@ -164,13 +165,15 @@ export class CanvasComponent implements OnChanges, OnInit, OnDestroy {
 
         element.event.onmousemove = (e) => {
             if (this._stateHandler.draggableCanBeMoved(element, e)) {
-                this.moveDraggable(this._stateHandler.getMovedDraggable() as Draggable);
+                this.moveDraggable(
+                    this._stateHandler.getMovedDraggable() as Draggable
+                );
             }
         };
         element.event.onmouseleave = () => {
             this._stateHandler.disableFocusForChildElement();
         };
-        element.event.onmouseup = (e) => {
+        element.event.onmouseup = () => {
             this.resetChildElementIfExisting();
             this._stateHandler.resetGlobalHandlers();
         };
@@ -215,15 +218,18 @@ export class CanvasComponent implements OnChanges, OnInit, OnDestroy {
         if (passedElement === undefined) {
             return;
         }
-        MoveElementsService.switchElements(
-            draggable,
-            passedElement
-        );
+        MoveElementsService.switchElements(draggable, passedElement);
         if (this.persistCoordinates) {
             const movedLayerPos = asInt(movingElement, layerPosYAttibute);
-            const passedLayerPos = asInt(passedElement.event, layerPosYAttibute);
+            const passedLayerPos = asInt(
+                passedElement.event,
+                layerPosYAttibute
+            );
             movingElement.setAttribute(layerPosYAttibute, `${passedLayerPos}`);
-            passedElement.event.setAttribute(layerPosYAttibute, `${movedLayerPos}`);
+            passedElement.event.setAttribute(
+                layerPosYAttibute,
+                `${movedLayerPos}`
+            );
             this.persistLayerPosition([passedElement.event, movingElement]);
         }
         movingElement.removeAttribute(originalYAttribute);
@@ -314,11 +320,8 @@ export class CanvasComponent implements OnChanges, OnInit, OnDestroy {
     }
 
     persistLayerPosition(elements: Array<HTMLElement>): void {
-        this._displayService.setCoordsInfo(
-            this.getCoordinates(elements)
-        );
+        this._displayService.setCoordsInfo(this.getCoordinates(elements));
     }
-
 
     public createDraggable(element: HTMLElement): Draggable | null {
         return DraggingCreationService.createDraggableFromElement(

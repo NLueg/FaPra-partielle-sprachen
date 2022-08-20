@@ -30,8 +30,7 @@ export function getIntersection(
     };
     const m = (targetY - sourceY) / (targetX - sourceX);
     const n = sourceY - sourceX * m;
-    point.y =
-        (sourceX + (backwards ? -eventSize : eventSize) / 2) * m + n;
+    point.y = (sourceX + (backwards ? -eventSize : eventSize) / 2) * m + n;
 
     //Check if intersection is out of the event bounds -> Calculate intersection on the top/bottom line of the event
     if (point.y < sourceY - eventSize / 2) {

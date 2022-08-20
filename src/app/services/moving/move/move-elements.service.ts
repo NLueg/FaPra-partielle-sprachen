@@ -2,21 +2,17 @@ import { Coordinates } from '../../../classes/diagram/coordinates';
 import { Draggable } from '../../../classes/diagram/draggable';
 import { getIntersection } from '../../../classes/diagram/functions/display.fn';
 import {
-    originalYAttribute,
-    textOffset,
+    eventIdAttribute,
     eventSize,
     fromTransitionAttribute,
-    eventIdAttribute, toTransitionAttribute
+    originalYAttribute,
+    textOffset,
+    toTransitionAttribute,
 } from '../../svg/svg-constants';
-import {
-    asInt,
-    getAttributePrefix,
-    getYAttribute,
-} from '../dragging-helper.fn';
+import { asInt, getYAttribute } from '../dragging-helper.fn';
 import { FindElementsService } from '../find/find-elements.service';
 
 export class MoveElementsService {
-
     public static moveElement(draggable: Draggable, newY: number): void {
         const event = draggable.event;
         event.setAttribute(getYAttribute(event), `${newY}`);
@@ -74,19 +70,30 @@ export class MoveElementsService {
         } else {
             for (let i = 0; i < draggable.incomingArcs.length; i++) {
                 draggable.incomingArcs[i].setAttribute('y2', `${newY}`);
-                MoveElementsService.rearrangeArcsForPredecessor(draggable.incomingArcs[i]);
+                MoveElementsService.rearrangeArcsForPredecessor(
+                    draggable.incomingArcs[i]
+                );
             }
             for (let j = 0; j < draggable.outgoingArcs.length; j++) {
                 draggable.outgoingArcs[j].setAttribute('y1', `${newY}`);
-                MoveElementsService.rearrangeArcsForSuccessor(draggable.incomingArcs[j]);
+                MoveElementsService.rearrangeArcsForSuccessor(
+                    draggable.incomingArcs[j]
+                );
             }
         }
     }
 
     private static rearrangeArcsForPredecessor(arc: Element) {
         if (arc.getAttribute(fromTransitionAttribute)) {
-            const selector = '[' + eventIdAttribute + '="' + arc.getAttribute(fromTransitionAttribute) + '"]';
-            const coords = FindElementsService.createCoordsFromElement(document.querySelector(selector) as HTMLElement);
+            const selector =
+                '[' +
+                eventIdAttribute +
+                '="' +
+                arc.getAttribute(fromTransitionAttribute) +
+                '"]';
+            const coords = FindElementsService.createCoordsFromElement(
+                document.querySelector(selector) as HTMLElement
+            );
             const c = getIntersection(
                 coords.x + eventSize / 2,
                 coords.y + eventSize / 2,
@@ -101,8 +108,15 @@ export class MoveElementsService {
 
     private static rearrangeArcsForSuccessor(arc: Element) {
         if (arc.getAttribute(toTransitionAttribute)) {
-            const selector = '[' + eventIdAttribute + '="' + arc.getAttribute(toTransitionAttribute) + '"]';
-            const coords = FindElementsService.createCoordsFromElement(document.querySelector(selector) as HTMLElement);
+            const selector =
+                '[' +
+                eventIdAttribute +
+                '="' +
+                arc.getAttribute(toTransitionAttribute) +
+                '"]';
+            const coords = FindElementsService.createCoordsFromElement(
+                document.querySelector(selector) as HTMLElement
+            );
             const c = getIntersection(
                 coords.x + eventSize / 2,
                 coords.y + eventSize / 2,
@@ -212,8 +226,7 @@ export class MoveElementsService {
         let newYPassed;
         if (nodeTypeOfMovingElement === 'rect') {
             if (nodeTypeOfPassedElement === 'circle') {
-                newYMoving =
-                    asInt(passedElementNode, 'cy') - eventSize / 2;
+                newYMoving = asInt(passedElementNode, 'cy') - eventSize / 2;
                 newYPassed =
                     asInt(movingElementNode, originalYAttribute) +
                     eventSize / 2;

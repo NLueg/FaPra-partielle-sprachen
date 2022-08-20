@@ -2,7 +2,7 @@ import { ElementRef } from '@angular/core';
 
 import { Coordinates } from '../../../classes/diagram/coordinates';
 import { Draggable } from '../../../classes/diagram/draggable';
-import {eventIdAttribute, eventSize} from '../../svg/svg-constants';
+import { eventIdAttribute, eventSize } from '../../svg/svg-constants';
 import { asInt, getXAttribute, getYAttribute } from '../dragging-helper.fn';
 import { FindElementsService } from '../find/find-elements.service';
 
@@ -40,7 +40,9 @@ export class DraggingCreationService {
         event: HTMLElement,
         drawingArea: ElementRef<SVGElement>
     ): HTMLElement {
-        const selector = 'text[describes-event="' +  event.getAttribute(eventIdAttribute) ?? ''  + '"]';
+        const selector =
+            'text[describes-event="' + event.getAttribute(eventIdAttribute) ??
+            '' + '"]';
         return FindElementsService.getElementFromCanvas(selector, drawingArea);
     }
 

@@ -6,7 +6,7 @@ import {
     OnInit,
     ViewChild,
 } from '@angular/core';
-import { map, Observable, Subscription, tap } from 'rxjs';
+import { map, Observable, Subscription } from 'rxjs';
 
 import { Run } from '../../classes/diagram/run';
 import { ColorService } from '../../services/color.service';

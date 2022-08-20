@@ -12,10 +12,11 @@ import {
     breakpointTrail,
     circleSize,
     eventIdAttribute,
-    fromTransitionAttribute,
-    layerPosYAttibute, textOffset,
-    toTransitionAttribute,
     eventSize,
+    fromTransitionAttribute,
+    layerPosYAttibute,
+    textOffset,
+    toTransitionAttribute,
 } from './svg-constants';
 
 let highlightColor: string;
@@ -141,14 +142,18 @@ function createSvgForElement(
     svg.setAttribute(eventIdAttribute, `${element.id}`);
 
     const text = createSvgElement('text');
-    text.setAttribute('x', `${x + eventSize / 2 - cropText(element.label).length*3.2}`);
+    text.setAttribute(
+        'x',
+        `${x + eventSize / 2 - cropText(element.label).length * 3.2}`
+    );
     text.setAttribute('y', `${y + eventSize + textOffset}`);
     const height = 40;
     const width = 100;
     text.setAttribute('height', `${height}`);
     text.setAttribute('width', `${width}`);
-    text.setAttribute('describes-event', element.id)
-    text.innerHTML = '<title>' + element.label + '</title>' + cropText(element.label);
+    text.setAttribute('describes-event', element.id);
+    text.innerHTML =
+        '<title>' + element.label + '</title>' + cropText(element.label);
     if (hightlight) {
         svg.setAttribute('stroke', highlightColor);
         text.setAttribute('style', `color: ${highlightColor};`);
@@ -159,7 +164,7 @@ function createSvgForElement(
 
 function cropText(text: string): string {
     if (text.length > 15) {
-        return text.substring(0, 12) + "...";
+        return text.substring(0, 12) + '...';
     }
     return text;
 }
@@ -200,18 +205,18 @@ function createSvgForArc(
             createLine(
                 {
                     x: start.x + offset.x,
-                    y: start.y + offset.y
+                    y: start.y + offset.y,
                 },
                 {
-                    x:   end.x + offset.x,
-                    y: end.y + offset.y
+                    x: end.x + offset.x,
+                    y: end.y + offset.y,
                 },
                 arc,
                 {
                     highlight: highlight,
                     showArrow: true,
                     hasFromAttribute: true,
-                    hasToAttribute: true
+                    hasToAttribute: true,
                 }
             )
         );
@@ -228,17 +233,17 @@ function createSvgForArc(
             createLine(
                 {
                     x: start.x + offset.x,
-                    y: start.y + offset.y
+                    y: start.y + offset.y,
                 },
                 {
                     x: arc.breakpoints[0].x + eventSize / 2 + offset.x,
-                    y: arc.breakpoints[0].y + eventSize / 2 + offset.y
+                    y: arc.breakpoints[0].y + eventSize / 2 + offset.y,
                 },
                 arc,
                 {
                     highlight: highlight,
                     showArrow: false,
-                    hasFromAttribute: true
+                    hasFromAttribute: true,
                 }
             )
         );
@@ -248,16 +253,16 @@ function createSvgForArc(
                 createLine(
                     {
                         x: arc.breakpoints[i].x + eventSize / 2 + offset.x,
-                        y: arc.breakpoints[i].y + eventSize / 2 + offset.y
+                        y: arc.breakpoints[i].y + eventSize / 2 + offset.y,
                     },
                     {
                         x: arc.breakpoints[i + 1].x + eventSize / 2 + offset.x,
-                        y: arc.breakpoints[i + 1].y + eventSize / 2 + offset.y
+                        y: arc.breakpoints[i + 1].y + eventSize / 2 + offset.y,
                     },
                     arc,
                     {
                         highlight: highlight,
-                        showArrow: false
+                        showArrow: false,
                     }
                 )
             );
@@ -273,10 +278,12 @@ function createSvgForArc(
         elements.push(
             createLine(
                 {
-                    x: arc.breakpoints[arc.breakpoints.length - 1].x +
+                    x:
+                        arc.breakpoints[arc.breakpoints.length - 1].x +
                         eventSize / 2 +
                         offset.x,
-                    y: arc.breakpoints[arc.breakpoints.length - 1].y +
+                    y:
+                        arc.breakpoints[arc.breakpoints.length - 1].y +
                         eventSize / 2 +
                         offset.y,
                 },
@@ -288,7 +295,7 @@ function createSvgForArc(
                 {
                     highlight: highlight,
                     showArrow: true,
-                    hasToAttribute: true
+                    hasToAttribute: true,
                 }
             )
         );
@@ -375,8 +382,8 @@ function createCircle(
 }
 
 type ArcDisplayInfo = {
-    highlight: boolean,
-    showArrow: boolean,
-    hasFromAttribute?: boolean,
-    hasToAttribute?: boolean
-}
+    highlight: boolean;
+    showArrow: boolean;
+    hasFromAttribute?: boolean;
+    hasToAttribute?: boolean;
+};

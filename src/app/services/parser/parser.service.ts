@@ -6,7 +6,6 @@ import { hasCycles } from '../../classes/diagram/functions/cycles.fn';
 import {
     addArc,
     addElement,
-    getEmptyRun,
     setRefs,
 } from '../../classes/diagram/functions/run-helper.fn';
 import { Run } from '../../classes/diagram/run';
