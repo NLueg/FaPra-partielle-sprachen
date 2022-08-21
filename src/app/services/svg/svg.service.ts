@@ -13,7 +13,6 @@ import {
 import { getIntersection } from '../../classes/diagram/functions/display.fn';
 import { Run } from '../../classes/diagram/run';
 import { ColorService } from '../color.service';
-import { DisplayService } from '../display.service';
 import {
     breakpointPositionAttribute,
     breakpointTrail,
@@ -31,22 +30,15 @@ let highlightColor: string;
     providedIn: 'root',
 })
 export class SvgService {
-    constructor(
-        public displayService: DisplayService,
-        private _colorService: ColorService
-    ) {
+    constructor(private _colorService: ColorService) {
         _colorService.getHighlightColor().subscribe((color) => {
             highlightColor = color;
         });
-        // displayService.currentRun$.subscribe((run) => {
-        //     currentRun = run;
-        // });
     }
 
     public createSvgElements(run: Run, merge: boolean): Array<SVGElement> {
         const result: Array<SVGElement> = [];
         const offset = run.offset ?? { x: 0, y: 0 };
-        // let samePrefix = false;
 
         run.elements.forEach((el) => {
             result.push(...createSvgForElement(el, merge, offset));
@@ -61,83 +53,6 @@ export class SvgService {
                 });
             }
         });
-
-        // if (merge) {
-        //     const elementWithNoIncomingArc: Array<Element> = [];
-        //     currentRun.elements.forEach((el) => {
-        //         if (el.incomingArcs.length == 0) {
-        //             elementWithNoIncomingArc.push(el);
-        //         }
-        //     });
-
-        //     run.elements.forEach((el) => {
-        //         elementWithNoIncomingArc.forEach((e) => {
-        //             if (el.incomingArcs.length == 0 && el.id == e.id) {
-        //                 samePrefix = true;
-        //             }
-        //         });
-        //     });
-        // }
-
-        // if (merge && samePrefix) {
-        //     run.elements.forEach((el) => {
-        //         let isCurrentRun = false;
-        //         currentRun.elements.forEach((element) => {
-        //             if (element.id == el.id) {
-        //                 isCurrentRun = true;
-        //                 return;
-        //             }
-        //         });
-        //         result.push(...createSvgForElement(el, isCurrentRun, offset));
-        //     });
-        //     run.arcs.forEach((arc) => {
-        //         const source = run.elements.find((el) => el.id === arc.source);
-        //         const target = run.elements.find((el) => el.id === arc.target);
-        //         let isCurrentRun = false;
-        //         currentRun.arcs.forEach((currentArc) => {
-        //             if (
-        //                 currentArc.source == arc.source &&
-        //                 currentArc.target == arc.target
-        //             ) {
-        //                 isCurrentRun = true;
-        //                 return;
-        //             }
-        //         });
-
-        //         const arrow = createSvgForArc(
-        //             arc,
-        //             source,
-        //             target,
-        //             isCurrentRun && merge && samePrefix,
-        //             offset
-        //         );
-        //         if (arrow) {
-        //             arrow.forEach((a) => {
-        //                 result.push(a);
-        //             });
-        //         }
-        //     });
-        // } else {
-        //     run.elements.forEach((el) => {
-        //         result.push(...createSvgForElement(el, false, offset));
-        //     });
-        //     run.arcs.forEach((arc) => {
-        //         const source = run.elements.find((el) => el.id === arc.source);
-        //         const target = run.elements.find((el) => el.id === arc.target);
-        //         const arrow = createSvgForArc(
-        //             arc,
-        //             source,
-        //             target,
-        //             false,
-        //             offset
-        //         );
-        //         if (arrow) {
-        //             arrow.forEach((a) => {
-        //                 result.push(a);
-        //             });
-        //         }
-        //     });
-        // }
         return result;
     }
 }
