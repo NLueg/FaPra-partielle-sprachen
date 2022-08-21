@@ -26,7 +26,6 @@ export class DownloadPopoverComponent {
         if (this.currentDownloadSelection === 'all') {
             this._downloadService.downloadRuns(
                 this.downloadName,
-                // this.data.contentToDownload,
                 this.fileFormat,
                 this.compression
             );
