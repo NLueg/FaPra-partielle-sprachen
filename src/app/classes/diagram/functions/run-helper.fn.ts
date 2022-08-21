@@ -123,7 +123,12 @@ export function setRefs(run: Run): boolean {
 }
 
 export function copyArc(arc: Arc): Arc {
-    return { source: arc.source, target: arc.target, breakpoints: [] };
+    return {
+        source: arc.source,
+        target: arc.target,
+        breakpoints: [],
+        currentRun: arc.currentRun,
+    };
 }
 
 export function copyElement(element: Element): Element {
@@ -132,6 +137,7 @@ export function copyElement(element: Element): Element {
         incomingArcs: [],
         outgoingArcs: [],
         id: element.id,
+        currentRun: element.currentRun,
     };
 }
 
@@ -146,15 +152,9 @@ export function copyRun(run: Run, copyCoordinates: boolean): Run {
             warnings: [],
         };
 
-        run.elements
-            .filter(
-                (element) =>
-                    element.incomingArcs.length > 0 ||
-                    element.outgoingArcs.length > 0
-            )
-            .forEach((e) => {
-                targetRun.elements.push(copyElement(e));
-            });
+        run.elements.forEach((e) => {
+            targetRun.elements.push(copyElement(e));
+        });
 
         run.arcs.forEach((a) => {
             targetRun.arcs.push(copyArc(a));

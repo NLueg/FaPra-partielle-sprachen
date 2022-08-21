@@ -3,7 +3,12 @@ import { BehaviorSubject, map, Observable, switchMap } from 'rxjs';
 
 import { Coordinates, CoordinatesInfo } from '../classes/diagram/coordinates';
 import { getEmptyRun } from '../classes/diagram/functions/run-helper.fn';
-import { isRunEmpty, Run } from '../classes/diagram/run';
+import {
+    isRunEmpty,
+    Run,
+    setCurrentRunFalse,
+    setCurrentRunTrue,
+} from '../classes/diagram/run';
 
 @Injectable({
     providedIn: 'root',
@@ -128,7 +133,18 @@ export class DisplayService implements OnDestroy {
     public updateCurrentRun(run: Run): void {
         const index = this.getCurrentRunIndex();
         const runs = this._runs$.getValue();
+        runs.forEach((run) => {
+            setCurrentRunFalse(run);
+        });
         runs[index] = run;
+        setCurrentRunTrue(run);
+        run.arcs.forEach((arc) => {
+            arc.currentRun = true;
+        });
+        run.elements.forEach((element) => {
+            element.currentRun = true;
+        });
+
         this._runs$.next(runs);
         this._currentRun$.next(run);
     }

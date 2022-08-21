@@ -32,16 +32,16 @@ export class DownloadService implements OnDestroy {
 
     downloadRuns(
         name: string,
-        contentToDownload: DownloadableContent,
+        // contentToDownload: DownloadableContent,
         formatToDownload: DownloadFormat,
         compression: boolean
     ): void {
-        const runsToDownload =
-            contentToDownload === 'mergeRuns'
-                ? this._mergeService.getMergedRuns$()
-                : this._displayService.runs$;
+        // const runsToDownload =
+        //     contentToDownload === 'mergeRuns'
+        //         ? this._mergeService.getMergedRuns$()
+        //         : this._displayService.runs$;
 
-        runsToDownload.pipe(first()).subscribe((runs) => {
+        this._displayService.runs$.pipe(first()).subscribe((runs) => {
             const timestamp = Date.now();
             const fileEnding = getFileEndingForFormat(formatToDownload);
 
@@ -75,8 +75,16 @@ export class DownloadService implements OnDestroy {
         });
     }
 
-    downloadCurrentRun(name: string, formatToDownload: DownloadFormat): void {
-        this._displayService.currentRun$.pipe(first()).subscribe((run) => {
+    downloadCurrentRun(
+        name: string,
+        contentToDownload: DownloadableContent,
+        formatToDownload: DownloadFormat
+    ): void {
+        const runToDownload =
+            contentToDownload === 'mergeRuns'
+                ? this._mergeService.getMergedRun$()
+                : this._displayService.currentRun$;
+        runToDownload.pipe(first()).subscribe((run) => {
             const fileEnding = getFileEndingForFormat(formatToDownload);
             const fileName = name
                 ? `${name}.${fileEnding}`
