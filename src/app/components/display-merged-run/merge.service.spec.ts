@@ -23,351 +23,341 @@ describe('MergeService', () => {
             secondExampleSecondRun,
         ]);
 
-        expect(result).toEqual([
-            {
-                arcs: [
-                    {
-                        breakpoints: [],
-                        source: 't1',
-                        target: 't2',
-                    },
-                    {
-                        breakpoints: [],
-                        source: 't2',
-                        target: 't4',
-                    },
-                    {
-                        breakpoints: [],
-                        source: 't4',
-                        target: 't7',
-                    },
-                    {
-                        breakpoints: [],
-                        source: 't2',
-                        target: 't7',
-                    },
-                    {
-                        breakpoints: [],
-                        source: 't4',
-                        target: 't5',
-                    },
-                    {
-                        breakpoints: [],
-                        source: 't5',
-                        target: 't6',
-                    },
-                    {
-                        breakpoints: [],
-                        source: 't6',
-                        target: 't3',
-                    },
-                    {
-                        breakpoints: [],
-                        source: 't5',
-                        target: 't3',
-                    },
-                    {
-                        breakpoints: [],
-                        source: 't4',
-                        target: 't3',
-                    },
-                ],
-                elements: [
-                    {
-                        incomingArcs: [],
-                        id: 't1',
-                        label: 't1',
-                        outgoingArcs: [
-                            {
-                                breakpoints: [],
-                                source: 't1',
-                                target: 't2',
-                            },
-                        ],
-                    },
-                    {
-                        incomingArcs: [
-                            {
-                                breakpoints: [],
-                                source: 't1',
-                                target: 't2',
-                            },
-                        ],
-                        id: 't2',
-                        label: 't2',
-                        outgoingArcs: [
-                            {
-                                breakpoints: [],
-                                source: 't2',
-                                target: 't4',
-                            },
-                            {
-                                breakpoints: [],
-                                source: 't2',
-                                target: 't7',
-                            },
-                        ],
-                    },
-                    {
-                        incomingArcs: [
-                            {
-                                breakpoints: [],
-                                source: 't2',
-                                target: 't4',
-                            },
-                        ],
-                        id: 't4',
-                        label: 't4',
-                        outgoingArcs: [
-                            {
-                                breakpoints: [],
-                                source: 't4',
-                                target: 't7',
-                            },
-                            {
-                                breakpoints: [],
-                                source: 't4',
-                                target: 't5',
-                            },
-                            {
-                                breakpoints: [],
-                                source: 't4',
-                                target: 't3',
-                            },
-                        ],
-                    },
-                    {
-                        incomingArcs: [
-                            {
-                                breakpoints: [],
-                                source: 't4',
-                                target: 't7',
-                            },
-                            {
-                                breakpoints: [],
-                                source: 't2',
-                                target: 't7',
-                            },
-                        ],
-                        id: 't7',
-                        label: 't7',
-                        outgoingArcs: [],
-                    },
-                    {
-                        incomingArcs: [
-                            {
-                                breakpoints: [],
-                                source: 't4',
-                                target: 't5',
-                            },
-                        ],
-                        id: 't5',
-                        label: 't5',
-                        outgoingArcs: [
-                            {
-                                breakpoints: [],
-                                source: 't5',
-                                target: 't6',
-                            },
-                            {
-                                breakpoints: [],
-                                source: 't5',
-                                target: 't3',
-                            },
-                        ],
-                    },
-                    {
-                        incomingArcs: [
-                            {
-                                breakpoints: [],
-                                source: 't5',
-                                target: 't6',
-                            },
-                        ],
-                        id: 't6',
-                        label: 't6',
-                        outgoingArcs: [
-                            {
-                                breakpoints: [],
-                                source: 't6',
-                                target: 't3',
-                            },
-                        ],
-                    },
-                    {
-                        incomingArcs: [
-                            {
-                                breakpoints: [],
-                                source: 't6',
-                                target: 't3',
-                            },
-                            {
-                                breakpoints: [],
-                                source: 't5',
-                                target: 't3',
-                            },
-                            {
-                                breakpoints: [],
-                                source: 't4',
-                                target: 't3',
-                            },
-                        ],
-                        id: 't3',
-                        label: 't3',
-                        outgoingArcs: [],
-                    },
-                ],
-                text: '.type run\n.events\nt1\nt2\nt4\nt7\nt5\nt6\nt3\n.arcs\nt1 t2\nt2 t4\nt4 t7\nt2 t7\nt4 t5\nt5 t6\nt6 t3\nt5 t3\nt4 t3',
-                warnings: [],
-            },
-            {
-                arcs: [
-                    {
-                        breakpoints: [],
-                        source: 't6',
-                        target: 't21',
-                    },
-                    {
-                        breakpoints: [],
-                        source: 't6',
-                        target: 't22',
-                    },
-                    {
-                        breakpoints: [],
-                        source: 't22',
-                        target: 't3',
-                    },
-                    {
-                        breakpoints: [],
-                        source: 't21',
-                        target: 't3',
-                    },
-                    {
-                        breakpoints: [],
-                        source: 't6',
-                        target: 't33',
-                    },
-                    {
-                        breakpoints: [],
-                        source: 't21',
-                        target: 't10',
-                    },
-                ],
-                elements: [
-                    {
-                        incomingArcs: [],
-                        id: 't6',
-                        label: 't6',
-                        outgoingArcs: [
-                            {
-                                breakpoints: [],
-                                source: 't6',
-                                target: 't21',
-                            },
-                            {
-                                breakpoints: [],
-                                source: 't6',
-                                target: 't22',
-                            },
-                            {
-                                breakpoints: [],
-                                source: 't6',
-                                target: 't33',
-                            },
-                        ],
-                    },
-                    {
-                        incomingArcs: [
-                            {
-                                breakpoints: [],
-                                source: 't6',
-                                target: 't21',
-                            },
-                        ],
-                        id: 't21',
-                        label: 't21',
-                        outgoingArcs: [
-                            {
-                                breakpoints: [],
-                                source: 't21',
-                                target: 't3',
-                            },
-                            {
-                                breakpoints: [],
-                                source: 't21',
-                                target: 't10',
-                            },
-                        ],
-                    },
-                    {
-                        incomingArcs: [
-                            {
-                                breakpoints: [],
-                                source: 't6',
-                                target: 't22',
-                            },
-                        ],
-                        id: 't22',
-                        label: 't22',
-                        outgoingArcs: [
-                            {
-                                breakpoints: [],
-                                source: 't22',
-                                target: 't3',
-                            },
-                        ],
-                    },
-                    {
-                        incomingArcs: [
-                            {
-                                breakpoints: [],
-                                source: 't22',
-                                target: 't3',
-                            },
-                            {
-                                breakpoints: [],
-                                source: 't21',
-                                target: 't3',
-                            },
-                        ],
-                        id: 't3',
-                        label: 't3',
-                        outgoingArcs: [],
-                    },
-                    {
-                        incomingArcs: [
-                            {
-                                breakpoints: [],
-                                source: 't21',
-                                target: 't10',
-                            },
-                        ],
-                        id: 't10',
-                        label: 't10',
-                        outgoingArcs: [],
-                    },
-                    {
-                        incomingArcs: [
-                            {
-                                breakpoints: [],
-                                source: 't6',
-                                target: 't33',
-                            },
-                        ],
-                        id: 't33',
-                        label: 't33',
-                        outgoingArcs: [],
-                    },
-                ],
-                text: '.type run\n.events\nt6\nt21\nt22\nt3\nt10\nt33\n.arcs\nt6 t21\nt6 t22\nt22 t3\nt21 t3\nt6 t33\nt21 t10',
-                warnings: [],
-            },
-        ]);
+        expect(result).toEqual({
+            arcs: [
+                {
+                    breakpoints: [],
+                    source: '0_t1',
+                    target: '0_t2',
+                },
+                {
+                    breakpoints: [],
+                    source: '0_t2',
+                    target: '0_t4',
+                },
+                {
+                    breakpoints: [],
+                    source: '0_t4',
+                    target: '0_t7',
+                },
+                {
+                    breakpoints: [],
+                    source: '0_t2',
+                    target: '0_t7',
+                },
+                {
+                    breakpoints: [],
+                    source: '0_t4',
+                    target: '1_t5',
+                },
+                {
+                    breakpoints: [],
+                    source: '1_t5',
+                    target: '1_t6',
+                },
+                {
+                    breakpoints: [],
+                    source: '1_t6',
+                    target: '1_t3',
+                },
+                {
+                    breakpoints: [],
+                    source: '1_t5',
+                    target: '1_t3',
+                },
+                {
+                    breakpoints: [],
+                    source: '0_t4',
+                    target: '1_t3',
+                },
+                {
+                    breakpoints: [],
+                    source: '2_t6',
+                    target: '2_t21',
+                },
+                {
+                    breakpoints: [],
+                    source: '2_t6',
+                    target: '2_t22',
+                },
+                {
+                    breakpoints: [],
+                    source: '2_t22',
+                    target: '2_t3',
+                },
+                {
+                    breakpoints: [],
+                    source: '2_t21',
+                    target: '2_t3',
+                },
+                {
+                    breakpoints: [],
+                    source: '2_t6',
+                    target: '3_t33',
+                },
+                {
+                    breakpoints: [],
+                    source: '2_t21',
+                    target: '3_t10',
+                },
+            ],
+            elements: [
+                {
+                    id: '0_t1',
+                    incomingArcs: [],
+                    label: 't1',
+                    outgoingArcs: [
+                        {
+                            breakpoints: [],
+                            source: '0_t1',
+                            target: '0_t2',
+                        },
+                    ],
+                },
+                {
+                    id: '0_t2',
+                    incomingArcs: [
+                        {
+                            breakpoints: [],
+                            source: '0_t1',
+                            target: '0_t2',
+                        },
+                    ],
+                    label: 't2',
+                    outgoingArcs: [
+                        {
+                            breakpoints: [],
+                            source: '0_t2',
+                            target: '0_t4',
+                        },
+                        {
+                            breakpoints: [],
+                            source: '0_t2',
+                            target: '0_t7',
+                        },
+                    ],
+                },
+                {
+                    id: '0_t4',
+                    incomingArcs: [
+                        {
+                            breakpoints: [],
+                            source: '0_t2',
+                            target: '0_t4',
+                        },
+                    ],
+                    label: 't4',
+                    outgoingArcs: [
+                        {
+                            breakpoints: [],
+                            source: '0_t4',
+                            target: '0_t7',
+                        },
+                        {
+                            breakpoints: [],
+                            source: '0_t4',
+                            target: '1_t5',
+                        },
+                        {
+                            breakpoints: [],
+                            source: '0_t4',
+                            target: '1_t3',
+                        },
+                    ],
+                },
+                {
+                    id: '0_t7',
+                    incomingArcs: [
+                        {
+                            breakpoints: [],
+                            source: '0_t4',
+                            target: '0_t7',
+                        },
+                        {
+                            breakpoints: [],
+                            source: '0_t2',
+                            target: '0_t7',
+                        },
+                    ],
+                    label: 't7',
+                    outgoingArcs: [],
+                },
+                {
+                    id: '1_t3',
+                    incomingArcs: [
+                        {
+                            breakpoints: [],
+                            source: '1_t6',
+                            target: '1_t3',
+                        },
+                        {
+                            breakpoints: [],
+                            source: '1_t5',
+                            target: '1_t3',
+                        },
+                        {
+                            breakpoints: [],
+                            source: '0_t4',
+                            target: '1_t3',
+                        },
+                    ],
+                    label: 't3',
+                    outgoingArcs: [],
+                },
+                {
+                    id: '1_t5',
+                    incomingArcs: [
+                        {
+                            breakpoints: [],
+                            source: '0_t4',
+                            target: '1_t5',
+                        },
+                    ],
+                    label: 't5',
+                    outgoingArcs: [
+                        {
+                            breakpoints: [],
+                            source: '1_t5',
+                            target: '1_t6',
+                        },
+                        {
+                            breakpoints: [],
+                            source: '1_t5',
+                            target: '1_t3',
+                        },
+                    ],
+                },
+                {
+                    id: '1_t6',
+                    incomingArcs: [
+                        {
+                            breakpoints: [],
+                            source: '1_t5',
+                            target: '1_t6',
+                        },
+                    ],
+                    label: 't6',
+                    outgoingArcs: [
+                        {
+                            breakpoints: [],
+                            source: '1_t6',
+                            target: '1_t3',
+                        },
+                    ],
+                },
+                {
+                    id: '2_t6',
+                    incomingArcs: [],
+                    label: 't6',
+                    outgoingArcs: [
+                        {
+                            breakpoints: [],
+                            source: '2_t6',
+                            target: '2_t21',
+                        },
+                        {
+                            breakpoints: [],
+                            source: '2_t6',
+                            target: '2_t22',
+                        },
+                        {
+                            breakpoints: [],
+                            source: '2_t6',
+                            target: '3_t33',
+                        },
+                    ],
+                },
+                {
+                    id: '2_t21',
+                    incomingArcs: [
+                        {
+                            breakpoints: [],
+                            source: '2_t6',
+                            target: '2_t21',
+                        },
+                    ],
+                    label: 't21',
+                    outgoingArcs: [
+                        {
+                            breakpoints: [],
+                            source: '2_t21',
+                            target: '2_t3',
+                        },
+                        {
+                            breakpoints: [],
+                            source: '2_t21',
+                            target: '3_t10',
+                        },
+                    ],
+                },
+                {
+                    id: '2_t22',
+                    incomingArcs: [
+                        {
+                            breakpoints: [],
+                            source: '2_t6',
+                            target: '2_t22',
+                        },
+                    ],
+                    label: 't22',
+                    outgoingArcs: [
+                        {
+                            breakpoints: [],
+                            source: '2_t22',
+                            target: '2_t3',
+                        },
+                    ],
+                },
+                {
+                    id: '2_t3',
+                    incomingArcs: [
+                        {
+                            breakpoints: [],
+                            source: '2_t22',
+                            target: '2_t3',
+                        },
+                        {
+                            breakpoints: [],
+                            source: '2_t21',
+                            target: '2_t3',
+                        },
+                    ],
+                    label: 't3',
+                    outgoingArcs: [],
+                },
+                {
+                    id: '3_t33',
+                    incomingArcs: [
+                        {
+                            breakpoints: [],
+                            source: '2_t6',
+                            target: '3_t33',
+                        },
+                    ],
+                    label: 't33',
+                    outgoingArcs: [],
+                },
+                {
+                    id: '3_t10',
+                    incomingArcs: [
+                        {
+                            breakpoints: [],
+                            source: '2_t21',
+                            target: '3_t10',
+                        },
+                    ],
+                    label: 't10',
+                    outgoingArcs: [],
+                },
+            ],
+            text: '.type run\n.events\n0_t1 | t1\n0_t2 | t2\n0_t4 | t4\n0_t7 | t7\n1_t3 | t3\n1_t5 | t5\n1_t6 | t6\n2_t6 | t6\n2_t21 | t21\n2_t22 | t22\n2_t3 | t3\n3_t33 | t33\n3_t10 | t10\n.arcs\n0_t1 0_t2\n0_t2 0_t4\n0_t4 0_t7\n0_t2 0_t7\n0_t4 1_t5\n1_t5 1_t6\n1_t6 1_t3\n1_t5 1_t3\n0_t4 1_t3\n2_t6 2_t21\n2_t6 2_t22\n2_t22 2_t3\n2_t21 2_t3\n2_t6 3_t33\n2_t21 3_t10',
+            warnings: [],
+        });
     });
 });
 
 const firstExampleFirstRun: Run = {
-    text: '.type ps\r\n.transitions\r\nt1\r\nt2\r\nt4\r\nt7\r\n.arcs\r\nt1 t2\r\nt2 t4\r\nt4 t7\r\nt2 t7\r\n',
+    text: '.type run\r\n.events\r\nt1\r\nt2\r\nt4\r\nt7\r\n.arcs\r\nt1 t2\r\nt2 t4\r\nt4 t7\r\nt2 t7\r\n',
     arcs: [
         { source: 't1', target: 't2', breakpoints: [] },
         { source: 't2', target: 't4', breakpoints: [] },
@@ -410,7 +400,7 @@ const firstExampleFirstRun: Run = {
 };
 
 const firstExampleSecondRun: Run = {
-    text: '.type ps\r\n.transitions\r\nt1\r\nt2\r\nt3\r\nt4\r\nt5\r\nt6\r\n.arcs\r\nt1 t2\r\nt2 t4\r\nt4 t5\r\nt5 t6\r\nt6 t3\r\nt5 t3\r\nt4 t3\r\n',
+    text: '.type run\r\n.events\r\nt1\r\nt2\r\nt3\r\nt4\r\nt5\r\nt6\r\n.arcs\r\nt1 t2\r\nt2 t4\r\nt4 t5\r\nt5 t6\r\nt6 t3\r\nt5 t3\r\nt4 t3\r\n',
     arcs: [
         { source: 't1', target: 't2', breakpoints: [] },
         { source: 't2', target: 't4', breakpoints: [] },
@@ -472,7 +462,7 @@ const firstExampleSecondRun: Run = {
 };
 
 const secondExampleFirstRun: Run = {
-    text: '.type ps\r\n.transitions\r\nt6\r\nt21\r\nt22\r\nt3\r\n.arcs\r\nt6 t21\r\nt6 t22\r\nt22 t3\r\nt21 t3',
+    text: '.type run\r\n.events\r\nt6\r\nt21\r\nt22\r\nt3\r\n.arcs\r\nt6 t21\r\nt6 t22\r\nt22 t3\r\nt21 t3',
     arcs: [
         { source: 't6', target: 't21', breakpoints: [] },
         { source: 't6', target: 't22', breakpoints: [] },
@@ -515,7 +505,7 @@ const secondExampleFirstRun: Run = {
 };
 
 const secondExampleSecondRun: Run = {
-    text: '.type ps\r\n.transitions\r\nt6\r\nt21\r\nt33\r\nt10\r\n.arcs\r\nt6 t21\r\nt6 t33\r\nt21 t10',
+    text: '.type run\r\n.events\r\nt6\r\nt21\r\nt33\r\nt10\r\n.arcs\r\nt6 t21\r\nt6 t33\r\nt21 t10',
     arcs: [
         { source: 't6', target: 't21', breakpoints: [] },
         { source: 't6', target: 't33', breakpoints: [] },

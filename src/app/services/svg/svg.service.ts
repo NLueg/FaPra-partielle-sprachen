@@ -1,12 +1,18 @@
 import { Injectable } from '@angular/core';
 
-import { Arc, Breakpoint } from '../../classes/diagram/arc';
+import {
+    Arc,
+    Breakpoint,
+    doesArcBelongToCurrentRun,
+} from '../../classes/diagram/arc';
 import { Coordinates } from '../../classes/diagram/coordinates';
-import { Element } from '../../classes/diagram/element';
+import {
+    doesElementBelongToCurrentRun,
+    Element,
+} from '../../classes/diagram/element';
 import { getIntersection } from '../../classes/diagram/functions/display.fn';
 import { Run } from '../../classes/diagram/run';
 import { ColorService } from '../color.service';
-import { DisplayService } from '../display.service';
 import {
     breakpointPositionAttribute,
     breakpointTrail,
@@ -19,105 +25,34 @@ import {
 } from './svg-constants';
 
 let highlightColor: string;
-let currentRun: Run;
 
 @Injectable({
     providedIn: 'root',
 })
 export class SvgService {
-    constructor(
-        public displayService: DisplayService,
-        private _colorService: ColorService
-    ) {
+    constructor(private _colorService: ColorService) {
         _colorService.getHighlightColor().subscribe((color) => {
             highlightColor = color;
-        });
-        displayService.currentRun$.subscribe((run) => {
-            currentRun = run;
         });
     }
 
     public createSvgElements(run: Run, merge: boolean): Array<SVGElement> {
         const result: Array<SVGElement> = [];
         const offset = run.offset ?? { x: 0, y: 0 };
-        let samePrefix = false;
 
-        if (merge) {
-            const elementWithNoIncomingArc: Array<Element> = [];
-            currentRun.elements.forEach((el) => {
-                if (el.incomingArcs.length == 0) {
-                    elementWithNoIncomingArc.push(el);
-                }
-            });
-
-            run.elements.forEach((el) => {
-                elementWithNoIncomingArc.forEach((e) => {
-                    if (el.incomingArcs.length == 0 && el.id == e.id) {
-                        samePrefix = true;
-                    }
+        run.arcs.forEach((arc) => {
+            const source = run.elements.find((el) => el.id === arc.source);
+            const target = run.elements.find((el) => el.id === arc.target);
+            const arrow = createSvgForArc(arc, source, target, merge, offset);
+            if (arrow) {
+                arrow.forEach((a) => {
+                    result.push(a);
                 });
-            });
-        }
-
-        if (merge && samePrefix) {
-            run.arcs.forEach((arc) => {
-                const source = run.elements.find((el) => el.id === arc.source);
-                const target = run.elements.find((el) => el.id === arc.target);
-                let isCurrentRun = false;
-                currentRun.arcs.forEach((currentArc) => {
-                    if (
-                        currentArc.source == arc.source &&
-                        currentArc.target == arc.target
-                    ) {
-                        isCurrentRun = true;
-                        return;
-                    }
-                });
-
-                const arrow = createSvgForArc(
-                    arc,
-                    source,
-                    target,
-                    isCurrentRun && merge && samePrefix,
-                    offset
-                );
-                if (arrow) {
-                    arrow.forEach((a) => {
-                        result.push(a);
-                    });
-                }
-            });
-            run.elements.forEach((el) => {
-                let isCurrentRun = false;
-                currentRun.elements.forEach((element) => {
-                    if (element.id == el.id) {
-                        isCurrentRun = true;
-                        return;
-                    }
-                });
-                result.push(...createSvgForElement(el, isCurrentRun, offset));
-            });
-        } else {
-            run.arcs.forEach((arc) => {
-                const source = run.elements.find((el) => el.id === arc.source);
-                const target = run.elements.find((el) => el.id === arc.target);
-                const arrow = createSvgForArc(
-                    arc,
-                    source,
-                    target,
-                    false,
-                    offset
-                );
-                if (arrow) {
-                    arrow.forEach((a) => {
-                        result.push(a);
-                    });
-                }
-            });
-            run.elements.forEach((el) => {
-                result.push(...createSvgForElement(el, false, offset));
-            });
-        }
+            }
+        });
+        run.elements.forEach((el) => {
+            result.push(...createSvgForElement(el, merge, offset));
+        });
         return result;
     }
 }
@@ -152,7 +87,7 @@ function createSvgForElement(
     span.textContent = element.label;
     text.append(span);
 
-    if (hightlight) {
+    if (doesElementBelongToCurrentRun(element) && hightlight) {
         svg.setAttribute('stroke', highlightColor);
         text.setAttribute('style', `color: ${highlightColor};`);
     }
@@ -199,7 +134,7 @@ function createSvgForArc(
                 end.x + offset.x,
                 end.y + offset.y,
                 true,
-                hightlight
+                hightlight && doesArcBelongToCurrentRun(arc)
             )
         );
     } else {
@@ -218,7 +153,7 @@ function createSvgForArc(
                 arc.breakpoints[0].x + transitionSize / 2 + offset.x,
                 arc.breakpoints[0].y + transitionSize / 2 + offset.y,
                 false,
-                hightlight
+                hightlight && doesArcBelongToCurrentRun(arc)
             )
         );
         //breakpoint -> next breakpoint
@@ -230,7 +165,7 @@ function createSvgForArc(
                     arc.breakpoints[i + 1].x + transitionSize / 2 + offset.x,
                     arc.breakpoints[i + 1].y + transitionSize / 2 + offset.y,
                     false,
-                    hightlight
+                    hightlight && doesArcBelongToCurrentRun(arc)
                 )
             );
         }
@@ -253,7 +188,7 @@ function createSvgForArc(
                 end.x + offset.x,
                 end.y + offset.y,
                 true,
-                hightlight
+                hightlight && doesArcBelongToCurrentRun(arc)
             )
         );
         elements.push(
