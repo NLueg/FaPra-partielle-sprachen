@@ -8,6 +8,10 @@ import {
     addElement,
     setRefs,
 } from '../../classes/diagram/functions/run-helper.fn';
+import {
+    hasTransitiveArcs,
+    removeTransitives,
+} from '../../classes/diagram/functions/transitives.fn';
 import { Run } from '../../classes/diagram/run';
 import {
     arcsAttribute,
@@ -200,8 +204,15 @@ export class ParserService {
                         } else {
                             run.warnings.push(`File contains invalid arcs`);
                             this.toastr.warning(
-                                `File contains invalid arcs`,
-                                `Invalid arcs are ignored`
+                                `Invalid arcs are ignored`,
+                                `File contains invalid arcs`
+                            );
+                        }
+                        if (hasTransitiveArcs(run)) {
+                            removeTransitives(run);
+                            this.toastr.warning(
+                                `Transitive arcs are ignored`,
+                                `File contains transitive arcs`
                             );
                         }
                         break;
@@ -242,7 +253,6 @@ export class ParserService {
                     `Invalid arcs are ignored`
                 );
             }
-
             //check cycles in run
             if (hasCycles(run)) {
                 run.warnings.push(`File contains cycles`);

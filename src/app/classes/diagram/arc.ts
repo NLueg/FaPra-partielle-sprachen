@@ -2,6 +2,7 @@ export type Arc = {
     source: string;
     target: string;
     breakpoints: Breakpoint[];
+    currentRun?: boolean;
 };
 
 export type Breakpoint = {
@@ -10,3 +11,9 @@ export type Breakpoint = {
     arc: Arc;
     layerPos?: number;
 };
+
+export function doesArcBelongToCurrentRun(arc: Arc): boolean {
+    if (arc.currentRun) {
+        return true;
+    } else return false;
+}
