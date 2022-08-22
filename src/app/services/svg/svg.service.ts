@@ -60,7 +60,7 @@ export class SvgService {
 
 function createSvgForElement(
     element: Element,
-    hightlight: boolean,
+    highlight: boolean,
     offset: Coordinates
 ): SVGElement[] {
     const svg = createSvgElement('rect');
@@ -89,7 +89,7 @@ function createSvgForElement(
     text.setAttribute('describes-event', element.id);
     text.innerHTML =
         '<title>' + element.label + '</title>' + cropText(element.label);
-    if (hightlight) {
+    if (doesElementBelongToCurrentRun(element) && highlight) {
         svg.setAttribute('stroke', highlightColor);
         text.setAttribute('style', `color: ${highlightColor};`);
     }
