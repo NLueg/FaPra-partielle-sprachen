@@ -22,8 +22,7 @@ import {
     fromTransitionAttribute,
     layerPosYAttibute,
     textOffset,
-    toTransitionAttribute,
-    transitionSize,
+    toTransitionAttribute
 } from './svg-constants';
 
 let highlightColor: string;
