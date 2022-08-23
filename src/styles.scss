@@ -27,10 +27,8 @@ svg foreignObject span {
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    text-shadow: 1px 1px #ffffff, 2px 2px #ffffff, -1px -1px #ffffff, -2px -2px #ffffff, -3px -3px #ffffff, 3px 3px #ffffff;
+    text-shadow: 1px 1px 3px #ffffff, 2px 2px 3px #ffffff, -1px -1px 3px #ffffff, -2px -2px 3px #ffffff, -3px -3px 3px #ffffff, 3px 3px 3px #ffffff;
 }
-
-
 
 :root {
     --success-color: #4CAF50;
