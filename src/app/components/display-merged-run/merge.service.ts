@@ -8,7 +8,9 @@ import {
 } from '../../classes/diagram/element';
 import {
     copyRun,
+    generateTextForRun,
     getEmptyRun,
+    setRefs,
 } from '../../classes/diagram/functions/run-helper.fn';
 import { Run } from '../../classes/diagram/run';
 import { DisplayService } from '../../services/display.service';
@@ -201,7 +203,8 @@ export class MergeService {
             primeEventStructure.elements.forEach((element) => {
                 element.label = element.label.split('|')[0];
             });
-
+            setRefs(primeEventStructure);
+            primeEventStructure.text = generateTextForRun(primeEventStructure);
             return primeEventStructure;
         }
     }
