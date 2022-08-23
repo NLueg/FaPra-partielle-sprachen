@@ -8,9 +8,7 @@ import {
 } from '../../classes/diagram/element';
 import {
     copyRun,
-    generateTextForRun,
     getEmptyRun,
-    setRefs,
 } from '../../classes/diagram/functions/run-helper.fn';
 import { Run } from '../../classes/diagram/run';
 import { DisplayService } from '../../services/display.service';
@@ -128,7 +126,7 @@ export class MergeService {
                                     nextElements[index2].id.split('_')[0]
                                 ) {
                                     nextElements[index2].label =
-                                        nextElements[index2].label + '_???_';
+                                        nextElements[index2].label + '|';
                                 }
                             }
                         }
@@ -201,11 +199,9 @@ export class MergeService {
             }
             /*provisorische Label werden wieder zurückgesetzt  */
             primeEventStructure.elements.forEach((element) => {
-                element.label = element.label.split('_???_')[0];
+                element.label = element.label.split('|')[0];
             });
 
-            setRefs(primeEventStructure);
-            primeEventStructure.text = generateTextForRun(primeEventStructure);
             return primeEventStructure;
         }
     }
