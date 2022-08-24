@@ -6,13 +6,16 @@ import {
     OnInit,
     ViewChild,
 } from '@angular/core';
-import { map, Observable, Subscription } from 'rxjs';
+import { map, Observable, Subscription, tap } from 'rxjs';
 
+import { CoordinatesInfo } from '../../classes/diagram/coordinates';
+import { Run } from '../../classes/diagram/run';
 import { ColorService } from '../../services/color.service';
 import { DisplayService } from '../../services/display.service';
 import { LayoutService } from '../../services/layout.service';
 import { SvgService } from '../../services/svg/svg.service';
 import { CanvasComponent } from '../canvas/canvas.component';
+import { updateCoordsInText } from '../source-file-textarea/update-coords-in-text.fn';
 import { MergeService } from './merge.service';
 
 @Component({
@@ -32,6 +35,8 @@ export class DisplayMergedRunComponent
     private _colorSub?: Subscription;
     private _highlightSub?: Subscription;
     private highlight = false;
+
+    private primeEventStructure?: Run;
 
     constructor(
         private mergeService: MergeService,
@@ -73,6 +78,10 @@ export class DisplayMergedRunComponent
 
     private update(): void {
         this.svgElements$ = this.mergeService.getMergedRun$().pipe(
+            tap(
+                (primeEventStructure) =>
+                    (this.primeEventStructure = primeEventStructure)
+            ),
             map(
                 (primeEventStructure) =>
                     this.layoutService.layout(primeEventStructure).run
@@ -99,6 +108,17 @@ export class DisplayMergedRunComponent
                     this.highlight
                 );
             })
+        );
+    }
+
+    updateTextInMergedRun(coordinates: CoordinatesInfo[]): void {
+        if (!this.primeEventStructure) {
+            return;
+        }
+
+        this.primeEventStructure.text = updateCoordsInText(
+            this.primeEventStructure.text,
+            coordinates
         );
     }
 }

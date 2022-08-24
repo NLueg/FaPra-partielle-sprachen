@@ -224,6 +224,7 @@ export class MoveElementsService {
         const nodeTypeOfPassedElement = passedElementNode.nodeName;
         let newYMoving;
         let newYPassed;
+
         if (nodeTypeOfMovingElement === 'rect') {
             if (nodeTypeOfPassedElement === 'circle') {
                 newYMoving = asInt(passedElementNode, 'cy') - eventSize / 2;
@@ -245,6 +246,7 @@ export class MoveElementsService {
                 newYMoving = asInt(passedElementNode, 'y') + eventSize / 2;
             }
         }
+
         MoveElementsService.moveElement(movingElement, newYMoving);
         MoveElementsService.moveElement(passedElement, newYPassed);
     }

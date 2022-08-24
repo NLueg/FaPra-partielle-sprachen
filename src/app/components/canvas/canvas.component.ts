@@ -1,10 +1,12 @@
 import {
     Component,
     ElementRef,
+    EventEmitter,
     Input,
     OnChanges,
     OnDestroy,
     OnInit,
+    Output,
     SimpleChanges,
     ViewChild,
 } from '@angular/core';
@@ -45,10 +47,10 @@ export class CanvasComponent implements OnChanges, OnInit, OnDestroy {
     canvasHeight = 400;
 
     @Input()
-    persistCoordinates = true;
+    persistUiChangesForRunInTextarea = true;
 
-    @Input()
-    updateOffsetInRun = true;
+    @Output()
+    coordinateChanged = new EventEmitter<CoordinatesInfo[]>();
 
     highlightColor: string | undefined;
     private _sub: Subscription | undefined;
@@ -124,7 +126,7 @@ export class CanvasComponent implements OnChanges, OnInit, OnDestroy {
             }
         };
         drawingArea.onmouseup = () => {
-            if (this.persistCoordinates) {
+            if (this.persistUiChangesForRunInTextarea) {
                 this.persistOffset();
             }
             this._stateHandler.resetCanvasHandlers();
@@ -138,7 +140,11 @@ export class CanvasComponent implements OnChanges, OnInit, OnDestroy {
     }
 
     private persistOffset() {
-        if (this._stateHandler.runIsMoved() && this.updateOffsetInRun) {
+        if (!this.persistUiChangesForRunInTextarea) {
+            return;
+        }
+
+        if (this._stateHandler.runIsMoved()) {
             this._displayService.setOffsetInfo(
                 this._stateHandler.getGlobalChangesForRun()
             );
@@ -222,19 +228,13 @@ export class CanvasComponent implements OnChanges, OnInit, OnDestroy {
             return;
         }
         MoveElementsService.switchElements(draggable, passedElement);
-        if (this.persistCoordinates) {
-            const movedLayerPos = asInt(movingElement, layerPosYAttibute);
-            const passedLayerPos = asInt(
-                passedElement.event,
-                layerPosYAttibute
-            );
-            movingElement.setAttribute(layerPosYAttibute, `${passedLayerPos}`);
-            passedElement.event.setAttribute(
-                layerPosYAttibute,
-                `${movedLayerPos}`
-            );
-            this.persistLayerPosition([passedElement.event, movingElement]);
-        }
+
+        const movedLayerPos = asInt(movingElement, layerPosYAttibute);
+        const passedLayerPos = asInt(passedElement.event, layerPosYAttibute);
+        movingElement.setAttribute(layerPosYAttibute, `${passedLayerPos}`);
+        passedElement.event.setAttribute(layerPosYAttibute, `${movedLayerPos}`);
+        this.persistLayerPosition([passedElement.event, movingElement]);
+
         movingElement.removeAttribute(originalYAttribute);
         passedElement.event.removeAttribute(originalYAttribute);
 
@@ -269,8 +269,9 @@ export class CanvasComponent implements OnChanges, OnInit, OnDestroy {
 
     private determineActiveNeighbourElement(movedElement: Draggable): void {
         if (!movedElement || !this.drawingArea) {
-            null;
+            return;
         }
+
         const transition = movedElement.event;
         const yAttribute = getYAttribute(transition);
         const direction = MoveElementsService.getMoveDirection(transition);
@@ -323,7 +324,12 @@ export class CanvasComponent implements OnChanges, OnInit, OnDestroy {
     }
 
     persistLayerPosition(elements: Array<HTMLElement>): void {
-        this._displayService.setCoordsInfo(this.getCoordinates(elements));
+        const coordinates = this.getCoordinates(elements);
+        this.coordinateChanged.next(coordinates);
+
+        if (this.persistUiChangesForRunInTextarea) {
+            this._displayService.setCoordsInfo(coordinates);
+        }
     }
 
     public createDraggable(element: HTMLElement): Draggable | null {

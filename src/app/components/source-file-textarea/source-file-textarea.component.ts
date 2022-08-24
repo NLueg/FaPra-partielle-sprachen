@@ -22,6 +22,7 @@ import {
     exampleContent2,
 } from '../../services/upload/example-file';
 import { UploadService } from '../../services/upload/upload.service';
+import { updateCoordsInText } from './update-coords-in-text.fn';
 
 type Valid = 'error' | 'warn' | 'success';
 
@@ -177,48 +178,15 @@ export class SourceFileTextareaComponent implements OnDestroy, OnInit {
     }
 
     private addLayerPosInfo(coordinatesInfo: Array<CoordinatesInfo>): void {
-        coordinatesInfo.forEach((infoElement) => {
-            if (
-                infoElement.transitionType === 'rect' ||
-                infoElement.transitionType === 'circle'
-            ) {
-                const currentValue = this.textareaFc.value;
-                let infoText = infoElement.transitionName;
-                if (infoElement.transitionType === 'rect') {
-                    const eventIdArray = currentValue.match(
-                        new RegExp(
-                            `\n${infoText}\\s+(\\|.*)?(\\[\\d+\\])?\\n`,
-                            'g'
-                        )
-                    );
-                    if (eventIdArray) {
-                        infoText = eventIdArray[0]
-                            .replace(/(\r\n|\n|\r)/gm, '')
-                            .split('[')[0]
-                            .trim();
-                    }
-                }
-                let patternString = `\\n${infoText.replace(
-                    new RegExp('\\[\\d+\\]', 'g'),
-                    ''
-                )}(\\[\\d+\\])*?\\n`;
-                let coordsString = `\n${infoElement.transitionName}\n`;
-                if (infoElement.transitionType === 'rect') {
-                    coordsString = `\n${infoText} [${infoElement.coordinates.y}]\n`;
-                    patternString = `\\n${infoText.replace(
-                        '|',
-                        '\\|'
-                    )}(\\s*\\[\\-?\\d+])?\\s*\\n`;
-                }
-                const replacePattern = new RegExp(patternString, 'g');
-                const newValue = currentValue.replace(
-                    replacePattern,
-                    coordsString
-                );
-                this.textareaFc.setValue(newValue, { emitEvent: false });
-                this.processSourceChange(newValue);
-            }
-        });
+        const newValue = updateCoordsInText(
+            this.textareaFc.value,
+            coordinatesInfo
+        );
+
+        if (newValue) {
+            this.textareaFc.setValue(newValue, { emitEvent: false });
+            this.processSourceChange(newValue);
+        }
     }
 
     private addOffsetInfo(offset: Coordinates): void {
