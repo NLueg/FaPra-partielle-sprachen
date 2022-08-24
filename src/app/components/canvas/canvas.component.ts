@@ -47,6 +47,9 @@ export class CanvasComponent implements OnChanges, OnInit, OnDestroy {
     @Input()
     persistCoordinates = true;
 
+    @Input()
+    updateOffsetInRun = true;
+
     highlightColor: string | undefined;
     private _sub: Subscription | undefined;
     private _offsetSub: Subscription;
@@ -135,7 +138,7 @@ export class CanvasComponent implements OnChanges, OnInit, OnDestroy {
     }
 
     private persistOffset() {
-        if (this._stateHandler.runIsMoved()) {
+        if (this._stateHandler.runIsMoved() && this.updateOffsetInRun) {
             this._displayService.setOffsetInfo(
                 this._stateHandler.getGlobalChangesForRun()
             );
