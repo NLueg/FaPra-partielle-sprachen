@@ -21,7 +21,6 @@ import {
     eventSize,
     fromTransitionAttribute,
     layerPosYAttibute,
-    textOffset,
     toTransitionAttribute,
 } from './svg-constants';
 
@@ -76,32 +75,25 @@ function createSvgForElement(
     svg.setAttribute(layerPosYAttibute, `${element.layerPos ?? 0}`);
     svg.setAttribute(eventIdAttribute, `${element.id}`);
 
-    const text = createSvgElement('text');
-    text.setAttribute(
-        'x',
-        `${x + eventSize / 2 - cropText(element.label).length * 3.2}`
-    );
-    text.setAttribute('y', `${y + eventSize + textOffset}`);
+    const text = createSvgElement('foreignObject');
+    text.setAttribute('x', `${x - (100 - eventSize) / 2}`);
+    text.setAttribute('y', `${y + eventSize + 2}`);
     const height = 40;
     const width = 100;
     text.setAttribute('height', `${height}`);
     text.setAttribute('width', `${width}`);
     text.setAttribute('describes-event', element.id);
-    text.innerHTML =
-        '<title>' + element.label + '</title>' + cropText(element.label);
+    const span = document.createElement('span');
+    span.setAttribute('title', element.label);
+    span.textContent = element.label;
+    text.append(span);
+
     if (doesElementBelongToCurrentRun(element) && highlight) {
         svg.setAttribute('stroke', highlightColor);
         text.setAttribute('style', `color: ${highlightColor};`);
     }
 
     return [svg, text];
-}
-
-function cropText(text: string): string {
-    if (text.length > 15) {
-        return text.substring(0, 12) + '...';
-    }
-    return text;
 }
 
 function createSvgElement(name: string): SVGElement {

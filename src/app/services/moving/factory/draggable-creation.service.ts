@@ -41,8 +41,8 @@ export class DraggingCreationService {
         drawingArea: ElementRef<SVGElement>
     ): HTMLElement {
         const selector =
-            'text[describes-event="' + event.getAttribute(eventIdAttribute) ??
-            '' + '"]';
+            'foreignObject[describes-event="' +
+                event.getAttribute(eventIdAttribute) ?? '' + '"]';
         return FindElementsService.getElementFromCanvas(selector, drawingArea);
     }
 

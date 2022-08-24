@@ -2,7 +2,7 @@ export const eventSize = 50;
 
 export const circleSize = 10;
 
-export const textOffset = 15;
+export const textOffset = 2;
 
 export const originalYAttribute = 'original-y';
 
