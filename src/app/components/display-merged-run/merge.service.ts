@@ -128,7 +128,7 @@ export class MergeService {
                                     nextElements[index2].id.split('_')[0]
                                 ) {
                                     nextElements[index2].label =
-                                        nextElements[index2].label + '_???_';
+                                        nextElements[index2].label + '|';
                                 }
                             }
                         }
@@ -201,9 +201,8 @@ export class MergeService {
             }
             /*provisorische Label werden wieder zurückgesetzt  */
             primeEventStructure.elements.forEach((element) => {
-                element.label = element.label.split('_???_')[0];
+                element.label = element.label.split('|')[0];
             });
-
             setRefs(primeEventStructure);
             primeEventStructure.text = generateTextForRun(primeEventStructure);
             return primeEventStructure;

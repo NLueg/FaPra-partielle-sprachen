@@ -1,5 +1,5 @@
 export type Draggable = {
-    transition: HTMLElement;
+    event: HTMLElement;
     infoElement?: HTMLElement;
     incomingArcs: Array<HTMLElement>;
     outgoingArcs: Array<HTMLElement>;

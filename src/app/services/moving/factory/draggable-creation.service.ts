@@ -2,7 +2,7 @@ import { ElementRef } from '@angular/core';
 
 import { Coordinates } from '../../../classes/diagram/coordinates';
 import { Draggable } from '../../../classes/diagram/draggable';
-import { transitionSize } from '../../svg/svg-constants';
+import { eventIdAttribute, eventSize } from '../../svg/svg-constants';
 import { asInt, getXAttribute, getYAttribute } from '../dragging-helper.fn';
 import { FindElementsService } from '../find/find-elements.service';
 
@@ -18,7 +18,7 @@ export class DraggingCreationService {
             return null;
         }
         const draggable = {
-            transition: element,
+            event: element,
         } as Draggable;
         draggable.infoElement =
             DraggingCreationService.findInfoElementForTransition(
@@ -37,19 +37,12 @@ export class DraggingCreationService {
     }
 
     static findInfoElementForTransition(
-        transition: HTMLElement,
+        event: HTMLElement,
         drawingArea: ElementRef<SVGElement>
     ): HTMLElement {
-        const x = asInt(transition, getXAttribute(transition));
-        const y = asInt(transition, getYAttribute(transition));
-        const currentXForInfolement = x - (100 - transitionSize) / 2;
-        const currentYInfoElement = y + transitionSize + 2;
         const selector =
-            'foreignObject[y="' +
-            currentYInfoElement +
-            '"][x="' +
-            currentXForInfolement +
-            '"]';
+            'foreignObject[describes-event="' +
+                event.getAttribute(eventIdAttribute) ?? '' + '"]';
         return FindElementsService.getElementFromCanvas(selector, drawingArea);
     }
 
@@ -81,9 +74,9 @@ export class DraggingCreationService {
             if (
                 (transition.nodeName === 'rect' &&
                     c.y >= coords.y &&
-                    c.y <= coords.y + transitionSize &&
+                    c.y <= coords.y + eventSize &&
                     c.x >= coords.x &&
-                    c.x <= coords.x + transitionSize / 2) ||
+                    c.x <= coords.x + eventSize / 2) ||
                 (c.y == coords.y && c.x == coords.x)
             ) {
                 incomingLines.push(nodes[i] as HTMLElement);
@@ -112,9 +105,9 @@ export class DraggingCreationService {
             if (
                 (transition.nodeName === 'rect' &&
                     c.y >= coords.y &&
-                    c.y <= coords.y + transitionSize &&
-                    c.x >= coords.x + transitionSize / 2 &&
-                    c.x <= coords.x + transitionSize) ||
+                    c.y <= coords.y + eventSize &&
+                    c.x >= coords.x + eventSize / 2 &&
+                    c.x <= coords.x + eventSize) ||
                 (c.x == coords.x && c.y == coords.y)
             ) {
                 outgoingLines.push(nodes[i] as HTMLElement);

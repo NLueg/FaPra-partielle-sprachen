@@ -1,63 +1,136 @@
 import { Coordinates } from '../../../classes/diagram/coordinates';
 import { Draggable } from '../../../classes/diagram/draggable';
 import { getIntersection } from '../../../classes/diagram/functions/display.fn';
-import { originalYAttribute, transitionSize } from '../../svg/svg-constants';
 import {
-    asInt,
-    getAttributePraefix,
-    getYAttribute,
-} from '../dragging-helper.fn';
-import { FindElementsService } from './../find/find-elements.service';
+    eventIdAttribute,
+    eventSize,
+    fromTransitionAttribute,
+    originalYAttribute,
+    textOffset,
+    toTransitionAttribute,
+} from '../../svg/svg-constants';
+import { asInt, getYAttribute } from '../dragging-helper.fn';
+import { FindElementsService } from '../find/find-elements.service';
 
 export class MoveElementsService {
     public static moveElement(draggable: Draggable, newY: number): void {
-        const transition = draggable.transition;
-        const attributePraefix = getAttributePraefix(transition);
-        transition.setAttribute(attributePraefix + 'y', `${newY}`);
-        const newYInfo = newY + transitionSize + 2;
+        const event = draggable.event;
+        event.setAttribute(getYAttribute(event), `${newY}`);
+        const newYInfo = newY + eventSize + textOffset;
         draggable.infoElement?.setAttribute('y', `${newYInfo}`);
-        let offsetIncoming = 0;
-        if (transition.nodeName === 'rect') {
-            offsetIncoming = transitionSize / 2;
-        }
-        const newYForLines = newY + offsetIncoming;
-        const coords = FindElementsService.createCoordsFromElement(transition);
-
-        if (transition.nodeName === 'rect') {
+        const coords = FindElementsService.createCoordsFromElement(event);
+        if (event.nodeName === 'rect') {
             for (let i = 0; i < draggable.incomingArcs.length; i++) {
-                const c = getIntersection(
-                    coords.x + transitionSize / 2,
-                    coords.y + transitionSize / 2,
-                    asInt(draggable.incomingArcs[i], 'x1'),
-                    asInt(draggable.incomingArcs[i], 'y1'),
+                const arc = draggable.incomingArcs[i];
+                let c = getIntersection(
+                    coords.x + eventSize / 2,
+                    coords.y + eventSize / 2,
+                    asInt(arc, 'x1'),
+                    asInt(arc, 'y1'),
                     true
                 );
-                draggable.incomingArcs[i].setAttribute('y2', `${c.y}`);
-                draggable.incomingArcs[i].setAttribute('x2', `${c.x}`);
+                arc.setAttribute('y2', `${c.y}`);
+                arc.setAttribute('x2', `${c.x}`);
+                MoveElementsService.rearrangeArcsForPredecessor(arc);
+                c = getIntersection(
+                    coords.x + eventSize / 2,
+                    coords.y + eventSize / 2,
+                    asInt(arc, 'x1'),
+                    asInt(arc, 'y1'),
+                    true
+                );
+                arc.setAttribute('y2', `${c.y}`);
+                arc.setAttribute('x2', `${c.x}`);
+                MoveElementsService.rearrangeArcsForPredecessor(arc);
             }
             for (let j = 0; j < draggable.outgoingArcs.length; j++) {
-                const c = getIntersection(
-                    coords.x + transitionSize / 2,
-                    coords.y + transitionSize / 2,
-                    asInt(draggable.outgoingArcs[j], 'x2'),
-                    asInt(draggable.outgoingArcs[j], 'y2'),
+                const arc = draggable.outgoingArcs[j];
+
+                let c = getIntersection(
+                    coords.x + eventSize / 2,
+                    coords.y + eventSize / 2,
+                    asInt(arc, 'x2'),
+                    asInt(arc, 'y2'),
                     false
                 );
-                draggable.outgoingArcs[j].setAttribute('y1', `${c.y}`);
-                draggable.outgoingArcs[j].setAttribute('x1', `${c.x}`);
+                arc.setAttribute('y1', `${c.y}`);
+                arc.setAttribute('x1', `${c.x}`);
+                MoveElementsService.rearrangeArcsForSuccessor(arc);
+                c = getIntersection(
+                    coords.x + eventSize / 2,
+                    coords.y + eventSize / 2,
+                    asInt(arc, 'x2'),
+                    asInt(arc, 'y2'),
+                    false
+                );
+                arc.setAttribute('y1', `${c.y}`);
+                arc.setAttribute('x1', `${c.x}`);
+                MoveElementsService.rearrangeArcsForSuccessor(arc);
             }
         } else {
             for (let i = 0; i < draggable.incomingArcs.length; i++) {
-                draggable.incomingArcs[i].setAttribute('y2', `${newYForLines}`);
+                draggable.incomingArcs[i].setAttribute('y2', `${newY}`);
+                MoveElementsService.rearrangeArcsForPredecessor(
+                    draggable.incomingArcs[i]
+                );
             }
             for (let j = 0; j < draggable.outgoingArcs.length; j++) {
-                draggable.outgoingArcs[j].setAttribute('y1', `${newYForLines}`);
+                draggable.outgoingArcs[j].setAttribute('y1', `${newY}`);
+                MoveElementsService.rearrangeArcsForSuccessor(
+                    draggable.incomingArcs[j]
+                );
             }
         }
     }
 
+    private static rearrangeArcsForPredecessor(arc: Element) {
+        if (arc.getAttribute(fromTransitionAttribute)) {
+            const selector =
+                '[' +
+                eventIdAttribute +
+                '="' +
+                arc.getAttribute(fromTransitionAttribute) +
+                '"]';
+            const coords = FindElementsService.createCoordsFromElement(
+                document.querySelector(selector) as HTMLElement
+            );
+            const c = getIntersection(
+                coords.x + eventSize / 2,
+                coords.y + eventSize / 2,
+                asInt(arc, 'x2'),
+                asInt(arc, 'y2'),
+                false
+            );
+            arc.setAttribute('y1', `${c.y}`);
+            arc.setAttribute('x1', `${c.x}`);
+        }
+    }
+
+    private static rearrangeArcsForSuccessor(arc: Element) {
+        if (arc.getAttribute(toTransitionAttribute)) {
+            const selector =
+                '[' +
+                eventIdAttribute +
+                '="' +
+                arc.getAttribute(toTransitionAttribute) +
+                '"]';
+            const coords = FindElementsService.createCoordsFromElement(
+                document.querySelector(selector) as HTMLElement
+            );
+            const c = getIntersection(
+                coords.x + eventSize / 2,
+                coords.y + eventSize / 2,
+                asInt(arc, 'x1'),
+                asInt(arc, 'y1'),
+                true
+            );
+            arc.setAttribute('x2', `${c.x}`);
+            arc.setAttribute('y2', `${c.y}`);
+        }
+    }
+
     static resetPositionForDraggable(e: Draggable): void {
-        const transition = e.transition;
+        const transition = e.event;
         const newY = asInt(transition, originalYAttribute);
         if (newY > 0) {
             MoveElementsService.moveElement(e, newY);
@@ -80,24 +153,24 @@ export class MoveElementsService {
         direction: string
     ): number {
         const movingNode = movingElement.nodeName;
-        const passedNode = activeNeighbour.transition.nodeName;
+        const passedNode = activeNeighbour.event.nodeName;
         if (passedNode === 'circle') {
             if (movingNode === 'circle') {
                 return 0;
             }
             if (movingNode === 'rect') {
                 if (direction === 'up') {
-                    return transitionSize / 2;
+                    return eventSize / 2;
                 }
-                return -transitionSize / 2;
+                return -eventSize / 2;
             }
         }
         if (passedNode === 'rect') {
             if (movingNode === 'circle') {
                 if (direction === 'up') {
-                    return transitionSize / 2;
+                    return eventSize / 2;
                 }
-                return -transitionSize / 2;
+                return -eventSize / 2;
             }
             if (movingNode === 'rect') {
                 return 0;
@@ -145,19 +218,19 @@ export class MoveElementsService {
         movingElement: Draggable,
         passedElement: Draggable
     ): void {
-        const movingElementNode = movingElement.transition;
-        const passedElementNode = passedElement.transition;
+        const movingElementNode = movingElement.event;
+        const passedElementNode = passedElement.event;
         const nodeTypeOfMovingElement = movingElementNode.nodeName;
         const nodeTypeOfPassedElement = passedElementNode.nodeName;
         let newYMoving;
         let newYPassed;
+
         if (nodeTypeOfMovingElement === 'rect') {
             if (nodeTypeOfPassedElement === 'circle') {
-                newYMoving =
-                    asInt(passedElementNode, 'cy') - transitionSize / 2;
+                newYMoving = asInt(passedElementNode, 'cy') - eventSize / 2;
                 newYPassed =
                     asInt(movingElementNode, originalYAttribute) +
-                    transitionSize / 2;
+                    eventSize / 2;
             } else {
                 newYMoving = asInt(passedElementNode, 'y');
                 newYPassed = asInt(movingElementNode, originalYAttribute);
@@ -169,10 +242,11 @@ export class MoveElementsService {
             } else {
                 newYPassed =
                     asInt(movingElementNode, originalYAttribute) -
-                    transitionSize / 2;
-                newYMoving = asInt(passedElementNode, 'y') + transitionSize / 2;
+                    eventSize / 2;
+                newYMoving = asInt(passedElementNode, 'y') + eventSize / 2;
             }
         }
+
         MoveElementsService.moveElement(movingElement, newYMoving);
         MoveElementsService.moveElement(passedElement, newYPassed);
     }

@@ -3,5 +3,7 @@
         #canvas
         *ngIf="svgElements$ | async as svgElements"
         [svgElements]="svgElements"
+        [persistUiChangesForRunInTextarea]="false"
+        (coordinateChanged)="updateTextInMergedRun($event)"
     ></app-canvas>
 </div>
