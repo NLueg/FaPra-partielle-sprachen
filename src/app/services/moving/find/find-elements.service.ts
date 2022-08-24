@@ -1,7 +1,7 @@
 import { ElementRef } from '@angular/core';
 
 import { Coordinates } from '../../../classes/diagram/coordinates';
-import { transitionSize } from '../../svg/svg-constants';
+import { eventSize } from '../../svg/svg-constants';
 import { asInt, getXAttribute, getYAttribute } from '../dragging-helper.fn';
 
 export class FindElementsService {
@@ -36,11 +36,11 @@ export class FindElementsService {
         let relevantXRect = 0;
         if (element.nodeName === 'circle') {
             relevantXCircle = asInt(element, 'cx');
-            relevantXRect = +relevantXCircle - transitionSize / 2;
+            relevantXRect = +relevantXCircle - eventSize / 2;
         }
         if (element.nodeName === 'rect') {
             relevantXRect = asInt(element, 'x');
-            relevantXCircle = relevantXRect + transitionSize / 2;
+            relevantXCircle = relevantXRect + eventSize / 2;
         }
         const rectSelector = 'rect[x="' + relevantXRect + '"]';
         const circleSelector = 'circle[cx="' + relevantXCircle + '"]';

@@ -10,7 +10,7 @@ export function getXAttribute(element: HTMLElement): string {
     return element.nodeName === 'rect' ? 'x' : 'cx';
 }
 
-export function getAttributePraefix(e: HTMLElement): string {
+export function getAttributePrefix(e: HTMLElement): string {
     if (e.nodeName === 'circle') {
         return 'c';
     }

@@ -17,11 +17,11 @@ import {
     breakpointPositionAttribute,
     breakpointTrail,
     circleSize,
-    eventId,
+    eventIdAttribute,
+    eventSize,
     fromTransitionAttribute,
     layerPosYAttibute,
     toTransitionAttribute,
-    transitionSize,
 } from './svg-constants';
 
 let highlightColor: string;
@@ -59,7 +59,7 @@ export class SvgService {
 
 function createSvgForElement(
     element: Element,
-    hightlight: boolean,
+    highlight: boolean,
     offset: Coordinates
 ): SVGElement[] {
     const svg = createSvgElement('rect');
@@ -67,27 +67,28 @@ function createSvgForElement(
     const y = (element.y ?? 0) + offset.y;
     svg.setAttribute('x', `${x}`);
     svg.setAttribute('y', `${y}`);
-    svg.setAttribute('width', `${transitionSize}`);
-    svg.setAttribute('height', `${transitionSize}`);
+    svg.setAttribute('width', `${eventSize}`);
+    svg.setAttribute('height', `${eventSize}`);
     svg.setAttribute('stroke', 'black');
     svg.setAttribute('stroke-width', '2');
     svg.setAttribute('fill-opacity', '0');
     svg.setAttribute(layerPosYAttibute, `${element.layerPos ?? 0}`);
-    svg.setAttribute(eventId, `${element.id}`);
+    svg.setAttribute(eventIdAttribute, `${element.id}`);
 
     const text = createSvgElement('foreignObject');
-    text.setAttribute('x', `${x - (100 - transitionSize) / 2}`);
-    text.setAttribute('y', `${y + transitionSize + 2}`);
+    text.setAttribute('x', `${x - (100 - eventSize) / 2}`);
+    text.setAttribute('y', `${y + eventSize + 2}`);
     const height = 40;
     const width = 100;
     text.setAttribute('height', `${height}`);
     text.setAttribute('width', `${width}`);
+    text.setAttribute('describes-event', element.id);
     const span = document.createElement('span');
     span.setAttribute('title', element.label);
     span.textContent = element.label;
     text.append(span);
 
-    if (doesElementBelongToCurrentRun(element) && hightlight) {
+    if (doesElementBelongToCurrentRun(element) && highlight) {
         svg.setAttribute('stroke', highlightColor);
         text.setAttribute('style', `color: ${highlightColor};`);
     }
@@ -103,7 +104,7 @@ function createSvgForArc(
     arc: Arc,
     source: Element | undefined,
     target: Element | undefined,
-    hightlight: boolean,
+    highlight: boolean,
     offset: Coordinates
 ): SVGElement[] {
     const elements: SVGElement[] = [];
@@ -114,81 +115,115 @@ function createSvgForArc(
 
     if (arc.breakpoints.length == 0) {
         const start = getIntersection(
-            (source.x ?? 0) + transitionSize / 2,
-            (source.y ?? 0) + transitionSize / 2,
-            (target.x ?? 0) + transitionSize / 2,
-            (target.y ?? 0) + transitionSize / 2,
+            (source.x ?? 0) + eventSize / 2,
+            (source.y ?? 0) + eventSize / 2,
+            (target.x ?? 0) + eventSize / 2,
+            (target.y ?? 0) + eventSize / 2,
             false
         );
         const end = getIntersection(
-            (target.x ?? 0) + transitionSize / 2,
-            (target.y ?? 0) + transitionSize / 2,
-            (source.x ?? 0) + transitionSize / 2,
-            (source.y ?? 0) + transitionSize / 2,
+            (target.x ?? 0) + eventSize / 2,
+            (target.y ?? 0) + eventSize / 2,
+            (source.x ?? 0) + eventSize / 2,
+            (source.y ?? 0) + eventSize / 2,
             true
         );
         elements.push(
             createLine(
-                start.x + offset.x,
-                start.y + offset.y,
-                end.x + offset.x,
-                end.y + offset.y,
-                true,
-                hightlight && doesArcBelongToCurrentRun(arc)
+                {
+                    x: start.x + offset.x,
+                    y: start.y + offset.y,
+                },
+                {
+                    x: end.x + offset.x,
+                    y: end.y + offset.y,
+                },
+                arc,
+                {
+                    highlight: highlight && doesArcBelongToCurrentRun(arc),
+                    showArrow: true,
+                    hasFromAttribute: true,
+                    hasToAttribute: true,
+                }
             )
         );
     } else {
         //source -> first breakpoint
         const start = getIntersection(
-            (source.x ?? 0) + transitionSize / 2,
-            (source.y ?? 0) + transitionSize / 2,
-            arc.breakpoints[0].x + transitionSize / 2,
-            arc.breakpoints[0].y + transitionSize / 2,
+            (source.x ?? 0) + eventSize / 2,
+            (source.y ?? 0) + eventSize / 2,
+            arc.breakpoints[0].x + eventSize / 2,
+            arc.breakpoints[0].y + eventSize / 2,
             false
         );
         elements.push(
             createLine(
-                start.x + offset.x,
-                start.y + offset.y,
-                arc.breakpoints[0].x + transitionSize / 2 + offset.x,
-                arc.breakpoints[0].y + transitionSize / 2 + offset.y,
-                false,
-                hightlight && doesArcBelongToCurrentRun(arc)
+                {
+                    x: start.x + offset.x,
+                    y: start.y + offset.y,
+                },
+                {
+                    x: arc.breakpoints[0].x + eventSize / 2 + offset.x,
+                    y: arc.breakpoints[0].y + eventSize / 2 + offset.y,
+                },
+                arc,
+                {
+                    highlight: highlight && doesArcBelongToCurrentRun(arc),
+                    showArrow: false,
+                    hasFromAttribute: true,
+                }
             )
         );
         //breakpoint -> next breakpoint
         for (let i = 0; i < arc.breakpoints.length - 1; i++) {
             elements.push(
                 createLine(
-                    arc.breakpoints[i].x + transitionSize / 2 + offset.x,
-                    arc.breakpoints[i].y + transitionSize / 2 + offset.y,
-                    arc.breakpoints[i + 1].x + transitionSize / 2 + offset.x,
-                    arc.breakpoints[i + 1].y + transitionSize / 2 + offset.y,
-                    false,
-                    hightlight && doesArcBelongToCurrentRun(arc)
+                    {
+                        x: arc.breakpoints[i].x + eventSize / 2 + offset.x,
+                        y: arc.breakpoints[i].y + eventSize / 2 + offset.y,
+                    },
+                    {
+                        x: arc.breakpoints[i + 1].x + eventSize / 2 + offset.x,
+                        y: arc.breakpoints[i + 1].y + eventSize / 2 + offset.y,
+                    },
+                    arc,
+                    {
+                        highlight: highlight && doesArcBelongToCurrentRun(arc),
+                        showArrow: false,
+                    }
                 )
             );
         }
         //last breakpoint -> target
         const end = getIntersection(
-            (target.x ?? 0) + transitionSize / 2,
-            (target.y ?? 0) + transitionSize / 2,
-            arc.breakpoints[arc.breakpoints.length - 1].x + transitionSize / 2,
-            arc.breakpoints[arc.breakpoints.length - 1].y + transitionSize / 2,
+            (target.x ?? 0) + eventSize / 2,
+            (target.y ?? 0) + eventSize / 2,
+            arc.breakpoints[arc.breakpoints.length - 1].x + eventSize / 2,
+            arc.breakpoints[arc.breakpoints.length - 1].y + eventSize / 2,
             true
         );
         elements.push(
             createLine(
-                arc.breakpoints[arc.breakpoints.length - 1].x +
-                    transitionSize / 2 +
-                    offset.x,
-                arc.breakpoints[arc.breakpoints.length - 1].y +
-                    transitionSize / 2 +
-                    offset.y,
-                end.x + offset.x,
-                end.y + offset.y,
-                true,
-                hightlight && doesArcBelongToCurrentRun(arc)
+                {
+                    x:
+                        arc.breakpoints[arc.breakpoints.length - 1].x +
+                        eventSize / 2 +
+                        offset.x,
+                    y:
+                        arc.breakpoints[arc.breakpoints.length - 1].y +
+                        eventSize / 2 +
+                        offset.y,
+                },
+                {
+                    x: end.x + offset.x,
+                    y: end.y + offset.y,
+                },
+                arc,
+                {
+                    highlight: highlight && doesArcBelongToCurrentRun(arc),
+                    showArrow: true,
+                    hasToAttribute: true,
+                }
             )
         );
         elements.push(
@@ -211,30 +246,35 @@ function createSvgForArc(
 }
 
 function createLine(
-    x1: number,
-    y1: number,
-    x2: number,
-    y2: number,
-    showArrow: boolean,
-    hightlight: boolean
+    fromCoords: Coordinates,
+    toCoords: Coordinates,
+    arc: Arc,
+    displayInfo: ArcDisplayInfo
 ): SVGElement {
     const line = createSvgElement('line');
-    if (hightlight) {
+    if (displayInfo.highlight) {
         line.setAttribute('stroke', highlightColor);
     } else {
         line.setAttribute('stroke', 'black');
     }
-
     line.setAttribute('stroke-width', '1');
-    if (hightlight && showArrow) {
-        line.setAttribute('marker-end', 'url(#arrowheadhightlight )');
-    } else if (showArrow) {
-        line.setAttribute('marker-end', 'url(#arrowhead)');
+    if (displayInfo.hasFromAttribute) {
+        line.setAttribute(fromTransitionAttribute, arc.source);
     }
-    line.setAttribute('x1', `${x1}`);
-    line.setAttribute('y1', `${y1}`);
-    line.setAttribute('x2', `${x2}`);
-    line.setAttribute('y2', `${y2}`);
+    if (displayInfo.hasToAttribute) {
+        line.setAttribute(toTransitionAttribute, arc.target);
+    }
+    if (displayInfo.showArrow) {
+        if (displayInfo.highlight) {
+            line.setAttribute('marker-end', 'url(#arrowheadhightlight )');
+        } else {
+            line.setAttribute('marker-end', 'url(#arrowhead)');
+        }
+    }
+    line.setAttribute('x1', `${fromCoords.x}`);
+    line.setAttribute('y1', `${fromCoords.y}`);
+    line.setAttribute('x2', `${toCoords.x}`);
+    line.setAttribute('y2', `${toCoords.y}`);
     return line;
 }
 
@@ -246,8 +286,8 @@ function createCircle(
     offset: Coordinates
 ): SVGElement {
     const breakpoint = breakpoints[positionInRun];
-    const x = breakpoint.x + transitionSize / 2 + offset.x;
-    const y = breakpoint.y + transitionSize / 2 + offset.y;
+    const x = breakpoint.x + eventSize / 2 + offset.x;
+    const y = breakpoint.y + eventSize / 2 + offset.y;
     const circle = createSvgElement('circle');
     circle.setAttribute('r', `${circleSize}`);
     circle.setAttribute('cx', `${x}`);
@@ -267,3 +307,10 @@ function createCircle(
     circle.setAttribute(breakpointTrail, trail);
     return circle;
 }
+
+type ArcDisplayInfo = {
+    highlight: boolean;
+    showArrow: boolean;
+    hasFromAttribute?: boolean;
+    hasToAttribute?: boolean;
+};

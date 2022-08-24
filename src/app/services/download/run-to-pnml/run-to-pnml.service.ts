@@ -18,9 +18,6 @@ export class RunToPnmlService {
 
     parseRunToPnml(name: string, run: Run): string {
         const { parsedRun, places } = this.layoutRun(run);
-
-        console.log(parsedRun);
-
         const parsedPlaces = parsedRun.elements.filter((element) =>
             places.find((place) => element.label === place.label)
         );

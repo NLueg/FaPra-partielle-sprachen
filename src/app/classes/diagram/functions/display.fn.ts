@@ -1,4 +1,4 @@
-import { transitionSize } from '../../../services/svg/svg-constants';
+import { eventSize } from '../../../services/svg/svg-constants';
 import { Coordinates } from '../coordinates';
 
 /**
@@ -19,28 +19,26 @@ export function getIntersection(
 ): Coordinates {
     if (targetY == sourceY) {
         return {
-            x: sourceX + (backwards ? -transitionSize : transitionSize) / 2,
+            x: sourceX + (backwards ? -eventSize : eventSize) / 2,
             y: sourceY,
         };
     }
 
     const point = {
-        x: sourceX + (backwards ? -transitionSize : transitionSize) / 2,
+        x: sourceX + (backwards ? -eventSize : eventSize) / 2,
         y: 0,
     };
     const m = (targetY - sourceY) / (targetX - sourceX);
     const n = sourceY - sourceX * m;
-    point.y =
-        (sourceX + (backwards ? -transitionSize : transitionSize) / 2) * m + n;
+    point.y = (sourceX + (backwards ? -eventSize : eventSize) / 2) * m + n;
 
     //Check if intersection is out of the event bounds -> Calculate intersection on the top/bottom line of the event
-    if (point.y < sourceY - transitionSize / 2) {
-        point.y = sourceY - transitionSize / 2;
+    if (point.y < sourceY - eventSize / 2) {
+        point.y = sourceY - eventSize / 2;
         point.x = (point.y - n) / m;
-    } else if (point.y > sourceY + transitionSize / 2) {
-        point.y = sourceY + transitionSize / 2;
+    } else if (point.y > sourceY + eventSize / 2) {
+        point.y = sourceY + eventSize / 2;
         point.x = (point.y - n) / m;
     }
-
     return point;
 }
