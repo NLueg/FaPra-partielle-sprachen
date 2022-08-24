@@ -13,6 +13,7 @@ import { UploadService } from './services/upload/upload.service';
 export class AppComponent {
     selectedDataToDownload: DownloadableContent = 'separateRuns';
     resetPositioningSubject: Subject<void> = new Subject<void>();
+    resetPositioningInMergeViewSubject: Subject<void> = new Subject<void>();
 
     constructor(
         private _uploadService: UploadService,
@@ -21,6 +22,10 @@ export class AppComponent {
 
     resetSvgPositioning(): void {
         this.resetPositioningSubject.next();
+    }
+
+    resetPositioningInMergeView(): void {
+        this.resetPositioningInMergeViewSubject.next();
     }
 
     public openFileSelector(): void {

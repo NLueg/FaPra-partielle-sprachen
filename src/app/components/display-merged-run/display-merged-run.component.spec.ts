@@ -24,7 +24,7 @@ describe('DisplayMergedRunComponent', () => {
                 {
                     provide: MergeService,
                     useValue: {
-                        getMergedRuns$: jest.fn().mockReturnValue(of([])),
+                        getMergedRun$: jest.fn().mockReturnValue(of([])),
                     },
                 },
                 { provide: LayoutService, useValue: {} },
