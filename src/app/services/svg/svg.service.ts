@@ -40,9 +40,6 @@ export class SvgService {
         const result: Array<SVGElement> = [];
         const offset = run.offset ?? { x: 0, y: 0 };
 
-        run.elements.forEach((el) => {
-            result.push(...createSvgForElement(el, merge, offset));
-        });
         run.arcs.forEach((arc) => {
             const source = run.elements.find((el) => el.id === arc.source);
             const target = run.elements.find((el) => el.id === arc.target);
@@ -52,6 +49,9 @@ export class SvgService {
                     result.push(a);
                 });
             }
+        });
+        run.elements.forEach((el) => {
+            result.push(...createSvgForElement(el, merge, offset));
         });
         return result;
     }
