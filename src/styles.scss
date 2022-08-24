@@ -26,17 +26,11 @@ svg foreignObject {
         -webkit-box-orient: vertical;
         overflow: hidden;
 
-        /* dünnerer shadow*/
-        text-shadow: -1px 1px#ffffff, -1px 0px #ffffff, -1px -1px #ffffff,
-        0px 1px #ffffff, 0px -1px #ffffff,
-        1px  1px #ffffff, 1px 0px #ffffff, 1px -1px #ffffff;
-
-        // /* dickerer shadow*/
-        // text-shadow: -2px 2px#ffffff, -2px 1px#ffffff, -2px 0px#ffffff, -2px -1px#ffffff,-2px -2px#ffffff,
-        // -1px 2px#ffffff, -1px 1px#ffffff, -1px 0px#ffffff, -1px -1px#ffffff,-1px -2px#ffffff,
-        // 0px 2px#ffffff, 0px 1px#ffffff, 0px 0px#ffffff, 0px -1px#ffffff,0px -2px#ffffff,
-        // 1px 2px#ffffff, 1px 1px#ffffff, 1px 0px#ffffff, 1px -1px#ffffff,1px -2px#ffffff,
-        // 2px 2px#ffffff, 2px 1px#ffffff, 2px 0px#ffffff, 2px -1px#ffffff,2px -2px#ffffff,
+        text-shadow: -2px 2px#ffffff, -2px 1px#ffffff, -2px 0px#ffffff, -2px -1px#ffffff,-2px -2px#ffffff,
+         -1px 2px#ffffff, -1px 1px#ffffff, -1px 0px#ffffff, -1px -1px#ffffff,-1px -2px#ffffff,
+         0px 2px#ffffff, 0px 1px#ffffff, 0px 0px#ffffff, 0px -1px#ffffff,0px -2px#ffffff,
+         1px 2px#ffffff, 1px 1px#ffffff, 1px 0px#ffffff, 1px -1px#ffffff,1px -2px#ffffff,
+         2px 2px#ffffff, 2px 1px#ffffff, 2px 0px#ffffff, 2px -1px#ffffff,2px -2px#ffffff,
     }
 }
 
