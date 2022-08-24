@@ -20,8 +20,12 @@
             <app-color></app-color>
             <app-display-merged-run
                 class="padding full-size"
+                [resetEvent]="resetPositioningInMergeViewSubject.asObservable()"
             ></app-display-merged-run>
-            <button (click)="resetSvgPositioning()" class="reset-button">
+            <button
+                (click)="resetPositioningInMergeView()"
+                class="reset-button"
+            >
                 Reset
             </button>
         </mat-tab>

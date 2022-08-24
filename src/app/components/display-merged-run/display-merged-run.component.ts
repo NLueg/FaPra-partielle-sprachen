@@ -2,11 +2,19 @@ import {
     AfterViewInit,
     Component,
     ElementRef,
+    Input,
     OnDestroy,
     OnInit,
     ViewChild,
 } from '@angular/core';
-import { map, Observable, Subscription, tap } from 'rxjs';
+import {
+    BehaviorSubject,
+    map,
+    Observable,
+    Subscription,
+    switchMap,
+    tap,
+} from 'rxjs';
 
 import { CoordinatesInfo } from '../../classes/diagram/coordinates';
 import { Run } from '../../classes/diagram/run';
@@ -15,7 +23,10 @@ import { DisplayService } from '../../services/display.service';
 import { LayoutService } from '../../services/layout.service';
 import { SvgService } from '../../services/svg/svg.service';
 import { CanvasComponent } from '../canvas/canvas.component';
-import { updateCoordsInText } from '../source-file-textarea/update-coords-in-text.fn';
+import {
+    removeCoordinates,
+    updateCoordsInText,
+} from '../source-file-textarea/update-coords-in-text.fn';
 import { MergeService } from './merge.service';
 
 @Component({
@@ -26,6 +37,9 @@ import { MergeService } from './merge.service';
 export class DisplayMergedRunComponent
     implements OnInit, OnDestroy, AfterViewInit
 {
+    @Input()
+    resetEvent?: Observable<void>;
+
     svgElements$: Observable<SVGElement[]> | undefined;
 
     @ViewChild('canvas') canvas: CanvasComponent | undefined;
@@ -37,18 +51,18 @@ export class DisplayMergedRunComponent
     private highlight = false;
 
     private primeEventStructure?: Run;
+    private manualUpdateTrigger = new BehaviorSubject<void>(undefined);
 
     constructor(
         private mergeService: MergeService,
         private layoutService: LayoutService,
         private svgService: SvgService,
-        private _displayService: DisplayService,
         private _colorService: ColorService
     ) {}
+
     ngOnInit(): void {
-        this._sub = this._displayService.runs$.subscribe(() => {
-            this.update();
-        });
+        this.update();
+
         this._colorSub = this._colorService
             .getHighlightColor()
             .subscribe(() => {
@@ -60,6 +74,17 @@ export class DisplayMergedRunComponent
                 this.highlight = highlight;
                 this.update();
             });
+
+        this.resetEvent?.subscribe(() => {
+            if (!this.primeEventStructure) {
+                return;
+            }
+
+            this.primeEventStructure.text = removeCoordinates(
+                this.primeEventStructure.text
+            );
+            this.manualUpdateTrigger.next();
+        });
     }
 
     ngAfterViewInit(): void {
@@ -68,8 +93,11 @@ export class DisplayMergedRunComponent
                 this.update();
             });
         });
-        if (this.svgWrapper) observer.observe(this.svgWrapper.nativeElement);
+        if (this.svgWrapper) {
+            observer.observe(this.svgWrapper.nativeElement);
+        }
     }
+
     ngOnDestroy(): void {
         this._sub?.unsubscribe();
         this._colorSub?.unsubscribe();
@@ -81,6 +109,9 @@ export class DisplayMergedRunComponent
             tap(
                 (primeEventStructure) =>
                     (this.primeEventStructure = primeEventStructure)
+            ),
+            switchMap((primeEventStructure) =>
+                this.manualUpdateTrigger.pipe(map(() => primeEventStructure))
             ),
             map(
                 (primeEventStructure) =>

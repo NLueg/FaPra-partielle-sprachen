@@ -22,7 +22,10 @@ import {
     exampleContent2,
 } from '../../services/upload/example-file';
 import { UploadService } from '../../services/upload/upload.service';
-import { updateCoordsInText } from './update-coords-in-text.fn';
+import {
+    removeCoordinates,
+    updateCoordsInText,
+} from './update-coords-in-text.fn';
 
 type Valid = 'error' | 'warn' | 'success';
 
@@ -209,17 +212,7 @@ export class SourceFileTextareaComponent implements OnDestroy, OnInit {
     }
 
     public removeCoordinates(): void {
-        const contentLines = this.textareaFc.value.split('\n');
-        let newText = '';
-        let first = true;
-        for (const line of contentLines) {
-            if (first) {
-                newText = newText + line.split('[')[0];
-                first = false;
-            } else {
-                newText = `${newText}\n${line.split('[')[0].trim()}`;
-            }
-        }
+        const newText = removeCoordinates(this.textareaFc.value);
         this.textareaFc.setValue(newText);
         this.processSourceChange(newText);
     }
