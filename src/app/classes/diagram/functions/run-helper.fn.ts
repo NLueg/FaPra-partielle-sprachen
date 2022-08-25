@@ -64,13 +64,14 @@ function getBreakpointInfo(arc: Arc): string {
     return text;
 }
 
-function removeCycles(run: Run): void {
+export function removeCycles(run: Run): void {
     getCycles(run).forEach((arc) => {
         return run.arcs.splice(
             run.arcs.findIndex((a) => a === arc),
             1
         );
     });
+    setRefs(run);
 }
 
 export function addElement(run: Run, element: Element): boolean {

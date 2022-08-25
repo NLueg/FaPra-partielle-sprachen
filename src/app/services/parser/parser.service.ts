@@ -6,6 +6,7 @@ import { hasCycles } from '../../classes/diagram/functions/cycles.fn';
 import {
     addArc,
     addElement,
+    removeCycles,
     setRefs,
 } from '../../classes/diagram/functions/run-helper.fn';
 import {
@@ -208,13 +209,6 @@ export class ParserService {
                                 `File contains invalid arcs`
                             );
                         }
-                        if (hasTransitiveArcs(run)) {
-                            removeTransitives(run);
-                            this.toastr.warning(
-                                `Transitive arcs are ignored`,
-                                `File contains transitive arcs`
-                            );
-                        }
                         break;
                     } else if (trimmedLine === eventsAttribute) {
                         currentParsingState = 'events';
@@ -253,13 +247,20 @@ export class ParserService {
                     `Invalid arcs are ignored`
                 );
             }
-            //check cycles in run
             if (hasCycles(run)) {
-                run.warnings.push(`File contains cycles`);
+                removeCycles(run);
                 this.toastr.warning(
-                    `Please remove all cycles from file or input field`,
-                    `Provided input is no partial language`
+                    `Cyclic arcs are ignored`,
+                    `File contains cyclic arcs`
                 );
+            }
+            if (hasTransitiveArcs(run)) {
+                removeTransitives(run);
+                this.toastr.warning(
+                    `Transitive arcs are ignored`,
+                    `File contains transitive arcs`
+                );
+                setRefs(run);
             }
 
             return run;
