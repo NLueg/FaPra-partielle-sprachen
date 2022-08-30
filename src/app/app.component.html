@@ -9,7 +9,10 @@
     </h2>
 
     <!--    Main content    -->
-    <mat-tab-group (selectedIndexChange)="updateTabIndex($event)">
+    <mat-tab-group
+        (selectedIndexChange)="updateTabIndex($event)"
+        animationDuration="0ms"
+    >
         <mat-tab id="separate" label="Current Run">
             <app-display class="padding full-size"></app-display>
             <button (click)="resetSvgPositioning()" class="reset-button">
