@@ -382,7 +382,7 @@ export class LayoutService {
                 );
             }
 
-            if (sourcePos)
+            if (sourcePos >= 0)
                 incomings.push({
                     sourcePos: sourcePos,
                     targetPos: index,
@@ -415,7 +415,7 @@ export class LayoutService {
                 );
             }
 
-            if (targetPos)
+            if (targetPos >= 0)
                 outgoings.push({
                     sourcePos: index,
                     targetPos: targetPos,
