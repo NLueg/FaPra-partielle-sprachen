@@ -512,7 +512,7 @@ export class LayoutService {
                     if ((e.x ?? 0) > runBoundsXMax) {
                         runBoundsXMax = e.x ?? 0;
                     }
-                    if ((e.x ?? 0) < runBoundsYMin) {
+                    if ((e.y ?? 0) < runBoundsYMin) {
                         runBoundsYMin = e.y ?? 0;
                     }
                     if ((e.y ?? 0) > runBoundsYMax) {
